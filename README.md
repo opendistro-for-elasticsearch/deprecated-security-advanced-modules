@@ -1,33 +1,56 @@
 # Open Distro For Elasticsearch Security Advanced Modules
 
-## About this module
-This module for Open Distro for Elasticsearch Security adds the following advanced features:
+The Open Distro For Elasticsearch Security Advanced Modules provide additional features for securing your cluster. 
 
-* Active Directory and LDAP Authentication/Authorisation
-* Kerberos/SPNEGO Authentication/Authorisation
-* JSON Web Token (JWT) Authentication/Authorisation
-* Document- and field level security
-* Audit logging
-* REST management API
-* Kibana multi tenancy module
+## Highlights
 
-## Documentation
-Please refer to the official documentation for installation and configuration instructions:
+* Active Directory and LDAP Authentication/Authorization
+* Kerberos/SPNEGO Authentication/Authorization
+* JSON Web Token (JWT) Authentication/Authorization
+* Document level security
+* Field level security
+* Audit logging with multiple audit log storage types
+* Security configuration REST API
+* Kibana multi tenancy
 
-## License
-Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- 
-Licensed under the Apache License, Version 2.0 (the "License").
-You may not use this file except in compliance with the License.
-A copy of the License is located at
+# Technical documentation
 
-http://www.apache.org/licenses/LICENSE-2.0
+Please see our [technical documentation](https://opendistro.github.io/for-elasticsearch-docs/) for installation and configuration instructions.
 
-or in the "license" file accompanying this file. This file is distributed
-on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-express or implied. See the License for the specific language governing
-permissions and limitations under the License.
+# Developer setup, build, and run steps
 
-## Legal
-Open Distro For Elasticsearch Security Advanced Modules
-Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+## Setup
+
+1. Check out this package from version control.
+1. Launch Intellij IDEA, choose **Import Project**,  select the root of this package and import it as maven project. 
+1. To build from the command line, set `JAVA_HOME` to point to a JDK >=11 before running `mvn`.
+
+## Build
+
+This package is organized into subprojects, most of which contribute JARs to the top-level plugin in the security subproject. All subprojects in this package use the Maven build system. Maven comes with excellent documentation that should be your first stop when trying to figure out how to operate or modify the build.
+
+### Building from the command line
+This project has a dependency on [security-parent][opendistro-elasticsearch-security-ssl] and [opendistro-elasticsearch-security] projects.You will have to build these projects  via maven (mvn clean install) first before attempting to build this package.
+
+To try out the build, issue the following at the command line:
+
+ 1.` mvn compile`
+
+This will run Maven, telling it to execute the compile goal. When it’s finished, you should find the compiled .class files in the target/classes directory.
+
+The package goal will compile your Java code, run any tests, and finish by packaging the code up in a JAR file within the target directory.
+
+2. `mvn package`
+
+The test goal runs all the unit tests in the package
+
+3. `mvn test`
+
+## Debugging
+
+Please refer to the well documented instructions provided by popular IDEs like Intellij and Eclipse on how to setup a debugger to debug code/test failures.
+
+# License
+
+This code is licensed under the [Apache License, Version 2.0](URL to license file).
