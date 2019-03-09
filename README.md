@@ -1,6 +1,6 @@
 # Open Distro For Elasticsearch Security Advanced Modules
 
-The Open Distro For Elasticsearch Security Advanced Modules provide additional features for securing your cluster. 
+The Open Distro For Elasticsearch Security Advanced Modules builds on Open Distro for Elasticsearch Security and Open Distro for Elasticsearch Security-SSL to provide additional advanced features for securing your cluster. 
 
 ## Highlights
 
