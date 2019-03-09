@@ -51,6 +51,12 @@ The test goal runs all the unit tests in the package
 
 Please refer to the well documented instructions provided by popular IDEs like Intellij and Eclipse on how to setup a debugger to debug code/test failures.
 
-# License
 
-This code is licensed under the [Apache License, Version 2.0](URL to license file).
+## License
+
+This code is licensed under the Apache 2.0 License. 
+
+## Copyright
+
+Open Distro For Elasticsearch Security Copyright 2019- Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
