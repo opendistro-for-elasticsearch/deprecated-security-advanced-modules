@@ -30,7 +30,7 @@
 
   <name>Open Distro Security Advanced Modules for Elasticsearch</name>
   <description>Advanced Modules for Elasticsearch Security</description>
-  <url>https://github.com/mauve-hedgehog/opendistro-elasticsearch-security-enterprise</url>
+  <url>https://github.com/opendistro-for-elasticsearch/security-advanced-modules</url>
   <inceptionYear>2016</inceptionYear>
 
   <properties>
@@ -52,15 +52,15 @@
   </properties>
 
   <scm>
-    <url>https://github.com/mauve-hedgehog/opendistro-elasticsearch-security-enterprise-modules</url>
-    <connection>scm:git:git@github.com:mauve-hedgehog/opendistro-elasticsearch-security-advanced-modules.git</connection>
-    <developerConnection>scm:git:git@github.com:mauve-hedgehog/opendistro-elasticsearch-security-advanced-modules.git</developerConnection>
+    <url>https://github.com/opendistro-for-elasticsearch/security-advanced-modules</url>
+    <connection>scm:git:git@github.com:opendistro-for-elasticsearch/security-advanced-modules.git</connection>
+    <developerConnection>scm:git:git@github.com:opendistro-for-elasticsearch/security-advanced-modules.git</developerConnection>
     <tag>v0.7.0.0</tag>
   </scm>
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/mauve-hedgehog/opendistro-elasticsearch-security-enterprise-modules/issues</url>
+    <url>https://github.com/opendistro-for-elasticsearch/security-advanced-modules/issues</url>
   </issueManagement>
 
   <contributors />
