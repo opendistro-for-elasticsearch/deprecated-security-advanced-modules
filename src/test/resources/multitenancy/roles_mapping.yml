@@ -59,8 +59,6 @@ opendistro_security_role_klingons1:
 
 opendistro_security_logstash:
   users:
-    #- 'CN=logstash,OU=client,O=client,L=Test,C=DE'
-    #- 'CN=topbeat,OU=IT Department,O=floragunn,L=City,ST=Berlin,C=DE'
     - logstash
     
 opendistro_security_kibana_server:
