@@ -14,7 +14,6 @@
   ~ express or implied. See the License for the specific language governing
   ~ permissions and limitations under the License.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -35,7 +34,7 @@
 
   <properties>
     <security.version>0.7.0.1</security.version>
-    <elasticsearch.version>6.5.4</elasticsearch.version>
+    <elasticsearch.version>6.6.2</elasticsearch.version>
 
     <!-- deps -->
     <log4j.version>2.11.1</log4j.version>
@@ -343,6 +342,14 @@
 	<dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
 
