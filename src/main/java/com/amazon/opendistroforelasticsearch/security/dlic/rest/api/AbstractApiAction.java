@@ -80,12 +80,14 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 	private String opendistrosecurityIndex;
 	private final RestApiPrivilegesEvaluator restApiPrivilegesEvaluator;
 	protected final AuditLog auditLog;
+  protected final Settings settings;
 
 	protected AbstractApiAction(final Settings settings, final Path configPath, final RestController controller,
 			final Client client, final AdminDNs adminDNs, final IndexBaseConfigurationRepository cl,
 			final ClusterService cs, final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator,
 			ThreadPool threadPool, AuditLog auditLog) {
 		super(settings);
+    this.settings = settings;
 		this.opendistrosecurityIndex = settings.get(ConfigConstants.OPENDISTRO_SECURITY_CONFIG_INDEX_NAME,
 				ConfigConstants.OPENDISTRO_SECURITY_DEFAULT_CONFIG_INDEX);
 
