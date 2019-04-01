@@ -14,18 +14,17 @@
   ~ express or implied. See the License for the specific language governing
   ~ permissions and limitations under the License.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>com.amazon.opendistroforelasticsearch</groupId>
     <artifactId>opendistro_security_parent</artifactId>
-    <version>0.7.0.1</version>
+    <version>0.8.0.0</version>
   </parent>
 
   <artifactId>opendistro_security_advanced_modules</artifactId>
-  <version>0.7.0.1</version>
+  <version>0.8.0.0</version>
   <packaging>jar</packaging>
 
   <name>Open Distro Security Advanced Modules for Elasticsearch</name>
@@ -34,14 +33,14 @@
   <inceptionYear>2016</inceptionYear>
 
   <properties>
-    <security.version>0.7.0.1</security.version>
-    <elasticsearch.version>6.5.4</elasticsearch.version>
+    <security.version>0.8.0.0</security.version>
+    <elasticsearch.version>6.6.2</elasticsearch.version>
 
     <!-- deps -->
     <log4j.version>2.11.1</log4j.version>
     <jjwt.version>0.10.5</jjwt.version>
     <ldaptive.version>1.2.3</ldaptive.version>
-    <jackson-databind.version>2.8.11.1</jackson-databind.version>
+    <jackson-databind.version>2.8.11.2</jackson-databind.version>
     <http.commons.version>4.5.3</http.commons.version>
     <cxf.version>3.2.2</cxf.version>
     <guava.version>25.1-jre</guava.version>
@@ -55,7 +54,7 @@
     <url>https://github.com/opendistro-for-elasticsearch/security-advanced-modules</url>
     <connection>scm:git:git@github.com:opendistro-for-elasticsearch/security-advanced-modules.git</connection>
     <developerConnection>scm:git:git@github.com:opendistro-for-elasticsearch/security-advanced-modules.git</developerConnection>
-    <tag>v0.7.0.1</tag>
+    <tag>v0.8.0.0</tag>
   </scm>
 
   <issueManagement>
@@ -343,6 +342,14 @@
 	<dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
 
