@@ -21,6 +21,10 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+
 import org.elasticsearch.SpecialPermission;
 import org.ldaptive.Connection;
 import org.ldaptive.DerefAliases;
@@ -75,14 +79,35 @@ public class LdapHelper {
     }
 
     public static LdapEntry lookup(final Connection conn, final String dn) throws LdapException {
+        try {
+            final List<LdapEntry> entries = search(conn, escapeDn(dn), "(objectClass=*)", SearchScope.OBJECT);
 
-        final List<LdapEntry> entries = search(conn, dn, "(objectClass=*)", SearchScope.OBJECT);
-
-        if (entries.size() == 1) {
-            return entries.get(0);
-        } else {
-            return null;
+            if (entries.size() == 1) {
+                return entries.get(0);
+            } else {
+                return null;
+            }
+        } catch (InvalidNameException e) {
+            throw new RuntimeException(e);           
         }
+    }
+
+    private static String escapeDn(String dn) throws InvalidNameException {
+        final LdapName dnName = new LdapName(dn);
+        final List<Rdn> escaped = new ArrayList<>(dnName.size());
+        for(Rdn rdn: dnName.getRdns()) {
+            escaped.add(new Rdn(rdn.getType(), escapeForwardSlash(rdn.getValue())));
+        }
+        return new LdapName(escaped).toString();
+    }
+
+    private static Object escapeForwardSlash(Object input) {
+        if(input != null && input instanceof String) {
+            return ((String)input).replace("/", "\\2f");
+        } else {
+            return input;
+        }
+
     }
 
 }

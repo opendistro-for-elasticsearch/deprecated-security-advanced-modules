@@ -791,8 +791,14 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
         final Set<LdapName> result = new HashSet<>(20);
         final HashMultimap<LdapName, Map.Entry<String, Settings>> resultRoleSearchBaseKeys = HashMultimap.create();
-
-        final LdapEntry e0 = LdapHelper.lookup(ldapConnection, roleDn.toString());
+        
+        LdapEntry e0 = null;
+        try {
+            e0 = LdapHelper.lookup(ldapConnection, roleDn.toString());
+        } catch (LdapException e) {
+            log.debug("Error found while going over nested groups ", e);
+            return result;
+        }
 
         if (e0.getAttribute(userRoleName) != null) {
             final Collection<String> userRoles = e0.getAttribute(userRoleName).getStringValues();
