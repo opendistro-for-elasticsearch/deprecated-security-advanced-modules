@@ -28,9 +28,9 @@
   <version>0.7.0.0</version>
   <packaging>jar</packaging>
 
-  <name>Open Distro Security Advanced Modules for Elasticsearch</name>
-  <description>Advanced Modules for Elasticsearch Security</description>
-  <url>https://github.com/mauve-hedgehog/opendistro-elasticsearch-security-enterprise</url>
+  <name>Open Distro For Elasticsearch Advanced Modules</name>
+  <description>Advanced Modules for Open Distro For Elasticsearch</description>
+  <url>https://github.com/opendistro-for-elasticsearch/security-advanced-modules</url>
   <inceptionYear>2016</inceptionYear>
 
   <properties>
