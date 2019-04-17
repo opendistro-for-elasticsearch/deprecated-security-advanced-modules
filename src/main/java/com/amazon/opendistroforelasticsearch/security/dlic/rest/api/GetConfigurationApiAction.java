@@ -26,10 +26,10 @@ import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.rest.BytesRestResponse;
+import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
-import org.elasticsearch.rest.RestResponse;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.threadpool.ThreadPool;
 
@@ -64,32 +64,34 @@ public class GetConfigurationApiAction extends AbstractApiAction {
 	}
 
 	@Override
-	protected Tuple<String[], RestResponse> handleGet(RestRequest request, Client client,
-			final Settings.Builder additionalSettingsBuilder) throws Throwable {
+	protected void handleGet(RestChannel channel, RestRequest request, Client client,
+							 final Settings.Builder additionalSettingsBuilder) {
 
 		final String configname = request.param("configname");
 
 		if (configname == null || configname.length() == 0
 				|| !ConfigConstants.CONFIG_NAMES.contains(configname)) {
-			return badRequestResponse("No configuration name given, must be one of "
+			badRequestResponse(channel, "No configuration name given, must be one of "
 					+ Joiner.on(",").join(ConfigConstants.CONFIG_NAMES));
+			return;
 
 		}
-		final Settings.Builder configBuilder = load(configname, true);
-		filter(configBuilder, configname);
-		final Settings config = configBuilder.build();
+		final Tuple<Long, Settings.Builder> configBuilder = load(configname, true);
+		filter(configBuilder.v2(), configname);
+		final Settings config = configBuilder.v2().build();
 
-		return new Tuple<String[], RestResponse>(new String[0],
-				new BytesRestResponse(RestStatus.OK, convertToJson(config)));
+		channel.sendResponse(
+				new BytesRestResponse(RestStatus.OK, convertToJson(channel, config)));
+		return;
 	}
 
 	protected void filter(Settings.Builder builder, String resourceName) {
-	    // common filtering
-	    filter(builder);
-	    // filter sensitive resources for internal users
-        if (resourceName.equals("internalusers")) {
-            filterHashes(builder);
-        }
+		// common filtering
+		filter(builder);
+		// filter sensitive resources for internal users
+		if (resourceName.equals("internalusers")) {
+			filterHashes(builder);
+		}
 	}
 
 	@Override
@@ -114,13 +116,13 @@ public class GetConfigurationApiAction extends AbstractApiAction {
 		request.param("configname");
 	}
 
-    private void filterHashes(Settings.Builder builder) {
-        // replace password hashes in addition. We must not remove them from the
-        // Builder since this would remove users completely if they
-        // do not have any addition properties like roles or attributes
-        Set<String> entries = builder.build().getAsGroups().keySet();
-        for (String key : entries) {
-            builder.put(key + ".hash", "");
-        }
-    }
+	private void filterHashes(Settings.Builder builder) {
+		// replace password hashes in addition. We must not remove them from the
+		// Builder since this would remove users completely if they
+		// do not have any addition properties like roles or attributes
+		Set<String> entries = builder.build().names();
+		for (String key : entries) {
+			builder.put(key + ".hash", "");
+		}
+	}
 }

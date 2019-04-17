@@ -40,6 +40,7 @@ import org.ldaptive.ConnectionFactory;
 import org.ldaptive.LdapAttribute;
 import org.ldaptive.LdapEntry;
 import org.ldaptive.LdapException;
+import org.ldaptive.SearchFilter;
 import org.ldaptive.SearchScope;
 import org.ldaptive.pool.ConnectionPool;
 
@@ -55,28 +56,24 @@ import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
 import com.amazon.opendistroforelasticsearch.security.user.User;
 import com.google.common.collect.HashMultimap;
 
-public class LDAPAuthorizationBackend implements AuthorizationBackend, Destroyable {
+public class LDAPAuthorizationBackend2 implements AuthorizationBackend, Destroyable {
 
-    static final String ZERO_PLACEHOLDER = "{0}";
-    static final String ONE_PLACEHOLDER = "{1}";
-    static final String TWO_PLACEHOLDER = "{2}";
+    static final int ZERO_PLACEHOLDER = 0;
+    static final int ONE_PLACEHOLDER = 1;
+    static final int TWO_PLACEHOLDER = 2;
     static final String DEFAULT_ROLEBASE = "";
     static final String DEFAULT_ROLESEARCH = "(member={0})";
     static final String DEFAULT_ROLENAME = "name";
     static final String DEFAULT_USERROLENAME = "memberOf";
 
-    static {
-        Utils.init();
-    }
-
-    protected static final Logger log = LogManager.getLogger(LDAPAuthorizationBackend.class);
+    protected static final Logger log = LogManager.getLogger(LDAPAuthorizationBackend2.class);
     private final Settings settings;
     private final List<Map.Entry<String, Settings>> roleBaseSettings;
     private ConnectionPool connectionPool;
     private ConnectionFactory connectionFactory;
     private LDAPUserSearcher userSearcher;
 
-    public LDAPAuthorizationBackend(final Settings settings, final Path configPath) throws SSLConfigException {
+    public LDAPAuthorizationBackend2(final Settings settings, final Path configPath) throws SSLConfigException {
         this.settings = settings;
         this.roleBaseSettings = getRoleSearchSettings(settings);
 
@@ -134,7 +131,7 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend, Destroyab
             authenticatedUser = entry.getDn();
             originalUserName = ((LdapUser) user).getOriginalUsername();
         } else {
-            authenticatedUser = Utils.escapeStringRfc2254(user.getName());
+            authenticatedUser =user.getName();
             originalUserName = user.getName();
         }
 
@@ -260,21 +257,25 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend, Destroyab
             final LdapAttribute userRoleAttribute = entry.getAttribute(userRoleAttributeName);
 
             if (userRoleAttribute != null) {
-                userRoleAttributeValue = userRoleAttribute.getStringValue();
+                userRoleAttributeValue = Utils.getSingleStringValue(userRoleAttribute);
             }
 
             if (rolesearchEnabled) {
-                String escapedDn = Utils.escapeStringRfc2254(dn);
+                String escapedDn = dn;
 
                 for (Map.Entry<String, Settings> roleSearchSettingsEntry : roleBaseSettings) {
                     Settings roleSearchSettings = roleSearchSettingsEntry.getValue();
 
+                    SearchFilter f = new SearchFilter();
+                    f.setFilter(roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_ROLESEARCH));
+                    f.setParameter(ZERO_PLACEHOLDER, escapedDn);
+                    f.setParameter(ONE_PLACEHOLDER, originalUserName);
+                    f.setParameter(TWO_PLACEHOLDER,
+                            userRoleAttributeValue == null ? TWO_PLACEHOLDER : userRoleAttributeValue);
+
                     List<LdapEntry> rolesResult = LdapHelper.search(connection,
                             roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_BASE, DEFAULT_ROLEBASE),
-                            roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_ROLESEARCH)
-                                    .replace(ZERO_PLACEHOLDER, escapedDn).replace(ONE_PLACEHOLDER, originalUserName)
-                                    .replace(TWO_PLACEHOLDER,
-                                            userRoleAttributeValue == null ? TWO_PLACEHOLDER : userRoleAttributeValue),
+                            f,
                             SearchScope.SUBTREE);
 
                     if (log.isTraceEnabled()) {
@@ -330,7 +331,7 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend, Destroyab
                 }
 
                 for (final LdapName roleLdapName : nestedReturn) {
-                    final String role = getRoleFromAttribute(roleLdapName, roleName);
+                    final String role = getRoleFromEntry(connection, roleLdapName, roleName);
 
                     if (!Strings.isNullOrEmpty(role)) {
                         user.addRole(role);
@@ -342,7 +343,7 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend, Destroyab
             } else {
                 // DN roles, extract rolename according to config
                 for (final LdapName roleLdapName : ldapRoles) {
-                    final String role = getRoleFromAttribute(roleLdapName, roleName);
+                    final String role = getRoleFromEntry(connection, roleLdapName, roleName);
 
                     if (!Strings.isNullOrEmpty(role)) {
                         user.addRole(role);
@@ -376,8 +377,8 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend, Destroyab
     }
 
     protected Set<LdapName> resolveNestedRoles(final LdapName roleDn, final Connection ldapConnection,
-            String userRoleName, int depth, final boolean rolesearchEnabled,
-            Set<Map.Entry<String, Settings>> roleSearchBaseSettingsSet, final List<String> roleFilter)
+                                               String userRoleName, int depth, final boolean rolesearchEnabled,
+                                               Set<Map.Entry<String, Settings>> roleSearchBaseSettingsSet, final List<String> roleFilter)
             throws ElasticsearchSecurityException, LdapException {
 
         if (!roleFilter.isEmpty() && WildcardMatcher.matchAny(roleFilter, roleDn.toString())) {
@@ -421,16 +422,20 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend, Destroyab
         }
 
         if (rolesearchEnabled) {
-            String escapedDn = Utils.escapeStringRfc2254(roleDn.toString());
+            String escapedDn = roleDn.toString();
 
             for (Map.Entry<String, Settings> roleSearchBaseSettingsEntry : Utils
                     .getOrderedBaseSettings(roleSearchBaseSettingsSet)) {
                 Settings roleSearchSettings = roleSearchBaseSettingsEntry.getValue();
 
+                SearchFilter f = new SearchFilter();
+                f.setFilter(roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_ROLESEARCH));
+                f.setParameter(ZERO_PLACEHOLDER, escapedDn);
+                f.setParameter(ONE_PLACEHOLDER, escapedDn);
+
                 List<LdapEntry> foundEntries = LdapHelper.search(ldapConnection,
                         roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_BASE, DEFAULT_ROLEBASE),
-                        roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_ROLESEARCH)
-                                .replace(ZERO_PLACEHOLDER, escapedDn).replace(ONE_PLACEHOLDER, escapedDn),
+                        f,
                         SearchScope.SUBTREE);
 
                 if (log.isTraceEnabled()) {
@@ -499,30 +504,27 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend, Destroyab
         return true;
     }
 
-    private String getRoleFromAttribute(final LdapName ldapName, final String role) {
+    private String getRoleFromEntry(final Connection ldapConnection, final LdapName ldapName, final String role) {
 
         if (ldapName == null || Strings.isNullOrEmpty(role)) {
             return null;
         }
 
-        if ("dn".equalsIgnoreCase(role)) {
+        if("dn".equalsIgnoreCase(role)) {
             return ldapName.toString();
         }
 
-        List<Rdn> rdns = new ArrayList<>(ldapName.getRdns().size());
-        rdns.addAll(ldapName.getRdns());
+        try {
+            final LdapEntry roleEntry = LdapHelper.lookup(ldapConnection, ldapName.toString());
 
-        Collections.reverse(rdns);
-
-        for (Rdn rdn : rdns) {
-            if (role.equalsIgnoreCase(rdn.getType())) {
-
-                if (rdn.getValue() == null) {
-                    return null;
+            if(roleEntry != null) {
+                final LdapAttribute roleAttribute = roleEntry.getAttribute(role);
+                if(roleAttribute != null) {
+                    return Utils.getSingleStringValue(roleAttribute);
                 }
-
-                return String.valueOf(rdn.getValue());
             }
+        } catch (LdapException e) {
+            log.error("Unable to handle role {} because of ",ldapName, e.toString(), e);
         }
 
         return null;

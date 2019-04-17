@@ -184,9 +184,7 @@ public class ComplianceAuditlogTest extends AbstractAuditlogiUnitTest {
 
         HttpResponse response = rh.executeGetRequest("_search?pretty", encodeBasicHeader("admin", "admin"));
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
-        System.out.println(response.getBody());
         Thread.sleep(1500);
-        System.out.println(TestAuditlogImpl.sb.toString());
         Assert.assertTrue(TestAuditlogImpl.messages.size() > 25);
         Assert.assertTrue(TestAuditlogImpl.sb.toString().contains("COMPLIANCE_INTERNAL_CONFIG_READ"));
         Assert.assertTrue(TestAuditlogImpl.sb.toString().contains("COMPLIANCE_INTERNAL_CONFIG_WRITE"));
@@ -315,10 +313,8 @@ public class ComplianceAuditlogTest extends AbstractAuditlogiUnitTest {
         for(int i=0; i<1; i++) {
             HttpResponse response = rh.executePostRequest("humanresources/employees/"+i+"", "{\"customer\": {\"Age\":"+i+"}}", encodeBasicHeader("admin", "admin"));
             Assert.assertEquals(HttpStatus.SC_CREATED, response.getStatusCode());
-            System.out.println("==================");
             response = rh.executePostRequest("humanresources/employees/"+i+"", "{\"customer\": {\"Age\":"+(i+2)+"}}", encodeBasicHeader("admin", "admin"));
             Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
-            System.out.println("==================");
             response = rh.executePostRequest("humanresources/employees/"+i+"/_update?pretty", "{\"doc\": {\"doesel\":"+(i+3)+"}}", encodeBasicHeader("admin", "admin"));
             Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         }

@@ -93,7 +93,7 @@ public class PermissionsInfoAction extends BaseRestHandler {
             		final User user = (User) threadPool.getThreadContext().getTransient(ConfigConstants.OPENDISTRO_SECURITY_USER);
             		final TransportAddress remoteAddress = (TransportAddress) threadPool.getThreadContext()
             				.getTransient(ConfigConstants.OPENDISTRO_SECURITY_REMOTE_ADDRESS);
-            		Set<String> userRoles = privilegesEvaluator.mapSecurityRoles(user, remoteAddress);
+            		Set<String> userRoles = privilegesEvaluator.mapRoles(user, remoteAddress);
             		Boolean hasApiAccess = restApiPrivilegesEvaluator.currentUserHasRestApiAccess(userRoles);
             		Map<Endpoint, List<Method>> disabledEndpoints = restApiPrivilegesEvaluator.getDisabledEndpointsForCurrentUser(user.getName(), userRoles);
 

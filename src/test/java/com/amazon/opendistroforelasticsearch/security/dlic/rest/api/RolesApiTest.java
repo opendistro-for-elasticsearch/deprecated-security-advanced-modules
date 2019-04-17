@@ -62,6 +62,14 @@ public class RolesApiTest extends AbstractRestApiUnitTest {
 		// GET, new URL endpoint in security
 		response = rh.executeGetRequest("/_opendistro/_security/api/roles", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+		Assert.assertTrue(response.getBody().contains("\"cluster\":[\"*\"]"));
+		Assert.assertFalse(response.getBody().contains("\"cluster\" : ["));
+
+		// GET, new URL endpoint in security, pretty
+		response = rh.executeGetRequest("/_opendistro/_security/api/roles?pretty", new Header[0]);
+		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+		Assert.assertFalse(response.getBody().contains("\"cluster\":[\"*\"]"));
+		Assert.assertTrue(response.getBody().contains("\"cluster\" : ["));
 
 	    // hidden role
         response = rh.executeGetRequest("/_opendistro/_security/api/roles/internal", new Header[0]);

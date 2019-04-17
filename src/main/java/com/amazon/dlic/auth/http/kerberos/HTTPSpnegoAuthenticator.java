@@ -25,6 +25,10 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
@@ -48,6 +52,7 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 
 import com.amazon.dlic.auth.http.kerberos.util.JaasKrbUtil;
 import com.amazon.dlic.auth.http.kerberos.util.KrbConstants;
@@ -58,11 +63,12 @@ import com.google.common.base.Strings;
 public class HTTPSpnegoAuthenticator implements HTTPAuthenticator {
 
     private static final String EMPTY_STRING = "";
+    private static final Oid[] KRB_OIDS = new Oid[] {KrbConstants.SPNEGO, KrbConstants.KRB5MECH};
 
     protected final Logger log = LogManager.getLogger(this.getClass());
 
     private boolean stripRealmFromPrincipalName;
-    private String acceptorPrincipal;
+    private Set<String> acceptorPrincipal;
     private Path acceptorKeyTabPath;
 
     public HTTPSpnegoAuthenticator(final Settings settings, final Path configPath) {
@@ -123,10 +129,10 @@ public class HTTPSpnegoAuthenticator implements HTTPAuthenticator {
                     }
 
                     stripRealmFromPrincipalName = settings.getAsBoolean("strip_realm_from_principal", true);
-                    acceptorPrincipal = settings.get("opendistro_security.kerberos.acceptor_principal");
+                    acceptorPrincipal = new HashSet<>(settings.getAsList("opendistro_security.kerberos.acceptor_principal", Collections.emptyList()));
                     final String _acceptorKeyTabPath = settings.get("opendistro_security.kerberos.acceptor_keytab_filepath");
 
-                    if(acceptorPrincipal == null || acceptorPrincipal.length() == 0) {
+                    if(acceptorPrincipal == null || acceptorPrincipal.size() == 0) {
                         log.error("acceptor_principal must not be null or empty. Kerberos authentication will not work");
                         acceptorPrincipal = null;
                     }
@@ -207,7 +213,7 @@ public class HTTPSpnegoAuthenticator implements HTTPAuthenticator {
                     final PrivilegedExceptionAction<GSSCredential> action = new PrivilegedExceptionAction<GSSCredential>() {
                         @Override
                         public GSSCredential run() throws GSSException {
-                            return manager.createCredential(null, credentialLifetime, KrbConstants.SPNEGO, GSSCredential.ACCEPT_ONLY);
+                            return manager.createCredential(null, credentialLifetime, KRB_OIDS, GSSCredential.ACCEPT_ONLY);
                         }
                     };
                     gssContext = manager.createContext(Subject.doAs(subject, action));

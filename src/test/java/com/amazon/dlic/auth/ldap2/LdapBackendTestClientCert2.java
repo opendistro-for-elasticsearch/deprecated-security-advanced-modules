@@ -27,7 +27,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.amazon.dlic.auth.ldap.LdapUser;
-import com.amazon.dlic.auth.ldap.backend.LDAPAuthenticationBackend;
 import com.amazon.dlic.auth.ldap.util.ConfigConstants;
 import com.amazon.opendistroforelasticsearch.security.ssl.util.ExceptionUtils;
 import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
@@ -57,7 +56,7 @@ public class LdapBackendTestClientCert2 {
         @SuppressWarnings("unused")
         LdapUser user;
         try {
-            user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
+            user = (LdapUser) new LDAPAuthenticationBackend2(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
                     , "ldap_hr_employee"
                     .getBytes(StandardCharsets.UTF_8)));
             Assert.fail();
@@ -85,7 +84,7 @@ public class LdapBackendTestClientCert2 {
         @SuppressWarnings("unused")
         LdapUser user;
         try {
-            user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
+            user = (LdapUser) new LDAPAuthenticationBackend2(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
                     , "ldap_hr_employee"
                     .getBytes(StandardCharsets.UTF_8)));
             Assert.fail();
@@ -113,7 +112,7 @@ public class LdapBackendTestClientCert2 {
         @SuppressWarnings("unused")
         LdapUser user;
         try {
-            user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
+            user = (LdapUser) new LDAPAuthenticationBackend2(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
                     , "ldap_hr_employee"
                     .getBytes(StandardCharsets.UTF_8)));
             Assert.fail();
@@ -142,7 +141,7 @@ public class LdapBackendTestClientCert2 {
                 .put("path.home",".")
                 .build();
 
-        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
+        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend2(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
                 , "ldap_hr_employee"
                 .getBytes(StandardCharsets.UTF_8)));
         Assert.assertNotNull(user);
@@ -165,7 +164,7 @@ public class LdapBackendTestClientCert2 {
                 .put("path.home",".")
                 .build();
 
-        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
+        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend2(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
                 , "ldap_hr_employee"
                 .getBytes(StandardCharsets.UTF_8)));
         Assert.assertNotNull(user);
@@ -191,7 +190,7 @@ public class LdapBackendTestClientCert2 {
                // .put(ConfigConstants.LDAP_PASSWORD, "ldapbinder")
                 .build();
 
-        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
+        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend2(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
                 , "ldap_hr_employee"
                 .getBytes(StandardCharsets.UTF_8)));
         Assert.assertNotNull(user);
@@ -214,7 +213,7 @@ public class LdapBackendTestClientCert2 {
                 .put("path.home",".")
                 .build();
 
-        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
+        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend2(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
                 , "ldap_hr_employee"
                 .getBytes(StandardCharsets.UTF_8)));
         Assert.assertNotNull(user);
@@ -246,7 +245,7 @@ public class LdapBackendTestClientCert2 {
                 .put("path.home",".")
                 .build();
 
-        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
+        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend2(settings, null).authenticate(new AuthCredentials("ldap_hr_employee"
                 , "ldap_hr_employee"
                 .getBytes(StandardCharsets.UTF_8)));
         Assert.assertNotNull(user);

@@ -6,13 +6,13 @@ opendistro_security_human_resources_trainee:
       '*':
         - READ
         - indices:admin/shards/search_shards # needed for CCS
-      _dls_: '{ "bool": { "must_not": { "match": { "Designation": "CEO"  }}}}'
+      _dls_: '{ "bool": { "must_not": { "match": { "Salary": "salary1"  }}}}'
       _fls_:
-        - 'Designation'
         - 'FirstName'
-        - 'LastName'
-        - 'Salary'
-        - 'LocalRules'
+        - 'LastName*'
+        - 'Salary*'
+        - 'XXX'
+        - 'CCSRules'
     '?kibana':
       '*':
         - ALL

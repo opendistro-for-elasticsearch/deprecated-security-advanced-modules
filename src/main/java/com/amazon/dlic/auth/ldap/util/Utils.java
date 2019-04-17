@@ -24,23 +24,20 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.common.settings.Settings;
 import org.ldaptive.Connection;
+import org.ldaptive.LdapAttribute;
 
 public final class Utils {
 
-    private static final String RFC2254_ESCAPE_CHARS = "\\*()\000";
+    private static final Logger log = LogManager.getLogger(Utils.class);
 
     private Utils() {
 
-    }
-
-    public static void init() {
-        // empty init() to allow prior initialization
     }
 
     public static void unbindAndCloseSilently(final Connection connection) {
@@ -65,42 +62,6 @@ public final class Utils {
         } catch (PrivilegedActionException e) {
             // ignore
         }
-    }
-
-    /**
-     * RFC 2254 string escaping
-     */
-    public static String escapeStringRfc2254(final String str) {
-
-        if (str == null || str.length() == 0) {
-            return str;
-        }
-
-        final StringTokenizer tok = new StringTokenizer(str, RFC2254_ESCAPE_CHARS, true);
-
-        if (tok.countTokens() == 0) {
-            return str;
-        }
-
-        final StringBuilder out = new StringBuilder();
-        while (tok.hasMoreTokens()) {
-            final String s = tok.nextToken();
-
-            if (s.equals("*")) {
-                out.append("\\2a");
-            } else if (s.equals("(")) {
-                out.append("\\28");
-            } else if (s.equals(")")) {
-                out.append("\\29");
-            } else if (s.equals("\\")) {
-                out.append("\\5c");
-            } else if (s.equals("\000")) {
-                out.append("\\00");
-            } else {
-                out.append(s);
-            }
-        }
-        return out.toString();
     }
 
     public static List<Map.Entry<String, Settings>> getOrderedBaseSettings(Settings settings) {
@@ -136,4 +97,17 @@ public final class Utils {
         });
     }
 
+    public static String getSingleStringValue(LdapAttribute attribute) {
+        if(attribute == null) {
+            return null;
+        }
+
+        if(attribute.size() > 1) {
+            if(log.isDebugEnabled()) {
+                log.debug("Multiple values found for {} ({})", attribute.getName(), attribute);
+            }
+        }
+
+        return attribute.getStringValue();
+    }
 }
