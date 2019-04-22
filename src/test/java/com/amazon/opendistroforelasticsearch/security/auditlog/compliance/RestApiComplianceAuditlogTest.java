@@ -15,6 +15,7 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.compliance;
 
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Assert;
@@ -193,6 +194,7 @@ public class RestApiComplianceAuditlogTest extends AbstractAuditlogiUnitTest {
         Settings additionalSettings = Settings.builder()
                 .put("opendistro_security.audit.type", TestAuditlogImpl.class.getName())
                 .put(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_ENABLE_TRANSPORT, true)
+                .put(ConfigConstants.OPENDISTRO_SECURITY_RESTAPI_ROLES_ENABLED, "opendistro_security_all_access")
                 .put(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_ENABLE_REST, true)
                 .put(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_RESOLVE_BULK_REQUESTS, false)
                 .put(ConfigConstants.OPENDISTRO_SECURITY_COMPLIANCE_HISTORY_EXTERNAL_CONFIG_ENABLED, false)
@@ -212,11 +214,7 @@ public class RestApiComplianceAuditlogTest extends AbstractAuditlogiUnitTest {
         System.out.println("req");
         HttpResponse response = rh.executeGetRequest("_opendistro/_security/api/internalusers/admin?pretty");
         Thread.sleep(1500);
-        System.out.println(" ===== == = = = ======  == ===== ====== ====");
-        System.out.println(response.getBody());
-        System.out.println(" ===== == = = = ======  == ===== ====== ====");
         System.out.println(TestAuditlogImpl.sb.toString());
-        System.out.println(TestAuditlogImpl.messages.toString());
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         Assert.assertTrue(TestAuditlogImpl.messages.size()+"",TestAuditlogImpl.messages.size() == 1);
         Assert.assertTrue(TestAuditlogImpl.sb.toString().contains("audit_request_effective_user"));

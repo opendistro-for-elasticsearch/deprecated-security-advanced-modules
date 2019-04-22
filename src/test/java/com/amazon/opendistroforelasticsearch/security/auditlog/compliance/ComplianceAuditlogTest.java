@@ -15,6 +15,7 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.compliance;
 
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
 import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.index.IndexRequest;
@@ -175,7 +176,6 @@ public class ComplianceAuditlogTest extends AbstractAuditlogiUnitTest {
         setup(additionalSettings);
 
         try (TransportClient tc = getInternalTransportClient()) {
-
             for(IndexRequest ir: new DynamicSecurityConfig().setSecurityRoles("roles_2.yml").getDynamicConfig(getResourceFolder())) {
                 tc.index(ir).actionGet();
             }
@@ -185,6 +185,7 @@ public class ComplianceAuditlogTest extends AbstractAuditlogiUnitTest {
         HttpResponse response = rh.executeGetRequest("_search?pretty", encodeBasicHeader("admin", "admin"));
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         Thread.sleep(1500);
+        System.out.println(TestAuditlogImpl.sb.toString());
         Assert.assertTrue(TestAuditlogImpl.messages.size() > 25);
         Assert.assertTrue(TestAuditlogImpl.sb.toString().contains("COMPLIANCE_INTERNAL_CONFIG_READ"));
         Assert.assertTrue(TestAuditlogImpl.sb.toString().contains("COMPLIANCE_INTERNAL_CONFIG_WRITE"));

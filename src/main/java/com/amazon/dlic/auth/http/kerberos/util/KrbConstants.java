@@ -24,6 +24,7 @@ public final class KrbConstants {
      Oid spnegoTmp = null;
      Oid krbTmp = null;
      try {
+         spnegoTmp = new Oid("1.3.6.1.5.5.2");
          krbTmp = new Oid("1.2.840.113554.1.2.2");
      } catch (final GSSException e) {
 

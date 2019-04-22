@@ -816,7 +816,6 @@ public abstract class AbstractAuditLog implements AuditLog {
                 if(log.isTraceEnabled()) {
                     log.trace("Skipped compliance log message because of user {} is ignored", effectiveUser);
                 }
-
                 return false;
             }
         }
@@ -828,7 +827,6 @@ public abstract class AbstractAuditLog implements AuditLog {
                 if(log.isTraceEnabled()) {
                     log.trace("Skipped compliance log message because of user {} is ignored", effectiveUser);
                 }
-
                 return false;
             }
         }

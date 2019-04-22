@@ -43,7 +43,7 @@ public class MockRestRequest extends RestRequest {
     }
 
     @Override
-    public BytesReference content() {
+    protected BytesReference innerContent() {
         return null;
     }
 }
