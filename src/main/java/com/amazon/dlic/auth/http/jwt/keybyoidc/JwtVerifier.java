@@ -16,6 +16,8 @@
 package com.amazon.dlic.auth.http.jwt.keybyoidc;
 
 import org.apache.cxf.rs.security.jose.jwk.JsonWebKey;
+import org.apache.cxf.rs.security.jose.jwk.KeyType;
+import org.apache.cxf.rs.security.jose.jwk.PublicKeyUse;
 import org.apache.cxf.rs.security.jose.jws.JwsJwtCompactConsumer;
 import org.apache.cxf.rs.security.jose.jws.JwsSignatureVerifier;
 import org.apache.cxf.rs.security.jose.jws.JwsUtils;
@@ -39,6 +41,13 @@ public class JwtVerifier {
 			JwsJwtCompactConsumer jwtConsumer = new JwsJwtCompactConsumer(encodedJwt);
 			JwtToken jwt = jwtConsumer.getJwtToken();
 			JsonWebKey key = keyProvider.getKey(jwt.getJwsHeaders().getKeyId());
+			
+			// Algorithm is not mandatory for the key material, so we set it to the same as the JWT
+			if (key.getAlgorithm() == null && key.getPublicKeyUse() == PublicKeyUse.SIGN && key.getKeyType() == KeyType.RSA)
+			{
+				key.setAlgorithm(jwt.getJwsHeaders().getAlgorithm());
+			}
+			
 			JwsSignatureVerifier signatureVerifier = getInitializedSignatureVerifier(key);
 
 			boolean signatureValid = jwtConsumer.verifySignatureWith(signatureVerifier);
