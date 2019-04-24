@@ -152,7 +152,9 @@ public class HTTPJwtAuthenticator implements HTTPAuthenticator {
         if((index = jwtToken.toLowerCase().indexOf(BEARER)) > -1) { //detect Bearer
             jwtToken = jwtToken.substring(index+BEARER.length());
         } else {
-        	log.warn("No Bearer scheme found in header");
+            if(log.isDebugEnabled()) {
+                log.debug("No Bearer scheme found in header");
+            }
         }
 
         try {

@@ -24,10 +24,10 @@ import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.rest.BytesRestResponse;
+import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
-import org.elasticsearch.rest.RestResponse;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.threadpool.ThreadPool;
 
@@ -53,25 +53,25 @@ public class OpenDistroSecurityConfigAction extends AbstractApiAction {
 
 
 	@Override
-	protected Tuple<String[], RestResponse> handleGet(RestRequest request, Client client,
-			final Settings.Builder additionalSettingsBuilder) throws Throwable {
+	protected void handleGet(RestChannel channel, RestRequest request, Client client,
+							 final Settings.Builder additionalSettingsBuilder) {
 
-		final Settings configurationSettings = loadAsSettings(getConfigName(), true);
+		final Tuple<Long, Settings> configurationSettings = loadAsSettings(getConfigName(), true);
 
-		return new Tuple<String[], RestResponse>(new String[0],
-				new BytesRestResponse(RestStatus.OK, convertToJson(configurationSettings)));
+		channel.sendResponse(
+				new BytesRestResponse(RestStatus.OK, convertToJson(channel, configurationSettings.v2())));
 	}
 
 	@Override
-	protected Tuple<String[], RestResponse> handlePut(final RestRequest request, final Client client,
-			final Settings.Builder additionalSettings) throws Throwable {
-		return notImplemented(Method.PUT);
+	protected void handlePut(RestChannel channel, final RestRequest request, final Client client,
+							 final Settings.Builder additionalSettings) {
+		notImplemented(channel, Method.PUT);
 	}
 
 	@Override
-	protected Tuple<String[], RestResponse> handleDelete(final RestRequest request, final Client client,
-			final Settings.Builder additionalSettings) throws Throwable {
-		return notImplemented(Method.DELETE);
+	protected void handleDelete(RestChannel channel, final RestRequest request, final Client client,
+								final Settings.Builder additionalSettings) {
+		notImplemented(channel, Method.DELETE);
 	}
 
 	@Override

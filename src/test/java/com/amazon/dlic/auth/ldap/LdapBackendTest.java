@@ -21,13 +21,13 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 
 import org.elasticsearch.ElasticsearchSecurityException;
-import org.elasticsearch.common.settings.SecureSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.ldaptive.Connection;
+import org.ldaptive.LdapAttribute;
 import org.ldaptive.LdapEntry;
 
 import com.amazon.dlic.auth.ldap.LdapUser;
@@ -464,6 +464,30 @@ public class LdapBackendTest {
         Assert.assertEquals("ceo", new ArrayList(new TreeSet(user.getRoles())).get(0));
     }
 
+
+    @Test
+    public void testLdapAuthorizationNonDNEntry() throws Exception {
+
+        final Settings settings = Settings.builder()
+                .putList(ConfigConstants.LDAP_HOSTS, "localhost:" + ldapPort)
+                .put(ConfigConstants.LDAP_AUTHC_USERSEARCH, "(uid={0})")
+                .put(ConfigConstants.LDAP_AUTHC_USERBASE, "ou=people,o=TEST")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLEBASE, "ou=groups,o=TEST")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLENAME, "description")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLESEARCH, "(uniqueMember={0})")
+                .build();
+
+        final User user = new User("jacksonm");
+
+        new LDAPAuthorizationBackend(settings, null).fillRoles(user, null);
+
+        Assert.assertNotNull(user);
+        Assert.assertEquals("jacksonm", user.getName());
+        Assert.assertEquals(2, user.getRoles().size());
+        Assert.assertEquals("ceo-ceo", new ArrayList(new TreeSet(user.getRoles())).get(0));
+    }
+
+
     @Test
     public void testLdapAuthorizationNested() throws Exception {
 
@@ -846,6 +870,129 @@ public class LdapBackendTest {
         Assert.assertTrue("Roles do not contain non-LDAP role 'role2'", user.getRoles().contains("role2"));
         Assert.assertTrue("Roles do not contain non-LDAP role 'anotherrole' from second role name", user.getRoles().contains("anotherrole"));
     }
+
+
+    @Test
+    public void testLdapSpecial186() throws Exception {
+
+        final Settings settings = Settings.builder()
+                .putList(ConfigConstants.LDAP_HOSTS, "localhost:" + ldapPort)
+                .put(ConfigConstants.LDAP_AUTHC_USERSEARCH, "(uid={0})")
+                .put(ConfigConstants.LDAP_AUTHC_USERBASE, "ou=people,o=TEST")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLEBASE, "ou=groups,o=TEST")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLENAME, "description")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLESEARCH, "(uniqueMember={0})")
+                .put(ConfigConstants.LDAP_AUTHZ_RESOLVE_NESTED_ROLES, true)
+                .build();
+
+        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("spec186", "spec186"
+                .getBytes(StandardCharsets.UTF_8)));
+        Assert.assertNotNull(user);
+        Assert.assertEquals("CN=AA BB/CC (DD) my\\, company end\\=with\\=whitespace\\ ,ou=people,o=TEST", user.getName());
+        Assert.assertEquals("AA BB/CC (DD) my, company end=with=whitespace ", user.getUserEntry().getAttribute("cn").getStringValue());
+        new LDAPAuthorizationBackend(settings, null).fillRoles(user, null);
+
+        Assert.assertEquals(3, user.getRoles().size());
+        Assert.assertTrue(user.getRoles().toString().contains("ROLE/(186) consists of\\, special="));
+        Assert.assertTrue(user.getRoles().toString().contains("ROLEx(186n) consists of\\, special="));
+        Assert.assertTrue(user.getRoles().toString().contains("ROLE/(186nn) consists of\\, special="));
+
+        new LDAPAuthorizationBackend(settings, null).fillRoles(new User("spec186"), null);
+        Assert.assertTrue(user.getRoles().toString().contains("ROLE/(186) consists of\\, special="));
+        Assert.assertTrue(user.getRoles().toString().contains("ROLEx(186n) consists of\\, special="));
+        Assert.assertTrue(user.getRoles().toString().contains("ROLE/(186nn) consists of\\, special="));
+
+        new LDAPAuthorizationBackend(settings, null).fillRoles(new User("CN=AA BB/CC (DD) my\\, company end\\=with\\=whitespace\\ ,ou=people,o=TEST"), null);
+        Assert.assertTrue(user.getRoles().toString().contains("ROLE/(186) consists of\\, special="));
+        Assert.assertTrue(user.getRoles().toString().contains("ROLEx(186n) consists of\\, special="));
+        Assert.assertTrue(user.getRoles().toString().contains("ROLE/(186nn) consists of\\, special="));
+
+        new LDAPAuthorizationBackend(settings, null).fillRoles(new User("CN=AA BB\\/CC (DD) my\\, company end\\=with\\=whitespace\\ ,ou=people,o=TEST"), null);
+        Assert.assertTrue(user.getRoles().toString().contains("ROLE/(186) consists of\\, special="));
+        Assert.assertTrue(user.getRoles().toString().contains("ROLEx(186n) consists of\\, special="));
+        Assert.assertTrue(user.getRoles().toString().contains("ROLE/(186nn) consists of\\, special="));
+    }
+
+    @Test
+    public void testLdapSpecial186_2() throws Exception {
+
+        final Settings settings = Settings.builder()
+                .putList(ConfigConstants.LDAP_HOSTS, "localhost:" + ldapPort)
+                .put(ConfigConstants.LDAP_AUTHC_USERSEARCH, "(uid={0})")
+                .put(ConfigConstants.LDAP_AUTHC_USERBASE, "ou=people,o=TEST")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLEBASE, "ou=groups,o=TEST")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLENAME, "dn")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLESEARCH, "(uniqueMember={0})")
+                .put(ConfigConstants.LDAP_AUTHZ_RESOLVE_NESTED_ROLES, true)
+                .build();
+
+        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("spec186", "spec186"
+                .getBytes(StandardCharsets.UTF_8)));
+        Assert.assertNotNull(user);
+        Assert.assertEquals("CN=AA BB/CC (DD) my\\, company end\\=with\\=whitespace\\ ,ou=people,o=TEST", user.getName());
+        Assert.assertEquals("AA BB/CC (DD) my, company end=with=whitespace ", user.getUserEntry().getAttribute("cn").getStringValue());
+        new LDAPAuthorizationBackend(settings, null).fillRoles(user, null);
+
+        Assert.assertEquals(3, user.getRoles().size());
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186) consists of\\, special\\=chars\\ "));
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186n) consists of\\, special\\=chars\\ "));
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186nn) consists of\\, special\\=chars\\ "));
+
+        new LDAPAuthorizationBackend(settings, null).fillRoles(new User("spec186"), null);
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186) consists of\\, special\\=chars\\ "));
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186n) consists of\\, special\\=chars\\ "));
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186nn) consists of\\, special\\=chars\\ "));
+
+
+        new LDAPAuthorizationBackend(settings, null).fillRoles(new User("CN=AA BB/CC (DD) my\\, company end\\=with\\=whitespace\\ ,ou=people,o=TEST"), null);
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186) consists of\\, special\\=chars\\ "));
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186n) consists of\\, special\\=chars\\ "));
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186nn) consists of\\, special\\=chars\\ "));
+
+        new LDAPAuthorizationBackend(settings, null).fillRoles(new User("CN=AA BB\\/CC (DD) my\\, company end\\=with\\=whitespace\\ ,ou=people,o=TEST"), null);
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186) consists of\\, special\\=chars\\ "));
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186n) consists of\\, special\\=chars\\ "));
+        Assert.assertTrue(user.getRoles().toString().contains("cn=ROLE/(186nn) consists of\\, special\\=chars\\ "));
+    }
+
+    @Test
+    public void testOperationalAttributes() throws Exception {
+
+
+        final Settings settings = Settings.builder()
+                .putList(ConfigConstants.LDAP_HOSTS, "localhost:" + ldapPort)
+                .put(ConfigConstants.LDAP_AUTHC_USERSEARCH, "(uid={0})").build();
+
+        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("jacksonm", "secret"
+                .getBytes(StandardCharsets.UTF_8)));
+        Assert.assertNotNull(user);
+        LdapAttribute operationAttribute = user.getUserEntry().getAttribute("entryUUID");
+        Assert.assertNotNull(operationAttribute);
+        Assert.assertNotNull(operationAttribute.getStringValue());
+        Assert.assertTrue(operationAttribute.getStringValue().length() > 10);
+        Assert.assertTrue(operationAttribute.getStringValue().split("-").length == 5);
+    }
+
+    @Test
+    public void testMultiCn() throws Exception {
+
+        final Settings settings = Settings.builder()
+                .putList(ConfigConstants.LDAP_HOSTS, "localhost:" + ldapPort)
+                .put(ConfigConstants.LDAP_AUTHC_USERSEARCH, "(uid={0})")
+                .put(ConfigConstants.LDAP_AUTHC_USERBASE, "ou=people,o=TEST")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLEBASE, "ou=groups,o=TEST")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLENAME, "cn")
+                .put(ConfigConstants.LDAP_AUTHZ_ROLESEARCH, "(uniqueMember={0})")
+                .put(ConfigConstants.LDAP_AUTHZ_RESOLVE_NESTED_ROLES, true)
+                .build();
+
+        final LdapUser user = (LdapUser) new LDAPAuthenticationBackend(settings, null).authenticate(new AuthCredentials("multi", "multi"
+                .getBytes(StandardCharsets.UTF_8)));
+        Assert.assertNotNull(user);
+        Assert.assertEquals("cn=cabc,ou=people,o=TEST", user.getName());
+        System.out.println(user.getUserEntry().getAttribute("cn"));
+    }
+
 
     @AfterClass
     public static void tearDown() throws Exception {

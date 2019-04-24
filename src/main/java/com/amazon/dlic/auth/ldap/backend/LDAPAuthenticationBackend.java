@@ -41,6 +41,7 @@ import org.ldaptive.Credential;
 import org.ldaptive.LdapEntry;
 import org.ldaptive.LdapException;
 import org.ldaptive.Response;
+import org.ldaptive.SearchFilter;
 import org.ldaptive.SearchScope;
 
 import com.amazon.dlic.auth.ldap.LdapUser;
@@ -53,13 +54,9 @@ import com.amazon.opendistroforelasticsearch.security.user.User;
 
 public class LDAPAuthenticationBackend implements AuthenticationBackend {
 
-    static final String ZERO_PLACEHOLDER = "{0}";
+    static final int ZERO_PLACEHOLDER = 0;
     static final String DEFAULT_USERBASE = "";
     static final String DEFAULT_USERSEARCH_PATTERN = "(sAMAccountName={0})";
-
-    static {
-        Utils.init();
-    }
 
     protected static final Logger log = LogManager.getLogger(LDAPAuthenticationBackend.class);
 
@@ -77,7 +74,7 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend {
     public User authenticate(final AuthCredentials credentials) throws ElasticsearchSecurityException {
 
         Connection ldapConnection = null;
-        final String user = Utils.escapeStringRfc2254(credentials.getUsername());
+        final String user =credentials.getUsername();
         byte[] password = credentials.getPassword();
 
         try {
@@ -129,7 +126,7 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend {
             String username = dn;
 
             if (usernameAttribute != null && entry.getAttribute(usernameAttribute) != null) {
-                username = entry.getAttribute(usernameAttribute).getStringValue();
+                username = Utils.getSingleStringValue(entry.getAttribute(usernameAttribute));
             }
 
             if (log.isDebugEnabled()) {
@@ -225,15 +222,18 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend {
 
     private static LdapEntry existsSearchingUntilFirstHit(final String user, Connection ldapConnection,
             List<Map.Entry<String, Settings>> userBaseSettings) throws Exception {
-        final String username = Utils.escapeStringRfc2254(user);
+        final String username = user;
 
         for (Map.Entry<String, Settings> entry : userBaseSettings) {
             Settings baseSettings = entry.getValue();
 
+            SearchFilter f = new SearchFilter();
+            f.setFilter(baseSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_USERSEARCH_PATTERN));
+            f.setParameter(ZERO_PLACEHOLDER, username);
+
             List<LdapEntry> result = LdapHelper.search(ldapConnection,
                     baseSettings.get(ConfigConstants.LDAP_AUTHCZ_BASE, DEFAULT_USERBASE),
-                    baseSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_USERSEARCH_PATTERN)
-                            .replace(ZERO_PLACEHOLDER, username),
+                    f,
                     SearchScope.SUBTREE);
 
             if (log.isDebugEnabled()) {
@@ -250,16 +250,19 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend {
 
     private static LdapEntry existsSearchingAllBases(final String user, Connection ldapConnection,
             List<Map.Entry<String, Settings>> userBaseSettings) throws Exception {
-        final String username = Utils.escapeStringRfc2254(user);
+        final String username = user;
         Set<LdapEntry> result = new HashSet<>();
 
         for (Map.Entry<String, Settings> entry : userBaseSettings) {
             Settings baseSettings = entry.getValue();
 
+            SearchFilter f = new SearchFilter();
+            f.setFilter(baseSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_USERSEARCH_PATTERN));
+            f.setParameter(ZERO_PLACEHOLDER, username);
+
             List<LdapEntry> foundEntries = LdapHelper.search(ldapConnection,
                     baseSettings.get(ConfigConstants.LDAP_AUTHCZ_BASE, DEFAULT_USERBASE),
-                    baseSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_USERSEARCH_PATTERN)
-                            .replace(ZERO_PLACEHOLDER, username),
+                    f,
                     SearchScope.SUBTREE);
 
             if (log.isDebugEnabled()) {

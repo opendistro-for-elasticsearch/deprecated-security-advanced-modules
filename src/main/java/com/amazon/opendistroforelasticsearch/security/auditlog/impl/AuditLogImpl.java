@@ -19,18 +19,27 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
 import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.env.Environment;
+import org.elasticsearch.index.engine.Engine.Delete;
+import org.elasticsearch.index.engine.Engine.DeleteResult;
+import org.elasticsearch.index.engine.Engine.Index;
+import org.elasticsearch.index.engine.Engine.IndexResult;
+import org.elasticsearch.index.get.GetResult;
+import org.elasticsearch.index.shard.ShardId;
+import org.elasticsearch.rest.RestRequest;
+import org.elasticsearch.tasks.Task;
 import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.transport.TransportRequest;
 
 import com.amazon.opendistroforelasticsearch.security.auditlog.routing.AuditMessageRouter;
 import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceConfig;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 
 public final class AuditLogImpl extends AbstractAuditLog {
 
@@ -38,7 +47,7 @@ public final class AuditLogImpl extends AbstractAuditLog {
 	private final boolean enabled;
 
 	public AuditLogImpl(final Settings settings, final Path configPath, Client clientProvider, ThreadPool threadPool,
-			final IndexNameExpressionResolver resolver, final ClusterService clusterService) {
+						final IndexNameExpressionResolver resolver, final ClusterService clusterService) {
 		super(settings, threadPool, resolver, clusterService);
 
 		this.messageRouter = new AuditMessageRouter(settings, clientProvider, threadPool, configPath);
@@ -62,7 +71,7 @@ public final class AuditLogImpl extends AbstractAuditLog {
 					public void run() {
 						try {
 							close();
-						} catch (IOException e) {
+						} catch (final IOException e) {
 							log.warn("Exception while shutting down message router", e);
 						}
 					}
@@ -74,10 +83,10 @@ public final class AuditLogImpl extends AbstractAuditLog {
 
 	}
 
-    @Override
-    public void setComplianceConfig(ComplianceConfig complianceConfig) {
-    	messageRouter.setComplianceConfig(complianceConfig);
-    }
+	@Override
+	public void setComplianceConfig(ComplianceConfig complianceConfig) {
+		messageRouter.setComplianceConfig(complianceConfig);
+	}
 
 	@Override
 	public void close() throws IOException {
@@ -88,6 +97,119 @@ public final class AuditLogImpl extends AbstractAuditLog {
 	protected void save(final AuditMessage msg) {
 		if (enabled) {
 			messageRouter.route(msg);
+		}
+	}
+
+	@Override
+	public void logFailedLogin(String effectiveUser, boolean securityAdmin, String initiatingUser, TransportRequest request, Task task) {
+		if (enabled) {
+			super.logFailedLogin(effectiveUser, securityAdmin, initiatingUser, request, task);
+		}
+	}
+
+	@Override
+	public void logFailedLogin(String effectiveUser, boolean securityAdmin, String initiatingUser, RestRequest request) {
+		if (enabled) {
+			super.logFailedLogin(effectiveUser, securityAdmin, initiatingUser, request);
+		}
+	}
+
+	@Override
+	public void logSucceededLogin(String effectiveUser, boolean securityAdmin, String initiatingUser, TransportRequest request, String action, Task task) {
+		if (enabled) {
+			super.logSucceededLogin(effectiveUser, securityAdmin, initiatingUser, request, action, task);
+		}
+	}
+
+	@Override
+	public void logSucceededLogin(String effectiveUser, boolean securityAdmin, String initiatingUser, RestRequest request) {
+		if (enabled) {
+			super.logSucceededLogin(effectiveUser, securityAdmin, initiatingUser, request);
+		}
+	}
+
+	@Override
+	public void logMissingPrivileges(String privilege, String effectiveUser, RestRequest request) {
+		if (enabled) {
+			super.logMissingPrivileges(privilege, effectiveUser, request);
+		}
+	}
+
+	@Override
+	public void logMissingPrivileges(String privilege, TransportRequest request, Task task) {
+		if (enabled) {
+			super.logMissingPrivileges(privilege, request, task);
+		}
+	}
+
+	@Override
+	public void logGrantedPrivileges(String privilege, TransportRequest request, Task task) {
+		if (enabled) {
+			super.logGrantedPrivileges(privilege, request, task);
+		}
+	}
+
+	@Override
+	public void logBadHeaders(TransportRequest request, String action, Task task) {
+		if (enabled) {
+			super.logBadHeaders(request, action, task);
+		}
+	}
+
+	@Override
+	public void logBadHeaders(RestRequest request) {
+		if (enabled) {
+			super.logBadHeaders(request);
+		}
+	}
+
+	@Override
+	public void logSecurityIndexAttempt (TransportRequest request, String action, Task task) {
+		if (enabled) {
+			super.logSecurityIndexAttempt(request, action, task);
+		}
+	}
+
+	@Override
+	public void logSSLException(TransportRequest request, Throwable t, String action, Task task) {
+		if (enabled) {
+			super.logSSLException(request, t, action, task);
+		}
+	}
+
+	@Override
+	public void logSSLException(RestRequest request, Throwable t) {
+		if (enabled) {
+			super.logSSLException(request, t);
+		}
+	}
+
+	@Override
+	public void logDocumentRead(String index, String id, ShardId shardId, Map<String, String> fieldNameValues, ComplianceConfig complianceConfig) {
+		if (enabled) {
+			super.logDocumentRead(index, id, shardId, fieldNameValues, complianceConfig);
+		}
+	}
+
+	@Override
+	public void logDocumentWritten(ShardId shardId, GetResult originalResult, Index currentIndex, IndexResult result,
+								   ComplianceConfig complianceConfig) {
+		if (enabled) {
+			super.logDocumentWritten(shardId, originalResult, currentIndex, result, complianceConfig);
+		}
+	}
+
+	@Override
+	public void logDocumentDeleted(ShardId shardId, Delete delete, DeleteResult result) {
+		if (enabled) {
+			super.logDocumentDeleted(shardId, delete, result);
+		}
+	}
+
+	@Override
+	public void logExternalConfig(Settings settings, Environment environment) {
+		if (enabled) {
+			super.logExternalConfig(settings, environment);
 		}
 	}
 

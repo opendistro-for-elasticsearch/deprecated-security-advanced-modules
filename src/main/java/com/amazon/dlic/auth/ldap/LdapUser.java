@@ -21,6 +21,7 @@ import java.util.Map;
 import org.ldaptive.LdapAttribute;
 import org.ldaptive.LdapEntry;
 
+import com.amazon.dlic.auth.ldap.util.Utils;
 import com.amazon.opendistroforelasticsearch.security.support.WildcardMatcher;
 import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
 import com.amazon.opendistroforelasticsearch.security.user.User;
@@ -43,7 +44,7 @@ public class LdapUser extends User {
         if (customAttrMaxValueLen > 0) {
             for (LdapAttribute attr : userEntry.getAttributes()) {
                 if (attr != null && !attr.isBinary() && !attr.getName().toLowerCase().contains("password")) {
-                    final String val = attr.getStringValue();
+                    final String val = Utils.getSingleStringValue(attr);
                     // only consider attributes which are not binary and where its value is not
                     // longer than customAttrMaxValueLen characters
                     if (val != null && val.length() > 0 && val.length() <= customAttrMaxValueLen) {
