@@ -65,6 +65,24 @@ public class HTTPJwtKeyByOpenIdConnectAuthenticatorTest {
 	}
 
 	@Test
+	public void testEscapeKid() {
+		Settings settings = Settings.builder().put("openid_connect_url", mockIdpServer.getDiscoverUri()).build();
+
+		HTTPJwtKeyByOpenIdConnectAuthenticator jwtAuth = new HTTPJwtKeyByOpenIdConnectAuthenticator(settings, null);
+
+		System.out.println("Entering Escape Kid ");
+
+		AuthCredentials creds = jwtAuth.extractCredentials(new FakeRestRequest(
+				ImmutableMap.of("Authorization",  "Bearer " + TestJwts.MC_COY_SIGNED_OCT_1_INVALID_KID), new HashMap<String, String>()), null);
+
+		Assert.assertNotNull(creds);
+		Assert.assertEquals(TestJwts.MCCOY_SUBJECT, creds.getUsername());
+		Assert.assertEquals(TestJwts.TEST_AUDIENCE, creds.getAttributes().get("attr.jwt.aud"));
+		Assert.assertEquals(0, creds.getBackendRoles().size());
+		Assert.assertEquals(3, creds.getAttributes().size());
+	}
+
+	@Test
 	public void bearerTest() {
 		Settings settings = Settings.builder().put("openid_connect_url", mockIdpServer.getDiscoverUri()).build();
 

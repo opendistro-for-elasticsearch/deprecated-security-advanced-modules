@@ -23,10 +23,15 @@ import org.apache.cxf.rs.security.jose.jwt.JwtClaims;
 import org.apache.cxf.rs.security.jose.jwt.JwtException;
 import org.apache.cxf.rs.security.jose.jwt.JwtToken;
 import org.apache.cxf.rs.security.jose.jwt.JwtUtils;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.common.base.Strings;
 
 public class JwtVerifier {
+
+	private final static Logger log = LogManager.getLogger(JwtVerifier.class);
 
 	private final KeyProvider keyProvider;
 
@@ -38,12 +43,20 @@ public class JwtVerifier {
 		try {
 			JwsJwtCompactConsumer jwtConsumer = new JwsJwtCompactConsumer(encodedJwt);
 			JwtToken jwt = jwtConsumer.getJwtToken();
-			JsonWebKey key = keyProvider.getKey(jwt.getJwsHeaders().getKeyId());
+			String escapedKid = jwt.getJwsHeaders().getKeyId();
+			String kid = escapedKid;
+			if (!kid.isEmpty()) {
+				kid = StringEscapeUtils.unescapeJava(escapedKid);
+				if (escapedKid != kid) {
+					log.info("Escaped Key ID from JWT Token");
+				}
+			}
+			JsonWebKey key = keyProvider.getKey(kid);
 			JwsSignatureVerifier signatureVerifier = getInitializedSignatureVerifier(key);
 
 			boolean signatureValid = jwtConsumer.verifySignatureWith(signatureVerifier);
 
-			if (!signatureValid && Strings.isNullOrEmpty(jwt.getJwsHeaders().getKeyId())) {
+			if (!signatureValid && Strings.isNullOrEmpty(kid)) {
 				key = keyProvider.getKeyAfterRefresh(null);
 				signatureVerifier = getInitializedSignatureVerifier(key);
 				signatureValid = jwtConsumer.verifySignatureWith(signatureVerifier);
