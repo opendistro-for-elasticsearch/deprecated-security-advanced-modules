@@ -23,24 +23,12 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 
 public class FlsDlsTestMulti extends AbstractDlsFlsTest{
 
 
-    protected void populate(TransportClient tc) {
-
-        tc.index(new IndexRequest(".opendistro_security").type("security").id("config").setRefreshPolicy(RefreshPolicy.IMMEDIATE)
-                .source("config", FileHelper.readYamlContent("dlsfls/config.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("internalusers")
-                .source("internalusers", FileHelper.readYamlContent("dlsfls/internal_users.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").id("roles").setRefreshPolicy(RefreshPolicy.IMMEDIATE)
-                .source("roles", FileHelper.readYamlContent("dlsfls/roles.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("rolesmapping")
-                .source("rolesmapping", FileHelper.readYamlContent("dlsfls/roles_mapping.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("actiongroups")
-                .source("actiongroups", FileHelper.readYamlContent("dlsfls/action_groups.yml"))).actionGet();
+    protected void populateData(TransportClient tc) {
 
         tc.index(new IndexRequest("deals").type("deals").id("0").setRefreshPolicy(RefreshPolicy.IMMEDIATE)
                 .source("{\"customer\": {\"name\":\"cust1\"}, \"zip\": \"12345\",\"secret\": \"tellnoone\",\"amount\": 10}", XContentType.JSON)).actionGet();
@@ -72,12 +60,12 @@ public class FlsDlsTestMulti extends AbstractDlsFlsTest{
 
         HttpResponse res;
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executePostRequest("/deals/_search?pretty", query, encodeBasicHeader("dept_manager_multi", "password"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 3,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 3,\n      \"relation"));
         Assert.assertTrue(res.getBody().contains("\"value\" : 1710.0"));
         Assert.assertTrue(res.getBody().contains("\"failed\" : 0"));
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executePostRequest("/deals/_search?pretty", query, encodeBasicHeader("admin", "admin"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 4,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 4,\n      \"relation"));
         Assert.assertTrue(res.getBody().contains("\"value\" : 21711.0"));
         Assert.assertTrue(res.getBody().contains("\"failed\" : 0"));
     }
@@ -96,11 +84,11 @@ public class FlsDlsTestMulti extends AbstractDlsFlsTest{
         Assert.assertTrue(res.getBody().contains("zip"));
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executeGetRequest("/deals/_search?pretty&size=0", encodeBasicHeader("dept_manager_multi", "password"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 3,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 3,\n      \"relation"));
         Assert.assertTrue(res.getBody().contains("\"failed\" : 0"));
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executeGetRequest("/deals/_search?pretty&size=0", encodeBasicHeader("admin", "admin"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 4,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 4,\n      \"relation"));
         Assert.assertTrue(res.getBody().contains("\"failed\" : 0"));
 
 
@@ -120,7 +108,7 @@ public class FlsDlsTestMulti extends AbstractDlsFlsTest{
 
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executePostRequest("/deals/_search?pretty", query,encodeBasicHeader("dept_manager_multi", "password"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 1,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 1,\n      \"relation"));
         Assert.assertTrue(res.getBody().contains("\"failed\" : 0"));
 
         query =
@@ -139,15 +127,15 @@ public class FlsDlsTestMulti extends AbstractDlsFlsTest{
 
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executePostRequest("/deals/_search?pretty", query,encodeBasicHeader("dept_manager_multi", "password"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 2,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 2,\n      \"relation"));
         Assert.assertTrue(res.getBody().contains("\"failed\" : 0"));
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executePostRequest("/deals/_search?pretty", query,encodeBasicHeader("admin", "admin"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 2,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 2,\n      \"relation"));
         Assert.assertTrue(res.getBody().contains("\"failed\" : 0"));
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executeGetRequest("/deals/_search?q=amount:10&pretty", encodeBasicHeader("dept_manager_multi", "password"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 1,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 1,\n      \"relation"));
         Assert.assertTrue(res.getBody().contains("\"failed\" : 0"));
 
         res = rh.executeGetRequest("/deals/deals/3?pretty", encodeBasicHeader("dept_manager_multi", "password"));
@@ -176,7 +164,7 @@ public class FlsDlsTestMulti extends AbstractDlsFlsTest{
                //"{\"size\":10, \"query\":{\"bool\":{\"must\":{\"match_all\":{}}}}}"+System.lineSeparator();
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executePostRequest("_msearch?pretty", msearchBody, encodeBasicHeader("dept_manager_multi", "password"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 3,\n        \"max_"));
+        Assert.assertTrue(res.getBody(), res.getBody().contains("\"value\" : 3,\n          \"relation"));
         Assert.assertFalse(res.getBody().contains("_opendistro_security_dls_query"));
         Assert.assertFalse(res.getBody().contains("_opendistro_security_fls_fields"));
         Assert.assertTrue(res.getBody().contains("\"amount\" : 1500"));

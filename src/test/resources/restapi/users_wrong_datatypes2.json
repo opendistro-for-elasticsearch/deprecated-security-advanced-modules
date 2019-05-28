@@ -1,6 +1,6 @@
 {
   "password": 123,
-  "roles": [
+  "backend_roles": [
     "role1",
     "role2"
   ]

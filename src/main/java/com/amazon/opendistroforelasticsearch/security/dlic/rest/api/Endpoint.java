@@ -18,12 +18,12 @@ package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 public enum Endpoint {
 	ACTIONGROUPS,
 	CACHE,
-	CONFIGURATION,
 	CONFIG,
 	ROLES,
 	ROLESMAPPING,
 	INTERNALUSERS,
 	SYSTEMINFO,
 	PERMISSIONSINFO,
-	AUTHTOKEN;
+	AUTHTOKEN,
+	TENANTS;
 }

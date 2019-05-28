@@ -15,6 +15,7 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 import org.elasticsearch.client.Client;
@@ -31,18 +32,20 @@ import org.elasticsearch.rest.RestRequest.Method;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.threadpool.ThreadPool;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
 import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
-import com.amazon.opendistroforelasticsearch.security.configuration.IndexBaseConfigurationRepository;
+import com.amazon.opendistroforelasticsearch.security.configuration.ConfigurationRepository;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.NoOpValidator;
 import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.CType;
 import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
 
 public class AuthTokenProcessorAction extends AbstractApiAction {
 	@Inject
 	public AuthTokenProcessorAction(final Settings settings, final Path configPath, final RestController controller,
-			final Client client, final AdminDNs adminDNs, final IndexBaseConfigurationRepository cl,
+			final Client client, final AdminDNs adminDNs, final ConfigurationRepository cl,
 			final ClusterService cs, final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator,
 			ThreadPool threadPool, AuditLog auditLog) {
 		super(settings, configPath, controller, client, adminDNs, cl, cs, principalExtractor, evaluator, threadPool,
@@ -52,13 +55,11 @@ public class AuthTokenProcessorAction extends AbstractApiAction {
 	}
 
 	@Override
-	protected void handlePost(RestChannel channel, final RestRequest request, final Client client,
-			final Settings.Builder additionalSettings) {
+	protected void handlePost(RestChannel channel, final RestRequest request, final Client client, final JsonNode content) throws IOException {
 
 		// Just do nothing here. Eligible authenticators will intercept calls and
 		// provide own responses.
-
-		channel.sendResponse(new BytesRestResponse(RestStatus.OK, ""));
+	    successResponse(channel,"");
 	}
 
 	@Override
@@ -72,7 +73,7 @@ public class AuthTokenProcessorAction extends AbstractApiAction {
 	}
 
 	@Override
-	protected String getConfigName() {
+    protected CType getConfigName() {
 		return null;
 	}
 

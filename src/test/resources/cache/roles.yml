@@ -1,331 +1,485 @@
-#<role_name>:
-#  cluster:
-#    - '<permission>'
-#  indices:
-#    '<indexname or alias>':
-#      '<type>':  
-#        - '<permission>'
-#      _dls_: '<querydsl query>'
-#      _fls_:
-#        - '<field>'
-#        - '<field>'
-
-# When a user make a request to elasticsearch then the following roles will be evaluated to see if the user has
-# permissions for the request. A request is always associated with an action and is executed against and index (or alias)
-# and a type. If a request is executed against all indices (or all types) then the asterix ('*') is needed.
-# Every role a user has will be examined if it allows the action against an index (or type). At least one role must match
-# for the request to be successful. If no role match then the request will be denied. Currently a match must happen within
-# one single role - that means that permissions can not span multiple roles. 
-
-# For <permission>, <indexname or alias> and <type> simple wildcards are possible. 
-# A asterix (*) will match any character sequence (or an empty sequence)
-# A question mark (?) will match any single character (but NOT empty character)
-# Example: '*my*index' will match 'my_first_index' as well as 'myindex' but not 'myindex1'
-# Example: '?kibana' will match '.kibana' but not 'kibana'
-
-# For <permission>, <indexname or alias> and <type> are also regular expressions possible. 
-# You have to pre- and apend a '/' to use regex instead of simple wildcards
-# '/<java regex>/'
-# Example: '/\S*/' will match any non whitespace characters
-
-# DLS (Document level security) - NOT FREE FOR COMMERCIAL
-# Install https://github.com/floragunncom/search-guard-module-dlsfls
-# Per Index you can define a DLS query
-# If more than one DLS query match they will be OR'ed
-
-# FLS (Field level security) - NOT FREE FOR COMMERCIAL
-# Per Index you can define a FLS fields
-# If more than one FLS config match the field will be appended
-# Install https://github.com/floragunncom/search-guard-module-dlsfls
-
-# Kibana multitenancy - NOT FREE FOR COMMERCIAL
-# Per role you can define on ore more tenants
-# https://github.com/floragunncom/search-guard-docs/blob/master/multitenancy.md
-
-# Demo roles for sample data (Kibana included)
-human_resources:
-  cluster:
-    - CLUSTER_COMPOSITE_OPS
-  indices:
-    'humanresources':
-      '*':
-        - '*'
-    '?kibana':
-      '*':
-        - ALL
-  tenants:
-    human_resources: RW
-    performance_data: RW
-    business_intelligence: RO
-    management: RW
-    PerFormance    ___Reviews/&%%/&&/ : RW
-    PerFormance ___Reviews%%%!!! : RW
-
-human_resources_trainee:
-  cluster:
-    - CLUSTER_COMPOSITE_OPS_RO
-  indices:
-    'humanresources':
-      '*':
-        - CRUD
-      _dls_: '{ "bool": { "must_not": { "match": { "Designation": "CEO"  }}}}'
-      _fls_:
-        - 'Designation'
-        - 'FirstName'
-        - 'LastName'
-        - 'Salary'
-    '?kibana':
-      '*':
-        - ALL
-  tenants:
-    human_resources: RO
-    performance_data: RO
-    business_intelligence: RO
-
-finance:
-  cluster:
-    - CLUSTER_COMPOSITE_OPS_RO
-  indices:
-    'finance':
-      '*':
-        - '*'
-    'humanresources':
-      '*':
-        - READ
-      _fls_:
-        - 'Designation'
-        - 'FirstName'
-        - 'LastName'
-        - 'Salary'
-    '?kibana':
-      '*':
-        - ALL
-  tenants:
-    finance: RW
-    finance_management: RW
-    performance_data: RW
-    management: RW
-    business_intelligence: RW
-    human_resources: RO
-
-finance_trainee:
-  cluster:
-    - CLUSTER_COMPOSITE_OPS_RO
-  indices:
-    'finance':
-      'revenue':
-        - CRUD
-    '?kibana':
-      '*':
-        - ALL
-  tenants:
-    finance: RO
-
-# End sample data demo, default roles below
-
-# Default role for all users (including anonymous)
-public:
-  cluster:
-    - cluster:monitor/main
-    - CLUSTER_COMPOSITE_OPS_RO
-
-# Allows everything
-# but not changes to searchguard config/index
-all_access:
-  cluster:
-    - UNLIMITED
-  indices:
-    '*':
-      '*':
-        - UNLIMITED
-  tenants:
-    adm_tenant: RW
-    test_tenant_ro: RW
-
-# Read all and monitor, but no write permissions 
-readonly_and_monitor:
-  cluster:
-    - CLUSTER_MONITOR
-    - CLUSTER_COMPOSITE_OPS_RO
-  indices:
-    '*':
-      '*':
-        - INDICES_ALL
-
-# Read all, but no write permissions
-readall:
-  cluster:
-    - CLUSTER_COMPOSITE_OPS_RO
-  indices:
-    '*':
-      '*':
-        - READ
-
-# For users which use kibana
-kibana:
-  cluster:
-    - MONITOR
-    - CLUSTER_COMPOSITE_OPS_RO
-  indices:
-    '?kibana':
-      '*':
-        - MANAGE
-        - INDEX
-        - READ
-        - DELETE
-    '?kibana-6':
-      '*':
-        - MANAGE
-        - INDEX
-        - READ
-        - DELETE
-    '*':
-      '*':
-        - indices:data/read/field_caps*
-
-# For the kibana server
-kibana_server:
-  cluster:
-      - CLUSTER_MONITOR
-      - CLUSTER_COMPOSITE_OPS
-  indices:
-    '?kibana':
-      '*':
-        - INDICES_ALL
-
-# For logstash and beats
-logstash:
-  cluster:
-    - indices:admin/template/get
-    - indices:admin/template/put
-    - CLUSTER_MONITOR
-    - CLUSTER_COMPOSITE_OPS
-  indices:
-    'logstash-*':
-      '*':
-        - CRUD
-        - CREATE_INDEX
-    '*beat*':
-      '*':
-        - CRUD
-        - CREATE_INDEX
-
-# Allows each user to access own named index
-own_index:
-  cluster:
-    - CLUSTER_COMPOSITE_OPS
-  indices:
-    '${user_name}':
-      '*':
-        - INDICES_ALL
-
-# Allows adding and modifying repositories
-# and creating and restoring snapshots
-manage_snapshots:
-  cluster:
-    - MANAGE_SNAPSHOTS
-  indices:
-    '*':
-      '*':
-        - "indices:data/write/index"
-        - "indices:admin/create"
-
-# Make xpack monitoring work
-monitor:
-  cluster:
-    - "cluster:admin/xpack/monitoring/*"
-    - "indices:admin/template/get"
-    - "indices:admin/template/put"
-    - "indices:admin/*get"
-    - CLUSTER_MONITOR
-    - CLUSTER_COMPOSITE_OPS
-  indices:
-    '.monitoring*':
-      '*':
-        - INDICES_ALL
-    
-# Examples
-role_starfleet:
-  cluster:
-    - CLUSTER_COMPOSITE_OPS
-  indices:
-    sf:
-       ships:  
-         - READ
-       public:  
-         - INDICES_ALL
-       students:  
-         - READ
-       alumni:  
-         - READ
-    'pub*':
-       '*':  
-         - READ
-  tenants:
-    enterprise_tenant: RW
-    test_tenant_ro: RW
-
-role_starfleet_captains:
-  indices:
-    sf:
-       '*':  
-         - CRUD
-    pub*:
-       '*':  
-         - CRUD 
-  cluster:
-    - 'cluster:monitor*'
-    - CLUSTER_COMPOSITE_OPS
-  tenants:
-    command_tenant: RW
-    
-readonly_dlsfls:
-  cluster:
-    - CLUSTER_COMPOSITE_OPS_RO
-  indices:
-    '/\S*/':
-      '*':
-        - READ    
-      _dls_: '{"term" : {"_type" : "legends"}}'
-      _fls_:
-        - 'aaa'
-        - 'bbb'
-
-kibana_testindex:
-  cluster:
-    - CLUSTER_COMPOSITE_OPS_RO
-  indices:
-    'test*':
-      '*':
-        - READ
-        - indices:admin/mappings/fields/get*
-    '.kibana':
-      '*':
-        - INDICES_ALL
-  tenants:
-    test_tenant_rw: RW
-    test_tenant_ro: RO
-    
-ua:
-  cluster:
-    - '*'
-  indices:
-    'indexa*':
-      '*':
-        - '*'
-    'permitnotexistentindex':
-      '*':
-        - '*'
-    '?kibana':
-      '*':
-        - ALL
-    '*':
-      '*':
-        - indices:data/read/field_caps
-ub:
-  cluster:
-    - '*'
-  indices:
-    'indexb':
-      '*':
-        - '*'
+---
+_meta:
+  type: "roles"
+  config_version: 2
+opendistro_security_own_index:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "CLUSTER_COMPOSITE_OPS"
+  index_permissions:
+  - index_patterns:
+    - "${user_name}"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "INDICES_ALL"
+  tenant_permissions: []
+opendistro_security_kibana_testindex:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "CLUSTER_COMPOSITE_OPS_RO"
+  index_permissions:
+  - index_patterns:
+    - "test*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "READ"
+    - "indices:admin/mappings/fields/get*"
+  - index_patterns:
+    - ".kibana"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "INDICES_ALL"
+  tenant_permissions:
+  - tenant_patterns:
+    - "test_tenant_rw"
+    allowed_actions:
+    - "ODS_KIBANA_ALL_WRITE"
+  - tenant_patterns:
+    - "test_tenant_ro"
+    allowed_actions:
+    - "ODS_KIBANA_ALL_READ"
+opendistro_security_human_resources:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "CLUSTER_COMPOSITE_OPS"
+  index_permissions:
+  - index_patterns:
+    - "humanresources"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "*"
+  - index_patterns:
+    - "?kibana"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "ALL"
+  tenant_permissions:
+  - tenant_patterns:
+    - "human_resources"
+    - "performance_data"
+    - "management"
+    - "PerFormance    ___Reviews/&%%/&&/"
+    - "PerFormance ___Reviews%%%!!!"
+    allowed_actions:
+    - "ODS_KIBANA_ALL_WRITE"
+  - tenant_patterns:
+    - "business_intelligence"
+    allowed_actions:
+    - "ODS_KIBANA_ALL_READ"
+opendistro_security_human_resources_trainee:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "CLUSTER_COMPOSITE_OPS_RO"
+  index_permissions:
+  - index_patterns:
+    - "humanresources"
+    dls: "{ \"bool\": { \"must_not\": { \"match\": { \"Designation\": \"CEO\"  }}}}"
+    fls:
+    - "Designation"
+    - "FirstName"
+    - "LastName"
+    - "Salary"
+    masked_fields: null
+    allowed_actions:
+    - "CRUD"
+  - index_patterns:
+    - "?kibana"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "ALL"
+  tenant_permissions:
+  - tenant_patterns:
+    - "human_resources"
+    - "performance_data"
+    - "business_intelligence"
+    allowed_actions:
+    - "ODS_KIBANA_ALL_READ"
+opendistro_security_readonly_and_monitor:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "CLUSTER_MONITOR"
+  - "CLUSTER_COMPOSITE_OPS_RO"
+  index_permissions:
+  - index_patterns:
+    - "*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "INDICES_ALL"
+  tenant_permissions: []
+opendistro_security_kibana:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "MONITOR"
+  - "CLUSTER_COMPOSITE_OPS_RO"
+  index_permissions:
+  - index_patterns:
+    - "?kibana"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "READ"
+    - "DELETE"
+    - "MANAGE"
+    - "INDEX"
+  - index_patterns:
+    - "?kibana-6"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "READ"
+    - "DELETE"
+    - "MANAGE"
+    - "INDEX"
+  - index_patterns:
+    - "*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "indices:data/read/field_caps*"
+  tenant_permissions: []
+opendistro_security_monitor:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "cluster:admin/xpack/monitoring/*"
+  - "indices:admin/template/get"
+  - "indices:admin/template/put"
+  - "indices:admin/*get"
+  - "CLUSTER_MONITOR"
+  - "CLUSTER_COMPOSITE_OPS"
+  index_permissions:
+  - index_patterns:
+    - ".monitoring*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "INDICES_ALL"
+  tenant_permissions: []
+opendistro_security_manage_snapshots:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "MANAGE_SNAPSHOTS"
+  index_permissions:
+  - index_patterns:
+    - "*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "indices:data/write/index"
+    - "indices:admin/create"
+  tenant_permissions: []
+opendistro_security_kibana_server:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "CLUSTER_MONITOR"
+  - "CLUSTER_COMPOSITE_OPS"
+  index_permissions:
+  - index_patterns:
+    - "?kibana"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "INDICES_ALL"
+  tenant_permissions: []
+opendistro_security_public:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "cluster:monitor/main"
+  - "CLUSTER_COMPOSITE_OPS_RO"
+  index_permissions: []
+  tenant_permissions: []
+opendistro_security_all_access:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "UNLIMITED"
+  index_permissions:
+  - index_patterns:
+    - "*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "UNLIMITED"
+  tenant_permissions:
+  - tenant_patterns:
+    - "adm_tenant"
+    - "test_tenant_ro"
+    allowed_actions:
+    - "ODS_KIBANA_ALL_WRITE"
+opendistro_security_logstash:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "indices:admin/template/get"
+  - "indices:admin/template/put"
+  - "CLUSTER_MONITOR"
+  - "CLUSTER_COMPOSITE_OPS"
+  index_permissions:
+  - index_patterns:
+    - "logstash-*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "CRUD"
+    - "CREATE_INDEX"
+  - index_patterns:
+    - "*beat*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "CRUD"
+    - "CREATE_INDEX"
+  tenant_permissions: []
+opendistro_security_ua:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "*"
+  index_permissions:
+  - index_patterns:
+    - "indexa*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "*"
+  - index_patterns:
+    - "permitnotexistentindex"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "*"
+  - index_patterns:
+    - "?kibana"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "ALL"
+  - index_patterns:
+    - "*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "indices:data/read/field_caps"
+  tenant_permissions: []
+opendistro_security_finance:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "CLUSTER_COMPOSITE_OPS_RO"
+  index_permissions:
+  - index_patterns:
+    - "finance"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "*"
+  - index_patterns:
+    - "humanresources"
+    dls: null
+    fls:
+    - "Designation"
+    - "FirstName"
+    - "LastName"
+    - "Salary"
+    masked_fields: null
+    allowed_actions:
+    - "READ"
+  - index_patterns:
+    - "?kibana"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "ALL"
+  tenant_permissions:
+  - tenant_patterns:
+    - "finance"
+    - "finance_management"
+    - "performance_data"
+    - "management"
+    - "business_intelligence"
+    allowed_actions:
+    - "ODS_KIBANA_ALL_WRITE"
+  - tenant_patterns:
+    - "human_resources"
+    allowed_actions:
+    - "ODS_KIBANA_ALL_READ"
+opendistro_security_readonly_dlsfls:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "CLUSTER_COMPOSITE_OPS_RO"
+  index_permissions:
+  - index_patterns:
+    - "/\\S*/"
+    dls: "{\"term\" : {\"_type\" : \"legends\"}}"
+    fls:
+    - "aaa"
+    - "bbb"
+    masked_fields: null
+    allowed_actions:
+    - "READ"
+  tenant_permissions: []
+opendistro_security_finance_trainee:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "CLUSTER_COMPOSITE_OPS_RO"
+  index_permissions:
+  - index_patterns:
+    - "finance"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "CRUD"
+  - index_patterns:
+    - "?kibana"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "ALL"
+  tenant_permissions:
+  - tenant_patterns:
+    - "finance"
+    allowed_actions:
+    - "ODS_KIBANA_ALL_READ"
+opendistro_security_role_starfleet:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "CLUSTER_COMPOSITE_OPS"
+  index_permissions:
+  - index_patterns:
+    - "sf"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "READ"
+    - "INDICES_ALL"
+  - index_patterns:
+    - "pub*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "READ"
+  tenant_permissions:
+  - tenant_patterns:
+    - "enterprise_tenant"
+    - "test_tenant_ro"
+    allowed_actions:
+    - "ODS_KIBANA_ALL_WRITE"
+opendistro_security_readall:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "CLUSTER_COMPOSITE_OPS_RO"
+  index_permissions:
+  - index_patterns:
+    - "*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "READ"
+  tenant_permissions: []
+opendistro_security_ub:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "*"
+  index_permissions:
+  - index_patterns:
+    - "indexb"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "*"
+  tenant_permissions: []
+opendistro_security_role_starfleet_captains:
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "cluster:monitor*"
+  - "CLUSTER_COMPOSITE_OPS"
+  index_permissions:
+  - index_patterns:
+    - "sf"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "CRUD"
+  - index_patterns:
+    - "pub*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "CRUD"
+  tenant_permissions:
+  - tenant_patterns:
+    - "command_tenant"
+    allowed_actions:
+    - "ODS_KIBANA_ALL_WRITE"

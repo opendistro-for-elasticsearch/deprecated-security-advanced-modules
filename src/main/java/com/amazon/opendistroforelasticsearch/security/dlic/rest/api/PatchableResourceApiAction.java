@@ -16,9 +16,11 @@
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Iterator;
 
+import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.index.IndexResponse;
@@ -27,24 +29,21 @@ import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.rest.BytesRestResponse;
 import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
-import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.threadpool.ThreadPool;
 
-import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
 import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
 import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
-import com.amazon.opendistroforelasticsearch.security.configuration.IndexBaseConfigurationRepository;
+import com.amazon.opendistroforelasticsearch.security.configuration.ConfigurationRepository;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
 import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.SecurityDynamicConfiguration;
 import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -57,7 +56,7 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
     protected final Logger log = LogManager.getLogger(this.getClass());
 
     public PatchableResourceApiAction(Settings settings, Path configPath, RestController controller, Client client,
-                                      AdminDNs adminDNs, IndexBaseConfigurationRepository cl, ClusterService cs,
+            AdminDNs adminDNs, ConfigurationRepository cl, ClusterService cs,
                                       PrincipalExtractor principalExtractor, PrivilegesEvaluator evaluator, ThreadPool threadPool,
                                       AuditLog auditLog) {
         super(settings, configPath, controller, client, adminDNs, cl, cs, principalExtractor, evaluator, threadPool,
@@ -72,19 +71,19 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
         }
 
         String name = request.param("name");
-        Tuple<Long, Settings> existingAsSettings = loadAsSettings(getConfigName(), false);
+        SecurityDynamicConfiguration<?> existingConfiguration = load(getConfigName(), false);
 
         JsonNode jsonPatch;
 
         try {
-            jsonPatch = DefaultObjectMapper.objectMapper.readTree(request.content().utf8ToString());
+            jsonPatch = DefaultObjectMapper.readTree(request.content().utf8ToString());
         } catch (IOException e) {
             log.debug("Error while parsing JSON patch", e);
             badRequestResponse(channel, "Error in JSON patch: " + e.getMessage());
             return;
         }
 
-        JsonNode existingAsJsonNode = Utils.convertJsonToJackson(existingAsSettings.v2());
+        JsonNode existingAsJsonNode = Utils.convertJsonToJackson(existingConfiguration, true);
 
         if (!(existingAsJsonNode instanceof ObjectNode)) {
             internalErrorResponse(channel, "Config " + getConfigName() + " is malformed");
@@ -94,27 +93,25 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
         ObjectNode existingAsObjectNode = (ObjectNode) existingAsJsonNode;
 
         if (Strings.isNullOrEmpty(name)) {
-            handleBulkPatch(channel, request, client, existingAsSettings, existingAsObjectNode, jsonPatch);
+            handleBulkPatch(channel, request, client, existingConfiguration, existingAsObjectNode, jsonPatch);
         } else {
-            handleSinglePatch(channel, request, client, name, existingAsSettings, existingAsObjectNode, jsonPatch);
+            handleSinglePatch(channel, request, client, name, existingConfiguration, existingAsObjectNode, jsonPatch);
         }
     }
 
     private void handleSinglePatch(RestChannel channel, RestRequest request, Client client, String name,
-                                   Tuple<Long,Settings> existingAsSettings, ObjectNode existingAsObjectNode, JsonNode jsonPatch) throws IOException {
-        if (isHidden(existingAsSettings.v2(), name)) {
+            SecurityDynamicConfiguration<?> existingConfiguration, ObjectNode existingAsObjectNode, JsonNode jsonPatch) throws IOException {
+        if (isHidden(existingConfiguration, name)) {
             notFound(channel, getResourceName() + " " + name + " not found.");
             return;
         }
 
-        if (isReadOnly(existingAsSettings.v2(), name)) {
+        if (isReserved(existingConfiguration, name)) {
             forbidden(channel, "Resource '" + name + "' is read-only.");
             return;
         }
 
-        Settings resourceSettings = existingAsSettings.v2().getAsSettings(name);
-
-        if (resourceSettings.isEmpty()) {
+        if (!existingConfiguration.exists(name)) {
             notFound(channel, getResourceName() + " " + name + " not found.");
             return;
         }
@@ -136,8 +133,7 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
         if(originalValidator != null) {
             if (!originalValidator.validateSettings()) {
                 request.params().clear();
-                channel.sendResponse(
-                        new BytesRestResponse(RestStatus.BAD_REQUEST, originalValidator.errorsAsXContent(channel)));
+                badRequestResponse(channel, originalValidator);
                 return;
             }
         }
@@ -147,28 +143,27 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
 
         if (!validator.validateSettings()) {
             request.params().clear();
-            channel.sendResponse(
-                    new BytesRestResponse(RestStatus.BAD_REQUEST, validator.errorsAsXContent(channel)));
+                badRequestResponse(channel, validator);
             return;
         }
 
         JsonNode updatedAsJsonNode = existingAsObjectNode.deepCopy().set(name, patchedResourceAsJsonNode);
 
-        BytesReference updatedAsBytesReference = new BytesArray(
-                DefaultObjectMapper.objectMapper.writeValueAsString(updatedAsJsonNode).getBytes());
+        SecurityDynamicConfiguration<?> mdc = SecurityDynamicConfiguration.fromNode(updatedAsJsonNode, existingConfiguration.getCType()
+                                   , existingConfiguration.getVersion(), existingConfiguration.getSeqNo(), existingConfiguration.getPrimaryTerm());
 
-        saveAnUpdateConfigs(client, request, getConfigName(), updatedAsBytesReference, new OnSucessActionListener<IndexResponse>(channel){
+        saveAnUpdateConfigs(client, request, getConfigName(), mdc, new OnSucessActionListener<IndexResponse>(channel){
 
             @Override
             public void onResponse(IndexResponse response) {
                 successResponse(channel, "'" + name + "' updated.");
 
             }
-        }, existingAsSettings.v1());
+            });
     }
 
     private void handleBulkPatch(RestChannel channel, RestRequest request, Client client,
-                                 Tuple<Long,Settings> existingAsSettings, ObjectNode existingAsObjectNode, JsonNode jsonPatch) throws IOException {
+            SecurityDynamicConfiguration<?> existingConfiguration, ObjectNode existingAsObjectNode, JsonNode jsonPatch) throws IOException {
 
         JsonNode patchedAsJsonNode;
 
@@ -180,18 +175,18 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
             return;
         }
 
-        for (String resourceName : existingAsSettings.v2().names()) {
+        for (String resourceName : existingConfiguration.getCEntries().keySet()) {
             JsonNode oldResource = existingAsObjectNode.get(resourceName);
             JsonNode patchedResource = patchedAsJsonNode.get(resourceName);
 
             if (oldResource != null && !oldResource.equals(patchedResource)) {
 
-                if (isReadOnly(existingAsSettings.v2(), resourceName)) {
+                if (isReserved(existingConfiguration, resourceName)) {
                     forbidden(channel, "Resource '" + resourceName + "' is read-only.");
                     return;
                 }
 
-                if (isHidden(existingAsSettings.v2(), resourceName)) {
+                if (isHidden(existingConfiguration, resourceName)) {
                     badRequestResponse(channel, "Resource name '" + resourceName + "' is reserved");
                     return;
                 }
@@ -210,8 +205,7 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
             if(originalValidator != null) {
                 if (!originalValidator.validateSettings()) {
                     request.params().clear();
-                    channel.sendResponse(
-                            new BytesRestResponse(RestStatus.BAD_REQUEST, originalValidator.errorsAsXContent(channel)));
+                        badRequestResponse(channel, originalValidator);
                     return;
                 }
             }
@@ -221,23 +215,21 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
 
                 if (!validator.validateSettings()) {
                     request.params().clear();
-                    channel.sendResponse(
-                            new BytesRestResponse(RestStatus.BAD_REQUEST, validator.errorsAsXContent(channel)));
+                        badRequestResponse(channel, validator);
                     return;
                 }
             }
         }
+        SecurityDynamicConfiguration<?> mdc = SecurityDynamicConfiguration.fromNode(patchedAsJsonNode, existingConfiguration.getCType()
+                                    , existingConfiguration.getVersion(), existingConfiguration.getSeqNo(), existingConfiguration.getPrimaryTerm());
 
-        BytesReference updatedAsBytesReference = new BytesArray(
-                DefaultObjectMapper.objectMapper.writeValueAsString(patchedAsJsonNode).getBytes());
-
-        saveAnUpdateConfigs(client, request, getConfigName(), updatedAsBytesReference, new OnSucessActionListener<IndexResponse>(channel) {
+        saveAnUpdateConfigs(client, request, getConfigName(), mdc, new OnSucessActionListener<IndexResponse>(channel) {
 
             @Override
             public void onResponse(IndexResponse response) {
                 successResponse(channel, "Resource updated.");
             }
-        }, existingAsSettings.v1());
+            });
 
     }
 
@@ -254,9 +246,12 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
     protected void handleApiRequest(RestChannel channel, final RestRequest request, final Client client)
             throws IOException {
 
+        System.out.println("REQUEST METHOD: " + request.method());
+
         if (request.method() == Method.PATCH) {
             handlePatch(channel, request, client);
         } else {
+            System.out.println("Handle API REQUEST WITH: " + request.method());
             super.handleApiRequest(channel, request, client);
         }
     }
@@ -264,7 +259,7 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
     private AbstractConfigurationValidator getValidator(RestRequest request, JsonNode patchedResource)
             throws JsonProcessingException {
         BytesReference patchedResourceAsByteReference = new BytesArray(
-                DefaultObjectMapper.objectMapper.writeValueAsString(patchedResource).getBytes());
+                DefaultObjectMapper.objectMapper.writeValueAsString(patchedResource).getBytes(StandardCharsets.UTF_8));
         return getValidator(request, patchedResourceAsByteReference);
     }
 }

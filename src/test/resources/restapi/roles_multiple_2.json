@@ -1,36 +1,12 @@
 {
-  "indices": {
-    "sf": {
-      "ships": [
-        "READ"
-      ],
-      "public": [
-        "indices:*"
-      ]
-    },
-    "pub": {
-      "*": [
-        "READ"
-      ]
-    }
-  },
-  "cluster": [
-    "cluster:monitor*",
-    "indices:data/read/scroll"
-  ],
-  "indices": {
-    "sf": {
-      "*": [
-        "CRUD"
-      ]
-    },
-    "pub": {
-      "*": [
-        "CRUD"
-      ]
-    }
-  },
-  "cluster": [
-    "cluster:monitor*"
-  ]
+  "cluster_permissions" : [ "cluster:monitor*" ],
+  "cluster_permissions" : [ "cluster:monitor*" ],
+  "index_permissions" : [ {
+    "index_patterns" : [ "sf" ],
+    "allowed_actions" : [ "CRUD" ]
+  }, {
+    "index_patterns" : [ "pub" ],
+    "allowed_actions" : [ "CRUD" ]
+  } ],
+  "tenant_permissions" : [ ]
 }

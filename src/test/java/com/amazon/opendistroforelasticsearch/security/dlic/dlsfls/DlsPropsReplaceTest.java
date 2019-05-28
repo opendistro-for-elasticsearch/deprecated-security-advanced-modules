@@ -23,24 +23,12 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 
 public class DlsPropsReplaceTest extends AbstractDlsFlsTest{
 
 
-    protected void populate(TransportClient tc) {
-
-        tc.index(new IndexRequest(".opendistro_security").type("security").id("config").setRefreshPolicy(RefreshPolicy.IMMEDIATE)
-                .source("config", FileHelper.readYamlContent("dlsfls/config.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("internalusers")
-                .source("internalusers", FileHelper.readYamlContent("dlsfls/internal_users.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").id("roles").setRefreshPolicy(RefreshPolicy.IMMEDIATE)
-                .source("roles", FileHelper.readYamlContent("dlsfls/roles.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("rolesmapping")
-                .source("rolesmapping", FileHelper.readYamlContent("dlsfls/roles_mapping.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("actiongroups")
-                .source("actiongroups", FileHelper.readYamlContent("dlsfls/action_groups.yml"))).actionGet();
+    protected void populateData(TransportClient tc) {
 
         tc.index(new IndexRequest("prop1").type("_doc").setRefreshPolicy(RefreshPolicy.IMMEDIATE)
                 .source("{\"prop_replace\": \"yes\", \"amount\": 1010}", XContentType.JSON)).actionGet();
@@ -65,10 +53,10 @@ public class DlsPropsReplaceTest extends AbstractDlsFlsTest{
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executeGetRequest("/prop1,prop2/_search?pretty&size=100", encodeBasicHeader("admin", "admin"))).getStatusCode());
         System.out.println(res.getBody());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 5,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 5,\n      \"relation"));
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executeGetRequest("/prop1,prop2/_search?pretty&size=100", encodeBasicHeader("prop_replace", "password"))).getStatusCode());
         System.out.println(res.getBody());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 3,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 3,\n      \"relation"));
     }
 }

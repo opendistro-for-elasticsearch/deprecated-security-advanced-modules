@@ -29,17 +29,17 @@ import org.elasticsearch.threadpool.ThreadPool;
 
 import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
 import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
-import com.amazon.opendistroforelasticsearch.security.configuration.IndexBaseConfigurationRepository;
+import com.amazon.opendistroforelasticsearch.security.configuration.ConfigurationRepository;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.RolesValidator;
 import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.CType;
 import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 
 public class RolesApiAction extends PatchableResourceApiAction {
 
 	@Inject
-	public RolesApiAction(Settings settings, final Path configPath, RestController controller, Client client, AdminDNs adminDNs, IndexBaseConfigurationRepository cl,
+	public RolesApiAction(Settings settings, final Path configPath, RestController controller, Client client, AdminDNs adminDNs, ConfigurationRepository cl,
 			ClusterService cs, final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator, ThreadPool threadPool, AuditLog auditLog) {
 		super(settings, configPath, controller, client, adminDNs, cl, cs, principalExtractor, evaluator, threadPool, auditLog);
 		controller.registerHandler(Method.GET, "/_opendistro/_security/api/roles/", this);
@@ -67,8 +67,8 @@ public class RolesApiAction extends PatchableResourceApiAction {
 	}
 
 	@Override
-	protected String getConfigName() {
-		return ConfigConstants.CONFIGNAME_ROLES;
+    protected CType getConfigName() {
+        return CType.ROLES;
 	}
 
 }

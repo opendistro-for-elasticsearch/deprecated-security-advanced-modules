@@ -4,7 +4,7 @@
     "janeway",
     "kirk"
   ]
-  "backendroles": [
+  "backend_roles": [
     "captains",
     "role2",
     "role3"

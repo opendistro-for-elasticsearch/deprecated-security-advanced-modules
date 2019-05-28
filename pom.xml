@@ -20,11 +20,11 @@
   <parent>
     <groupId>com.amazon.opendistroforelasticsearch</groupId>
     <artifactId>opendistro_security_parent</artifactId>
-    <version>0.9.0.0</version>
+    <version>1.0.0.0</version>
   </parent>
 
   <artifactId>opendistro_security_advanced_modules</artifactId>
-  <version>0.9.0.0</version>
+  <version>1.0.0.0</version>
   <packaging>jar</packaging>
 
   <name>Open Distro For Elasticsearch Advanced Modules</name>
@@ -33,20 +33,20 @@
   <inceptionYear>2016</inceptionYear>
 
   <properties>
-    <security.version>0.9.0.0</security.version>
-    <elasticsearch.version>6.7.1</elasticsearch.version>
+    <security.version>1.0.0.0</security.version>
+    <elasticsearch.version>7.0.1</elasticsearch.version>
 
     <!-- deps -->
     <log4j.version>2.11.1</log4j.version>
     <jjwt.version>0.10.5</jjwt.version>
     <ldaptive.version>1.2.3</ldaptive.version>
-    <jackson-databind.version>2.8.11.2</jackson-databind.version>
+    <jackson-databind.version>2.9.9</jackson-databind.version>
     <http.commons.version>4.5.3</http.commons.version>
     <cxf.version>3.2.2</cxf.version>
     <guava.version>25.1-jre</guava.version>
 
     <!-- Test only -->
-    <mockito.version>2.21.0</mockito.version>
+    <mockito.version>2.23.0</mockito.version>
     <unboundid-ldapsdk.version>4.0.9</unboundid-ldapsdk.version>
   </properties>
 
@@ -116,16 +116,15 @@
 
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>fluent-hc</artifactId>
-      <version>${http.commons.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient-cache</artifactId>
       <version>${http.commons.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-
 
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
@@ -133,8 +132,8 @@
       <version>${elasticsearch.version}</version>
       <exclusions>
         <exclusion>
-          <artifactId>elasticsearch</artifactId>
-          <groupId>org.elasticsearch</groupId>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -229,6 +228,10 @@
           <groupId>joda-time</groupId>
           <artifactId>joda-time</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
@@ -295,6 +298,19 @@
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-all</artifactId>
       <scope>test</scope>
+      <exclusions>
+      <exclusion>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch-ssl-config</artifactId>
+      </exclusion>
+      </exclusions>
+    </dependency>
+
+     <dependency>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch-ssl-config</artifactId>
+      <version>${elasticsearch.version}</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -308,6 +324,19 @@
       <artifactId>reindex-client</artifactId>
       <version>${elasticsearch.version}</version>
       <scope>test</scope>
+      <exclusions>
+      <exclusion>
+        <groupId>org.elasticsearch</groupId>
+        <artifactId>elasticsearch-ssl-config</artifactId>
+      </exclusion>
+    </exclusions>
+  </dependency>
+
+  <dependency>
+    <groupId>org.elasticsearch</groupId>
+    <artifactId>elasticsearch-ssl-config</artifactId>
+    <version>${elasticsearch.version}</version>
+    <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -343,14 +372,8 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <scope>test</scope>
-    </dependency>
 
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <version>${log4j.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
+
     </dependency>
 
   </dependencies>
@@ -367,17 +390,19 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M3</version>
+
         <configuration>
           <argLine>-Xmx3072m</argLine>
-          <rerunFailingTestsCount>3</rerunFailingTestsCount>
-          <forkCount>3</forkCount>
+          <rerunFailingTestsCount>0</rerunFailingTestsCount>
+          <forkCount>1</forkCount>
           <reuseForks>true</reuseForks>
-          <!-- <parallel>methods</parallel> <threadCount>1</threadCount> -->
+          <!--
+          <parallel>methods</parallel>
+          <threadCount>1</threadCount>
+           -->
           <systemPropertyVariables>
             <forkno>fork_${surefire.forkNumber}</forkno>
           </systemPropertyVariables>
-
           <includes>
             <include>**/*.java</include>
           </includes>
