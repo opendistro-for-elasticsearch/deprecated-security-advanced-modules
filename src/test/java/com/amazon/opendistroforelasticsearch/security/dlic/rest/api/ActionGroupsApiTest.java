@@ -47,7 +47,7 @@ public class ActionGroupsApiTest extends AbstractRestApiUnitTest {
 		Assert.assertNotNull(permissions);
 		Assert.assertEquals(2, permissions.size());
         Assert.assertTrue(permissions.contains("READ_UT"));
-		Assert.assertTrue(permissions.contains("WRITE"));
+		Assert.assertTrue(permissions.contains("OPENDISTRO_SECURITY_WRITE"));
 
 		// GET_UT, actiongroup does not exist
 		response = rh.executeGetRequest("/_opendistro/_security/api/actiongroups/nothinghthere", new Header[0]);
@@ -224,8 +224,8 @@ public class ActionGroupsApiTest extends AbstractRestApiUnitTest {
         Assert.assertNotNull(permissions);
         Assert.assertEquals(3, permissions.size());
         Assert.assertTrue(permissions.contains("READ_UT"));
-        Assert.assertTrue(permissions.contains("WRITE"));
-        Assert.assertTrue(permissions.contains("DELETE"));
+        Assert.assertTrue(permissions.contains("OPENDISTRO_SECURITY_WRITE"));
+        Assert.assertTrue(permissions.contains("OPENDISTRO_SECURITY_DELETE"));
 
 
         // -- PATCH on whole config resource

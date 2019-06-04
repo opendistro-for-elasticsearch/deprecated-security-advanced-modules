@@ -309,7 +309,7 @@ class MockSamlIdpServer implements Closeable {
     protected void handleSsoRequest(HttpRequest request, HttpResponse response, HttpContext context)
             throws HttpException, IOException {
 
-        if ("GET".equalsIgnoreCase(request.getRequestLine().getMethod())) {
+        if ("OPENDISTRO_SECURITY_GET".equalsIgnoreCase(request.getRequestLine().getMethod())) {
             handleSsoGetRequestBase(request);
         } else {
             response.setStatusCode(405);
@@ -320,7 +320,7 @@ class MockSamlIdpServer implements Closeable {
     protected void handleSloRequest(HttpRequest request, HttpResponse response, HttpContext context)
             throws HttpException, IOException {
 
-        if ("GET".equalsIgnoreCase(request.getRequestLine().getMethod())) {
+        if ("OPENDISTRO_SECURITY_GET".equalsIgnoreCase(request.getRequestLine().getMethod())) {
             handleSloGetRequestBase(request);
         } else {
             response.setStatusCode(405);
@@ -328,7 +328,7 @@ class MockSamlIdpServer implements Closeable {
     }
 
     public String handleSsoGetRequestURI(String samlRequestURI) {
-        return handleSsoGetRequestBase(new BasicHttpRequest("GET", samlRequestURI));
+        return handleSsoGetRequestBase(new BasicHttpRequest("OPENDISTRO_SECURITY_GET", samlRequestURI));
     }
 
     public String handleSsoGetRequestBase(HttpRequest request) {
@@ -361,7 +361,7 @@ class MockSamlIdpServer implements Closeable {
     }
 
     public void handleSloGetRequestURI(String samlRequestURI) {
-        handleSloGetRequestBase(new BasicHttpRequest("GET", samlRequestURI));
+        handleSloGetRequestBase(new BasicHttpRequest("OPENDISTRO_SECURITY_GET", samlRequestURI));
     }
 
     @SuppressWarnings("unchecked")

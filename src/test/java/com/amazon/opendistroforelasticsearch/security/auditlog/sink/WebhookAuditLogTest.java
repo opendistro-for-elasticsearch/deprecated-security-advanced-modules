@@ -317,7 +317,7 @@ public class WebhookAuditLogTest {
 
 		auditlog = new WebhookSink("name", settings, ConfigConstants.OPENDISTRO_SECURITY_AUDIT_CONFIG_DEFAULT, null, fallback);
 		auditlog.store(msg);
-		Assert.assertTrue(handler.method.equals("GET"));
+		Assert.assertTrue(handler.method.equals("OPENDISTRO_SECURITY_GET"));
 		Assert.assertEquals(null, handler.body);
 		assertStringContainsAllKeysAndValues(URLDecoder.decode(handler.uri, StandardCharsets.UTF_8.displayName()));
 		server.shutdown(3l, TimeUnit.SECONDS);

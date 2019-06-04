@@ -344,8 +344,8 @@ public class RolesApiTest extends AbstractRestApiUnitTest {
         permissions = DefaultObjectMapper.objectMapper.convertValue(settings.get("opendistro_security_role_starfleet").get("indices").get("sf").get("ships"), List.class);
         Assert.assertNotNull(permissions);
         Assert.assertEquals(2, permissions.size());
-        Assert.assertTrue(permissions.contains("READ"));
-        Assert.assertTrue(permissions.contains("SEARCH")); */
+        Assert.assertTrue(permissions.contains("OPENDISTRO_SECURITY_READ"));
+        Assert.assertTrue(permissions.contains("OPENDISTRO_SECURITY_SEARCH")); */
 
         // -- PATCH on whole config resource
         // PATCH on non-existing resource
@@ -389,7 +389,7 @@ public class RolesApiTest extends AbstractRestApiUnitTest {
         permissions =  new SecurityJsonNode(settings).get("bulknew1").get("index_permissions").get(0).get("allowed_actions").asList();
         Assert.assertNotNull(permissions);
         Assert.assertEquals(1, permissions.size());
-        Assert.assertTrue(permissions.contains("READ"));
+        Assert.assertTrue(permissions.contains("OPENDISTRO_SECURITY_READ"));
 
         // delete resource
         rh.sendHTTPClientCertificate = true;

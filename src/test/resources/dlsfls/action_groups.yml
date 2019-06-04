@@ -20,8 +20,8 @@ OPENDISTRO_SECURITY_CRUD:
   reserved: false
   hidden: false
   allowed_actions:
-  - "READ"
-  - "WRITE"
+  - "OPENDISTRO_SECURITY_READ"
+  - "OPENDISTRO_SECURITY_WRITE"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
 OPENDISTRO_SECURITY_SEARCH:
@@ -30,7 +30,7 @@ OPENDISTRO_SECURITY_SEARCH:
   allowed_actions:
   - "indices:data/read/search*"
   - "indices:data/read/msearch*"
-  - "SUGGEST"
+  - "OPENDISTRO_SECURITY_SUGGEST"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
 MONITOR:

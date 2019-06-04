@@ -22,7 +22,7 @@ opendistro_security_internal:
   hidden: true
   description: "Migrated from v6 (all types mapped)"
   cluster_permissions:
-  - "CLUSTER_ALL"
+  - "OPENDISTRO_SECURITY_CLUSTER_ALL"
   index_permissions:
   - index_patterns:
     - "*"
@@ -116,7 +116,7 @@ opendistro_security_power_user:
   hidden: false
   description: "Migrated from v6 (all types mapped)"
   cluster_permissions:
-  - "CLUSTER_MONITOR"
+  - "OPENDISTRO_SECURITY_CLUSTER_MONITOR"
   index_permissions:
   - index_patterns:
     - "*"
@@ -170,7 +170,7 @@ opendistro_security_admin:
   hidden: false
   description: "Migrated from v6 (all types mapped)"
   cluster_permissions:
-  - "CLUSTER_ALL"
+  - "OPENDISTRO_SECURITY_CLUSTER_ALL"
   index_permissions:
   - index_patterns:
     - "*"
@@ -240,7 +240,7 @@ opendistro_security_logstash:
     - "indices:data/read/scroll"
     - "indices:data/write/bulk"
     - "indices:data/read/search"
-    - "CREATE_INDEX"
+    - "OPENDISTRO_SECURITY_CREATE_INDEX"
   tenant_permissions: []
 opendistro_security_flsdls:
   reserved: false

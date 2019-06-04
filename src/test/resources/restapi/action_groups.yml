@@ -21,7 +21,7 @@ CRUD_UT:
   hidden: false
   allowed_actions:
   - "READ_UT"
-  - "WRITE"
+  - "OPENDISTRO_SECURITY_WRITE"
   type: "index"
   description: "Migrated from v6"
 OPENDISTRO_SECURITY_SEARCH:
@@ -30,7 +30,7 @@ OPENDISTRO_SECURITY_SEARCH:
   allowed_actions:
   - "indices:data/read/search*"
   - "indices:data/read/msearch*"
-  - "SUGGEST"
+  - "OPENDISTRO_SECURITY_SUGGEST"
   type: "index"
   description: "Migrated from v6"
 MONITOR:
