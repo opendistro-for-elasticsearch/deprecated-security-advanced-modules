@@ -72,7 +72,7 @@ dept_manager_fls_reversed_fields:
   backend_roles: []
   attributes: {}
   description: "Migrated from v6"
-logstash:
+opendistro_security_logstash:
   hash: "$2a$12$YCBrpxYyFusK609FurY5Ee3BlmuzWw0qHwpwqEyNhM2.XnQY3Bxpe"
   reserved: false
   hidden: false

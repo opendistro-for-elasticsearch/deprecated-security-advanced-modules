@@ -83,7 +83,7 @@ mister.picard:
   backend_roles: []
   attributes: {}
   description: "Migrated from v6"
-readall:
+opendistro_security_readall:
   hash: "$2a$12$ae4ycwzwvLtZxwZ82RmiEunBbIPiAmGZduBAjKN0TXdwQFtCwARz2"
   reserved: false
   hidden: false
@@ -97,7 +97,7 @@ hr_trainee:
   backend_roles: []
   attributes: {}
   description: "Migrated from v6"
-logstash:
+opendistro_security_logstash:
   hash: "$2a$12$u1ShR4l4uBS3Uv59Pa2y5.1uQuZBrZtmNfqB3iM/.jL0XoV9sghS2"
   reserved: false
   hidden: false
