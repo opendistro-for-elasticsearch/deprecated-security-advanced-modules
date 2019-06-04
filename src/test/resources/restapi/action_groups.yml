@@ -2,7 +2,7 @@
 _meta:
   type: "actiongroups"
   config_version: 2
-CLUSTER_ALL:
+OPENDISTRO_SECURITY_CLUSTER_ALL:
   reserved: false
   hidden: false
   allowed_actions:
@@ -24,7 +24,7 @@ CRUD_UT:
   - "WRITE"
   type: "index"
   description: "Migrated from v6"
-SEARCH:
+OPENDISTRO_SECURITY_SEARCH:
   reserved: false
   hidden: false
   allowed_actions:
@@ -40,7 +40,7 @@ MONITOR:
   - "indices:monitor/*"
   type: "index"
   description: "Migrated from v6"
-DATA_ACCESS:
+OPENDISTRO_SECURITY_DATA_ACCESS:
   reserved: false
   hidden: false
   allowed_actions:
@@ -48,7 +48,7 @@ DATA_ACCESS:
   - "indices:admin/mapping/put"
   type: "index"
   description: "Migrated from v6"
-CREATE_INDEX:
+OPENDISTRO_SECURITY_CREATE_INDEX:
   reserved: false
   hidden: false
   allowed_actions:
@@ -56,7 +56,7 @@ CREATE_INDEX:
   - "indices:admin/mapping/put"
   type: "index"
   description: "Migrated from v6"
-WRITE:
+OPENDISTRO_SECURITY_WRITE:
   reserved: false
   hidden: false
   allowed_actions:
@@ -64,7 +64,7 @@ WRITE:
   - "indices:admin/mapping/put"
   type: "index"
   description: "Migrated from v6"
-MANAGE_ALIASES:
+OPENDISTRO_SECURITY_MANAGE_ALIASES:
   reserved: false
   hidden: false
   allowed_actions:
@@ -78,7 +78,7 @@ READ_UT:
   - "indices:data/read*"
   type: "index"
   description: "Migrated from v6"
-DELETE:
+OPENDISTRO_SECURITY_DELETE:
   reserved: false
   hidden: false
   allowed_actions:
@@ -93,7 +93,7 @@ GET_UT:
   - "indices:data/read/mget*"
   type: "index"
   description: "Migrated from v6"
-MANAGE:
+OPENDISTRO_SECURITY_MANAGE:
   reserved: false
   hidden: false
   allowed_actions:
@@ -109,14 +109,14 @@ INTERNAL:
   - "indices:data/read/mget*"
   type: "index"
   description: "Migrated from v6"
-CLUSTER_MONITOR:
+OPENDISTRO_SECURITY_CLUSTER_MONITOR:
   reserved: false
   hidden: false
   allowed_actions:
   - "cluster:monitor/*"
   type: "cluster"
   description: "Migrated from v6"
-INDEX:
+OPENDISTRO_SECURITY_INDEX:
   reserved: false
   hidden: false
   allowed_actions:
@@ -125,7 +125,7 @@ INDEX:
   - "indices:admin/mapping/put"
   type: "index"
   description: "Migrated from v6"
-SUGGEST:
+OPENDISTRO_SECURITY_SUGGEST:
   reserved: false
   hidden: false
   allowed_actions:

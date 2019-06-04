@@ -2,7 +2,7 @@
 _meta:
   type: "actiongroups"
   config_version: 2
-CLUSTER_ALL:
+OPENDISTRO_SECURITY_CLUSTER_ALL:
   reserved: false
   hidden: false
   allowed_actions:
@@ -16,7 +16,7 @@ ALL:
   - "indices:*"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-CRUD:
+OPENDISTRO_SECURITY_CRUD:
   reserved: false
   hidden: false
   allowed_actions:
@@ -24,7 +24,7 @@ CRUD:
   - "WRITE"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-SEARCH:
+OPENDISTRO_SECURITY_SEARCH:
   reserved: false
   hidden: false
   allowed_actions:
@@ -40,7 +40,7 @@ MONITOR:
   - "indices:monitor/*"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-DATA_ACCESS:
+OPENDISTRO_SECURITY_DATA_ACCESS:
   reserved: false
   hidden: false
   allowed_actions:
@@ -48,7 +48,7 @@ DATA_ACCESS:
   - "indices:admin/mapping/put"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-CREATE_INDEX:
+OPENDISTRO_SECURITY_CREATE_INDEX:
   reserved: false
   hidden: false
   allowed_actions:
@@ -56,7 +56,7 @@ CREATE_INDEX:
   - "indices:admin/mapping/put"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-WRITE:
+OPENDISTRO_SECURITY_WRITE:
   reserved: false
   hidden: false
   allowed_actions:
@@ -64,28 +64,28 @@ WRITE:
   - "indices:admin/mapping/put"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-MANAGE_ALIASES:
+OPENDISTRO_SECURITY_MANAGE_ALIASES:
   reserved: false
   hidden: false
   allowed_actions:
   - "indices:admin/aliases*"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-READ:
+OPENDISTRO_SECURITY_READ:
   reserved: false
   hidden: false
   allowed_actions:
   - "indices:data/read*"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-DELETE:
+OPENDISTRO_SECURITY_DELETE:
   reserved: false
   hidden: false
   allowed_actions:
   - "indices:data/write/delete*"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-GET:
+OPENDISTRO_SECURITY_GET:
   reserved: false
   hidden: false
   allowed_actions:
@@ -93,7 +93,7 @@ GET:
   - "indices:data/read/mget*"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-MANAGE:
+OPENDISTRO_SECURITY_MANAGE:
   reserved: false
   hidden: false
   allowed_actions:
@@ -101,14 +101,14 @@ MANAGE:
   - "indices:admin/*"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-CLUSTER_MONITOR:
+OPENDISTRO_SECURITY_CLUSTER_MONITOR:
   reserved: false
   hidden: false
   allowed_actions:
   - "cluster:monitor/*"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-INDEX:
+OPENDISTRO_SECURITY_INDEX:
   reserved: false
   hidden: false
   allowed_actions:
@@ -117,7 +117,7 @@ INDEX:
   - "indices:admin/mapping/put"
   type: "unknown"
   description: "Migrated from v6 (legacy)"
-SUGGEST:
+OPENDISTRO_SECURITY_SUGGEST:
   reserved: false
   hidden: false
   allowed_actions:
