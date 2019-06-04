@@ -17,7 +17,7 @@
       "admin_tenant"
     ],
     "allowed_actions": [
-      "ODS_KIBANA_ALL_WRITE"
+      "KIBANA_ALL_WRITE"
     ]
   }]
 }

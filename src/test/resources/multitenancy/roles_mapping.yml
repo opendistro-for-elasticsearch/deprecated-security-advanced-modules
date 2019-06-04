@@ -36,7 +36,7 @@ opendistro_security_role_klingons1:
   - "worf"
   and_backend_roles: []
   description: "Migrated from v6"
-ODS_KIBANA_USER:
+KIBANA_USER:
   reserved: false
   hidden: false
   backend_roles: []
@@ -84,7 +84,7 @@ opendistro_security_logstash:
   backend_roles: []
   hosts: []
   users:
-  - "logstash"
+  - "opendistro_security_logstash"
   and_backend_roles: []
   description: "Migrated from v6"
 opendistro_security_finance:
@@ -137,7 +137,7 @@ opendistro_security_readall:
   backend_roles: []
   hosts: []
   users:
-  - "readall"
+  - "opendistro_security_readall"
   - "riker"
   - "troid"
   and_backend_roles: []

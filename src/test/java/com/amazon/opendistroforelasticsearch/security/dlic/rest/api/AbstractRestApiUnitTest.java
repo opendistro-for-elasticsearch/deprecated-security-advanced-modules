@@ -99,7 +99,7 @@ public abstract class AbstractRestApiUnitTest extends SingleClusterTest {
 		builder.put("opendistro_security.restapi.endpoints_disabled.opendistro_security_role_klingons.conFiGuration.0", "*");
 		builder.put("opendistro_security.restapi.endpoints_disabled.opendistro_security_role_klingons.wRongType.0", "WRONGType");
 		builder.put("opendistro_security.restapi.endpoints_disabled.opendistro_security_role_klingons.ROLESMAPPING.0", "PUT");
-		builder.put("opendistro_security.restapi.endpoints_disabled.opendistro_security_role_klingons.ROLESMAPPING.1", "OPENDISTRO_SECURITY_DELETE");
+		builder.put("opendistro_security.restapi.endpoints_disabled.opendistro_security_role_klingons.ROLESMAPPING.1", "DELETE");
 
 		builder.put("opendistro_security.restapi.endpoints_disabled.opendistro_security_role_vulcans.CONFIG.0", "*");
 
