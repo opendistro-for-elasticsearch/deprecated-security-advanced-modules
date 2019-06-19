@@ -9,9 +9,9 @@
   } ],
   "tenant_permissions" : [ {
     "tenant_patterns" : [ "tenant2" ],
-    "allowed_actions" : [ "KIBANA_ALL_WRITE" ]
+    "allowed_actions" : [ "kibana_all_write" ]
   }, {
     "tenant_patterns" : [ "tenant1" ],
-    "allowed_actions" : [ "KIBANA_ALL_WRITE" ]
+    "allowed_actions" : [ "kibana_all_write" ]
   } ]
 }

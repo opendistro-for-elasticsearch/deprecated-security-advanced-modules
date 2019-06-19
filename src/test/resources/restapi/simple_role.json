@@ -17,7 +17,7 @@
       "admin_tenant"
     ],
     "allowed_actions": [
-      "KIBANA_ALL_WRITE"
+      "kibana_all_write"
     ]
   }]
 }

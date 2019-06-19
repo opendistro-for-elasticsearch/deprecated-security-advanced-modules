@@ -41,8 +41,8 @@ opendistro_security_human_resources_trainee:
     - "human_resources"
     - "performance_data"
     allowed_actions:
-    - "KIBANA_ALL_READ"
+    - "kibana_all_read"
   - tenant_patterns:
-    - "GL*AL_TE*ANT"
+    - "gl*al_te*ant"
     allowed_actions:
-    - "KIBANA_ALL_WRITE"
+    - "kibana_all_write"

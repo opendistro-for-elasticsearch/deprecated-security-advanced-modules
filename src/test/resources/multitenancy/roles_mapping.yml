@@ -36,7 +36,7 @@ opendistro_security_role_klingons1:
   - "worf"
   and_backend_roles: []
   description: "Migrated from v6"
-KIBANA_USER:
+kibana_user:
   reserved: false
   hidden: false
   backend_roles: []
