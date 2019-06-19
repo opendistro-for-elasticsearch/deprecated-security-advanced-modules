@@ -44,6 +44,8 @@ class TestJwts {
 
 	static final String MC_COY_SIGNED_OCT_1 = createSigned(MC_COY, TestJwk.OCT_1);
 
+	static final String MC_COY_SIGNED_OCT_1_INVALID_KID = createSigned(MC_COY, TestJwk.FORWARD_SLASH_KID_OCT_1);
+
 	static final String MC_COY_SIGNED_RSA_1 = createSigned(MC_COY, TestJwk.RSA_1);
 
 	static final String MC_COY_SIGNED_RSA_X = createSigned(MC_COY, TestJwk.RSA_X);
