@@ -132,7 +132,7 @@ public class WebhookAuditLogTest {
 		Assert.assertEquals(WebhookFormat.TEXT, auditlog.webhookFormat);
 		Assert.assertEquals(ContentType.TEXT_PLAIN, auditlog.webhookFormat.getContentType());
 		Assert.assertTrue(auditlog.payload, !auditlog.payload.startsWith("{\"text\":"));
-		Assert.assertTrue(auditlog.payload, auditlog.payload.contains("audit_utc_timestamp"));
+		Assert.assertTrue(auditlog.payload, auditlog.payload.contains(AuditMessage.UTC_TIMESTAMP));
 		Assert.assertTrue(auditlog.payload, auditlog.payload.contains("audit_request_remote_address"));
 
 		// JSON
@@ -149,7 +149,7 @@ public class WebhookAuditLogTest {
 		Assert.assertEquals(WebhookFormat.JSON, auditlog.webhookFormat);
 		Assert.assertEquals(ContentType.APPLICATION_JSON, auditlog.webhookFormat.getContentType());
 		Assert.assertTrue(auditlog.payload, !auditlog.payload.startsWith("{\"text\":"));
-		Assert.assertTrue(auditlog.payload, auditlog.payload.contains("audit_utc_timestamp"));
+		Assert.assertTrue(auditlog.payload, auditlog.payload.contains(AuditMessage.UTC_TIMESTAMP));
         Assert.assertTrue(auditlog.payload, auditlog.payload.contains("audit_request_remote_address"));
 
 		// SLACK
@@ -165,7 +165,7 @@ public class WebhookAuditLogTest {
 		Assert.assertEquals(WebhookFormat.SLACK, auditlog.webhookFormat);
 		Assert.assertEquals(ContentType.APPLICATION_JSON, auditlog.webhookFormat.getContentType());
 		Assert.assertTrue(auditlog.payload, auditlog.payload.startsWith("{\"text\":"));
-		Assert.assertTrue(auditlog.payload, auditlog.payload.contains("audit_utc_timestamp"));
+		Assert.assertTrue(auditlog.payload, auditlog.payload.contains(AuditMessage.UTC_TIMESTAMP));
         Assert.assertTrue(auditlog.payload, auditlog.payload.contains("audit_request_remote_address"));
 	}
 

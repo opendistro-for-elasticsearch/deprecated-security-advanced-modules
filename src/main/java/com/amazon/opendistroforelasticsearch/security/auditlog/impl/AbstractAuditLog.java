@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,7 +66,6 @@ import org.elasticsearch.tasks.Task;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportRequest;
 
-import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
 import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
 import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceConfig;
@@ -534,7 +534,6 @@ public abstract class AbstractAuditLog implements AuditLog {
         msg.addIndices(new String[]{shardId.getIndexName()});
         msg.addResolvedIndices(new String[]{shardId.getIndexName()});
         msg.addId(currentIndex.id());
-        msg.addType(currentIndex.type());
         msg.addShardId(shardId);
         msg.addComplianceDocVersion(result.getVersion());
         msg.addComplianceOperation(result.isCreated()?Operation.CREATE:Operation.UPDATE);
@@ -624,7 +623,6 @@ public abstract class AbstractAuditLog implements AuditLog {
         msg.addIndices(new String[]{shardId.getIndexName()});
         msg.addResolvedIndices(new String[]{shardId.getIndexName()});
         msg.addId(delete.id());
-        msg.addType(delete.type());
         msg.addShardId(shardId);
         msg.addComplianceDocVersion(result.getVersion());
         msg.addComplianceOperation(Operation.DELETE);

@@ -20,10 +20,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 
+import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
 import org.apache.http.Header;
 import org.elasticsearch.common.settings.Settings;
 
-import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
 import com.amazon.opendistroforelasticsearch.security.auditlog.routing.AuditMessageRouter;
 import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceConfig;

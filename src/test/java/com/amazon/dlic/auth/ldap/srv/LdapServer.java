@@ -27,11 +27,7 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,29 +72,6 @@ final class LdapServer {
     public boolean isStarted() {
         return this.isStarted.get();
     }
-
-
-
-    /*private InMemoryDirectoryServer getInMemoryDirectoryServer() {
-        boolean hasLock = false;
-        InMemoryDirectoryServer inMemoryDirectoryServer = null;
-        try {
-            hasLock = serverStateLock.tryLock(LdapServer.LOCK_TIMEOUT, LdapServer.TIME_UNIT);
-            if (hasLock) {
-                inMemoryDirectoryServer = server;
-            } else {
-                throw new IllegalStateException(LdapServer.LOCK_TIMEOUT_MSG);
-            }
-        } catch (InterruptedException ioe) {
-            //lock interrupted
-            LOG.error(ioe.getMessage(), ioe);
-        } finally {
-            if (hasLock) {
-                serverStateLock.unlock();
-            }
-        }
-        return inMemoryDirectoryServer;
-    }*/
 
     public int getLdapPort() {
         return ldapPort;
@@ -243,7 +216,7 @@ final class LdapServer {
         return ldifLoadCount;
     }
 
-    private static class DebugHandler extends Handler {
+    /* private static class DebugHandler extends Handler {
         private final static Logger LOG = LoggerFactory.getLogger(DebugHandler.class);
 
         @Override
@@ -263,4 +236,5 @@ final class LdapServer {
     }
 
     private static final DebugHandler DEBUG_HANDLER = new DebugHandler();
+    */
 }

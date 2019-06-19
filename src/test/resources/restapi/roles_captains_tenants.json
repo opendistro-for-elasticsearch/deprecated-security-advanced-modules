@@ -1,21 +1,17 @@
 {
-  "indices": {
-    "sf": {
-      "*": [
-        "CRUD"
-      ]
-    },
-    "pub": {
-      "*": [
-        "CRUD"
-      ]
-    }
-  },
-  "cluster": [
-    "cluster:monitor*"
-  ],
-  "tenants": {
-    "tenant1": "RO",
-    "tenant2": "RW"
-  }
+  "cluster_permissions" : [ "cluster:monitor*" ],
+  "index_permissions" : [ {
+    "index_patterns" : [ "sf" ],
+    "allowed_actions" : [ "OPENDISTRO_SECURITY_CRUD" ]
+  }, {
+    "index_patterns" : [ "pub" ],
+    "allowed_actions" : [ "OPENDISTRO_SECURITY_CRUD" ]
+  } ],
+  "tenant_permissions" : [ {
+    "tenant_patterns" : [ "tenant2" ],
+    "allowed_actions" : [ "kibana_all_write" ]
+  }, {
+    "tenant_patterns" : [ "tenant1" ],
+    "allowed_actions" : [ "kibana_all_read" ]
+  } ]
 }

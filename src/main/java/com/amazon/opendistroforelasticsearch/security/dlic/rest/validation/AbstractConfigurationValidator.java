@@ -23,10 +23,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -36,11 +36,13 @@ import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
 
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+
 
 public abstract class AbstractConfigurationValidator {
 
@@ -81,8 +83,6 @@ public abstract class AbstractConfigurationValidator {
 
     protected boolean payloadAllowed = true;
 
-    private Settings.Builder settingsBuilder;
-
     protected final Method method;
 
     protected final BytesReference content;
@@ -93,12 +93,18 @@ public abstract class AbstractConfigurationValidator {
 
     protected final Object[] param;
 
+    private JsonNode contentAsNode;
+
     public AbstractConfigurationValidator(final RestRequest request, final BytesReference ref, final Settings esSettings, Object... param) {
         this.content = ref;
         this.method = request.method();
         this.esSettings = esSettings;
         this.request = request;
         this.param = param;
+    }
+
+    public JsonNode getContentAsNode() {
+        return contentAsNode;
     }
 
     /**
@@ -110,25 +116,39 @@ public abstract class AbstractConfigurationValidator {
         if (method.equals(Method.DELETE) || method.equals(Method.GET)) {
             return true;
         }
-        // try to parse payload
-        try {
-            this.settingsBuilder = toSettingsBuilder(content);
-        } catch (ElasticsearchException e) {
-            this.errorType = ErrorType.BODY_NOT_PARSEABLE;
+
+        if(this.payloadMandatory && content.length() == 0) {
+            this.errorType = ErrorType.PAYLOAD_MANDATORY;
             return false;
         }
 
-        Settings settings = settingsBuilder.build();
+        if(this.payloadMandatory && content.length() > 0) {
 
-        Set<String> requested = new HashSet<String>(settings.names());
-        // check if payload is accepted at all
-        if (!this.payloadAllowed && !requested.isEmpty()) {
+            try {
+                if(DefaultObjectMapper.readTree(content.utf8ToString()).size() == 0) {
+                    this.errorType = ErrorType.PAYLOAD_MANDATORY;
+                    return false;
+                }
+
+            } catch (IOException e) {
+                this.errorType = ErrorType.BODY_NOT_PARSEABLE;
+                return false;
+            }
+        }
+
+        if (!this.payloadAllowed && content.length() > 0) {
             this.errorType = ErrorType.PAYLOAD_NOT_ALLOWED;
             return false;
         }
-        // check if payload is mandatory
-        if (this.payloadMandatory && requested.isEmpty()) {
-            this.errorType = ErrorType.PAYLOAD_MANDATORY;
+
+        // try to parse payload
+        Set<String> requested = new HashSet<String>();
+        try {
+            contentAsNode = DefaultObjectMapper.readTree(content.utf8ToString());
+            requested.addAll(ImmutableList.copyOf(contentAsNode.fieldNames()));
+        } catch (Exception e) {
+            log.error(ErrorType.BODY_NOT_PARSEABLE.toString(), e);
+            this.errorType = ErrorType.BODY_NOT_PARSEABLE;
             return false;
         }
 
@@ -158,6 +178,7 @@ public abstract class AbstractConfigurationValidator {
                 return false;
             }
         } catch (Exception e) {
+            log.error(ErrorType.BODY_NOT_PARSEABLE.toString(), e);
             this.errorType = ErrorType.BODY_NOT_PARSEABLE;
             return false;
         }
@@ -239,27 +260,11 @@ public abstract class AbstractConfigurationValidator {
         }
     }
 
-    public Settings.Builder settingsBuilder() {
-        return settingsBuilder;
-    }
-
     private void addErrorMessage(final XContentBuilder builder, final String message, final Set<String> keys) throws IOException {
         if (!keys.isEmpty()) {
             builder.startObject(message);
             builder.field("keys", Joiner.on(",").join(keys.toArray(new String[0])));
             builder.endObject();
-        }
-    }
-
-    private Settings.Builder toSettingsBuilder(final BytesReference ref) {
-        if (ref == null || ref.length() == 0) {
-            return Settings.builder();
-        }
-
-        try {
-            return Settings.builder().loadFromSource(ref.utf8ToString(), XContentType.JSON);
-        } catch (final Exception e) {
-            throw ExceptionsHelper.convertToElastic(e);
         }
     }
 
@@ -270,7 +275,7 @@ public abstract class AbstractConfigurationValidator {
     public static enum ErrorType {
         NONE("ok"), INVALID_CONFIGURATION("Invalid configuration"), INVALID_PASSWORD("Invalid password"), WRONG_DATATYPE("Wrong datatype"),
         BODY_NOT_PARSEABLE("Could not parse content of request."), PAYLOAD_NOT_ALLOWED("Request body not allowed for this action."),
-        PAYLOAD_MANDATORY("Request body required for this action."), OPENDISTRO_SECURITY_NOT_INITIALIZED("Open Distro Security index not initialized.");
+        PAYLOAD_MANDATORY("Request body required for this action."), SECURITY_NOT_INITIALIZED("Security index not initialized");
 
         private String message;
 

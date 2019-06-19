@@ -37,9 +37,9 @@ public class InternalUsersValidator extends AbstractConfigurationValidator {
         this.payloadMandatory = true;
         allowedKeys.put("hash", DataType.STRING);
         allowedKeys.put("password", DataType.STRING);
-        allowedKeys.put("roles", DataType.ARRAY);
+        allowedKeys.put("backend_roles", DataType.ARRAY);
         allowedKeys.put("attributes", DataType.OBJECT);
-        allowedKeys.put("username", DataType.STRING);
+        allowedKeys.put("description", DataType.STRING);
     }
 
     @Override

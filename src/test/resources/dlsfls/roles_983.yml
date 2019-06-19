@@ -1,24 +1,48 @@
+---
+_meta:
+  type: "roles"
+  config_version: 2
 opendistro_security_human_resources_trainee:
-  cluster:
-    - '*'
-  indices:
-    'humanresources':
-      '*':
-        - READ
-        - indices:admin/shards/search_shards # needed for CCS
-      _dls_: '{ "bool": { "must_not": { "match": { "Designation": "CEO"  }}}}'
-      _fls_:
-        - 'Designation'
-        - 'FirstName'
-        - 'LastName'
-        - 'Salary'
-        - 'LocalRules'
-    '?kibana':
-      '*':
-        - ALL
-    '*':
-      '*':
-        - indices:data/read/field_caps
-  tenants:
-    human_resources: RO
-    performance_data: RO
+  reserved: false
+  hidden: false
+  description: "Migrated from v6 (all types mapped)"
+  cluster_permissions:
+  - "*"
+  index_permissions:
+  - index_patterns:
+    - "humanresources"
+    dls: "{ \"bool\": { \"must_not\": { \"match\": { \"Designation\": \"CEO\"  }}}}"
+    fls:
+    - "Designation"
+    - "FirstName"
+    - "LastName"
+    - "Salary"
+    - "LocalRules"
+    masked_fields: null
+    allowed_actions:
+    - "OPENDISTRO_SECURITY_READ"
+    - "indices:admin/shards/search_shards"
+  - index_patterns:
+    - "?kibana"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "ALL"
+  - index_patterns:
+    - "*"
+    dls: null
+    fls: null
+    masked_fields: null
+    allowed_actions:
+    - "indices:data/read/field_caps"
+  tenant_permissions:
+  - tenant_patterns:
+    - "human_resources"
+    - "performance_data"
+    allowed_actions:
+    - "kibana_all_read"
+  - tenant_patterns:
+    - "gl*al_te*ant"
+    allowed_actions:
+    - "kibana_all_write"

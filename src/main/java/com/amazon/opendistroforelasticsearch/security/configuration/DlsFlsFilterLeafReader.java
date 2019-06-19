@@ -918,11 +918,6 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
         }
     }
 
-    //@Override
-    //public LeafMetaData getMetaData() {
-    //    return in.getMetaData();
-    //}
-
     @Override
     public Bits getLiveDocs() {
 
@@ -994,16 +989,6 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
 
         return in.numDocs();
     }
-
-    //@Override
-    //public LeafReader getDelegate() {
-    //    return in;
-    //}
-
-    //@Override
-    //public int maxDoc() {
-    //    return in.maxDoc();
-    //}
 
     @Override
     public CacheHelper getCoreCacheHelper() {

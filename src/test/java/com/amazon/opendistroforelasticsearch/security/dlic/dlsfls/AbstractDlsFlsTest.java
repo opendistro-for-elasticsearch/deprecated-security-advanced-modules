@@ -15,16 +15,17 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.dlsfls;
 
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.junit.Assert;
-
 import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateAction;
 import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateRequest;
 import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateResponse;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
+
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
 import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
+import org.junit.Assert;
 
 public abstract class AbstractDlsFlsTest extends SingleClusterTest {
 
@@ -36,19 +37,27 @@ public abstract class AbstractDlsFlsTest extends SingleClusterTest {
     }
 
     protected final void setup() throws Exception {
-        Settings settings = Settings.builder().put(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_TYPE_DEFAULT, "debug").build();
-        setup(Settings.EMPTY, null, settings, false);
+        setup(Settings.EMPTY);
+    }
+
+    protected final void setup(Settings override) throws Exception {
+        setup(override, new DynamicSecurityConfig());
+    }
+
+    protected final void setup(DynamicSecurityConfig dynamicSecurityConfig) throws Exception {
+        setup(Settings.EMPTY, dynamicSecurityConfig);
+    }
+
+    protected final void setup(Settings override, DynamicSecurityConfig dynamicSecurityConfig) throws Exception {
+        Settings settings = Settings.builder().put(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_TYPE_DEFAULT, "debug").put(override).build();
+        setup(Settings.EMPTY, dynamicSecurityConfig, settings, true);
 
         try(TransportClient tc = getInternalTransportClient(this.clusterInfo, Settings.EMPTY)) {
-            populate(tc);
-            ConfigUpdateResponse cur = tc
-                    .execute(ConfigUpdateAction.INSTANCE, new ConfigUpdateRequest(ConfigConstants.CONFIG_NAMES.toArray(new String[0])))
-                    .actionGet();
-            Assert.assertEquals(this.clusterInfo.numNodes, cur.getNodes().size());
+            populateData(tc);
         }
 
         rh = nonSslRestHelper();
     }
 
-    abstract void populate(TransportClient tc);
+    abstract void populateData(TransportClient tc);
 }

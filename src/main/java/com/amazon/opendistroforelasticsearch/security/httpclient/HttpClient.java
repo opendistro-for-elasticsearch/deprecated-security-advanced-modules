@@ -51,6 +51,7 @@ import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
+import org.elasticsearch.client.Node;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
@@ -162,14 +163,14 @@ public class HttpClient implements Closeable {
 
         RestClientBuilder builder = RestClient.builder(hosts);
         //builder.setMaxRetryTimeoutMillis(10000);
-        /*builder.setFailureListener(new RestClient.FailureListener() {
 
+        builder.setFailureListener(new RestClient.FailureListener() {
             @Override
             public void onFailure(Node node) {
 
             }
 
-        });*/
+        });
 
         builder.setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
             @Override
@@ -190,7 +191,9 @@ public class HttpClient implements Closeable {
 
             try {
 
-                final IndexResponse response = rclient.index(new IndexRequest(index, type)
+                final IndexRequest ir = type==null?new IndexRequest(index):new IndexRequest(index, type);
+                
+                final IndexResponse response = rclient.index(ir
                               .setRefreshPolicy(refresh?RefreshPolicy.IMMEDIATE:RefreshPolicy.NONE)
                               .source(content, XContentType.JSON), RequestOptions.DEFAULT);
 

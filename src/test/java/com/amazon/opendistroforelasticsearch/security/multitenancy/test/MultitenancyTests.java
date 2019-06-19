@@ -196,7 +196,7 @@ public class MultitenancyTests extends SingleClusterTest {
             Assert.assertEquals(HttpStatus.SC_FORBIDDEN, (resc=rh.executeGetRequest("starfleet/_search?pretty", encodeBasicHeader("user_a", "user_a"))).getStatusCode());
             System.out.println(resc.getBody());
 
-            Assert.assertEquals(HttpStatus.SC_FORBIDDEN, (resc=rh.executeGetRequest("starfleet/_search?pretty", encodeBasicHeader("worf", "worf"))).getStatusCode());
+            Assert.assertEquals(HttpStatus.SC_OK, (resc=rh.executeGetRequest("starfleet/_search?pretty", encodeBasicHeader("worf", "worf"))).getStatusCode());
             System.out.println(resc.getBody());
 
     }
@@ -262,7 +262,7 @@ public class MultitenancyTests extends SingleClusterTest {
         //System.out.println(res.getBody());
         Assert.assertFalse(res.getBody().contains("exception"));
         Assert.assertTrue(res.getBody().contains("humanresources"));
-        Assert.assertTrue(res.getBody().contains("\"total\" : 1"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 1"));
         Assert.assertTrue(res.getBody().contains(".kibana_92668751_admin"));
 
         System.out.println("#### msearch");
@@ -274,7 +274,7 @@ public class MultitenancyTests extends SingleClusterTest {
         //System.out.println(res.getBody());
         Assert.assertFalse(res.getBody().contains("exception"));
         Assert.assertTrue(res.getBody().contains("humanresources"));
-        Assert.assertTrue(res.getBody().contains("\"total\" : 1"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 1"));
         Assert.assertTrue(res.getBody().contains(".kibana_92668751_admin"));
 
         System.out.println("#### get");

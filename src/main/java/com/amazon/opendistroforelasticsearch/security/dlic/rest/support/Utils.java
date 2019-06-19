@@ -16,6 +16,7 @@
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.support;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.elasticsearch.ElasticsearchParseException;
@@ -28,9 +29,10 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
 import com.amazon.opendistroforelasticsearch.security.support.OpenDistroSecurityDeprecationHandler;
-import com.fasterxml.jackson.databind.JsonNode;
 
 public class Utils {
 
@@ -70,14 +72,50 @@ public class Utils {
         }
     }
 
-    public static JsonNode convertJsonToJackson(ToXContent jsonContent) {
+    public static JsonNode convertJsonToJackson(BytesReference jsonContent) {
         try {
-            final BytesReference bytes = XContentHelper.toXContent(jsonContent, XContentType.JSON, false);
-            return DefaultObjectMapper.objectMapper.readTree(bytes.utf8ToString());
+            return DefaultObjectMapper.readTree(jsonContent.utf8ToString());
         } catch (IOException e1) {
             throw ExceptionsHelper.convertToElastic(e1);
         }
 
     }
 
+    public static JsonNode convertJsonToJackson(ToXContent jsonContent, boolean omitDefaults) {
+        try {
+            Map<String, String> pm = new HashMap<>(1);
+            pm.put("omit_defaults", String.valueOf(omitDefaults));
+            ToXContent.MapParams params = new ToXContent.MapParams(pm);
+
+            final BytesReference bytes = XContentHelper.toXContent(jsonContent, XContentType.JSON, params, false);
+            return DefaultObjectMapper.readTree(bytes.utf8ToString());
+        } catch (IOException e1) {
+            throw ExceptionsHelper.convertToElastic(e1);
+        }
+
+    }
+
+    public static <T> T serializeToXContentToPojo(ToXContent jsonContent, Class<T> clazz) {
+        try {
+
+            if (jsonContent instanceof BytesReference) {
+                return serializeToXContentToPojo(((BytesReference) jsonContent).utf8ToString(), clazz);
+            }
+
+            final BytesReference bytes = XContentHelper.toXContent(jsonContent, XContentType.JSON, false);
+            return DefaultObjectMapper.readValue(bytes.utf8ToString(), clazz);
+        } catch (IOException e1) {
+            throw ExceptionsHelper.convertToElastic(e1);
+        }
+
+    }
+
+    public static <T> T serializeToXContentToPojo(String jsonContent, Class<T> clazz) {
+        try {
+            return DefaultObjectMapper.readValue(jsonContent, clazz);
+        } catch (IOException e1) {
+            throw ExceptionsHelper.convertToElastic(e1);
+        }
+
+    }
 }

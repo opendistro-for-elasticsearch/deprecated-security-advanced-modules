@@ -28,9 +28,9 @@ public class OpenDistroSecurityApiAccessTest extends AbstractRestApiUnitTest {
 
 		// test with no cert, must fail
 		Assert.assertEquals(HttpStatus.SC_UNAUTHORIZED,
-				rh.executeGetRequest("_opendistro/_security/api/configuration/internalusers").getStatusCode());
+				rh.executeGetRequest("_opendistro/_security/api/internalusers").getStatusCode());
 		Assert.assertEquals(HttpStatus.SC_FORBIDDEN,
-				rh.executeGetRequest("_opendistro/_security/api/configuration/internalusers",
+				rh.executeGetRequest("_opendistro/_security/api/internalusers",
 						encodeBasicHeader("admin", "admin"))
 						.getStatusCode());
 
@@ -38,9 +38,9 @@ public class OpenDistroSecurityApiAccessTest extends AbstractRestApiUnitTest {
 		rh.keystore = "restapi/node-0-keystore.jks";
 		rh.sendHTTPClientCertificate = true;
 		Assert.assertEquals(HttpStatus.SC_UNAUTHORIZED,
-				rh.executeGetRequest("_opendistro/_security/api/configuration/internalusers").getStatusCode());
+				rh.executeGetRequest("_opendistro/_security/api/internalusers").getStatusCode());
 		Assert.assertEquals(HttpStatus.SC_FORBIDDEN,
-				rh.executeGetRequest("_opendistro/_security/api/configuration/internalusers",
+				rh.executeGetRequest("_opendistro/_security/api/internalusers",
 						encodeBasicHeader("admin", "admin"))
 						.getStatusCode());
 

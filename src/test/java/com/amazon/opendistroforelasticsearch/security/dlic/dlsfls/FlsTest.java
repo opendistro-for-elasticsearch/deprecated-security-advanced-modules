@@ -23,24 +23,12 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 
 public class FlsTest extends AbstractDlsFlsTest{
 
 
-    protected void populate(TransportClient tc) {
-
-        tc.index(new IndexRequest(".opendistro_security").type("security").id("config").setRefreshPolicy(RefreshPolicy.IMMEDIATE)
-                .source("config", FileHelper.readYamlContent("dlsfls/config.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("internalusers")
-                .source("internalusers", FileHelper.readYamlContent("dlsfls/internal_users.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").id("roles").setRefreshPolicy(RefreshPolicy.IMMEDIATE)
-                .source("roles", FileHelper.readYamlContent("dlsfls/roles.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("rolesmapping")
-                .source("rolesmapping", FileHelper.readYamlContent("dlsfls/roles_mapping.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("actiongroups")
-                .source("actiongroups", FileHelper.readYamlContent("dlsfls/action_groups.yml"))).actionGet();
+    protected void populateData(TransportClient tc) {
 
         tc.index(new IndexRequest("deals").type("deals").id("0").setRefreshPolicy(RefreshPolicy.IMMEDIATE)
                 .source("{\"customer\": {\"name\":\"cust1\"}, \"zip\": \"12345\",\"secret\": \"tellnoone\",\"amount\": 10}", XContentType.JSON)).actionGet();
@@ -125,7 +113,7 @@ public class FlsTest extends AbstractDlsFlsTest{
         HttpResponse res;
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executeGetRequest("/deals/_search?pretty", encodeBasicHeader("admin", "admin"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 2,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 2,\n      \"relation"));
         Assert.assertTrue(res.getBody().contains("\"failed\" : 0"));
         Assert.assertTrue(res.getBody().contains("cust1"));
         Assert.assertTrue(res.getBody().contains("cust2"));
@@ -135,7 +123,7 @@ public class FlsTest extends AbstractDlsFlsTest{
         Assert.assertTrue(res.getBody().contains("secret"));
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executeGetRequest("/deals/_search?pretty", encodeBasicHeader("dept_manager_fls", "password"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 2,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 2,\n      \"relation"));
         Assert.assertTrue(res.getBody().contains("\"failed\" : 0"));
         Assert.assertTrue(res.getBody().contains("cust1"));
         Assert.assertTrue(res.getBody().contains("cust2"));
@@ -145,7 +133,7 @@ public class FlsTest extends AbstractDlsFlsTest{
         Assert.assertFalse(res.getBody().contains("secret"));
 
         Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executeGetRequest("/deals/_search?pretty", encodeBasicHeader("dept_manager_fls_reversed_fields", "password"))).getStatusCode());
-        Assert.assertTrue(res.getBody().contains("\"total\" : 2,\n    \"max_"));
+        Assert.assertTrue(res.getBody().contains("\"value\" : 2,\n      \"relation"));
         Assert.assertTrue(res.getBody().contains("\"failed\" : 0"));
         Assert.assertFalse(res.getBody().contains("cust1"));
         Assert.assertFalse(res.getBody().contains("cust2"));

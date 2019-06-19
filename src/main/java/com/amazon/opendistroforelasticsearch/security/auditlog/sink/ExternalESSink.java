@@ -66,7 +66,7 @@ public final class ExternalESSink extends AuditLogSink {
                     + "If you have no date pattern configured you can safely ignore this message", e.getMessage());
         }
 
-		this.type = sinkSettings.get(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_ES_TYPE, "auditlog");
+		this.type = sinkSettings.get(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_ES_TYPE, null);
 		final boolean verifyHostnames = sinkSettings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_EXTERNAL_ES_VERIFY_HOSTNAMES, true);
 		final boolean enableSsl = sinkSettings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_EXTERNAL_ES_ENABLE_SSL, false);
 		final boolean enableSslClientAuth = sinkSettings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_EXTERNAL_ES_ENABLE_SSL_CLIENT_AUTH , ConfigConstants.OPENDISTRO_SECURITY_AUDIT_SSL_ENABLE_SSL_CLIENT_AUTH_DEFAULT);
