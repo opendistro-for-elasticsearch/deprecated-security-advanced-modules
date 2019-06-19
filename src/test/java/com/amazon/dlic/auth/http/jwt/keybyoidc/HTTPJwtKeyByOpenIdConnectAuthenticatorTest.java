@@ -70,8 +70,6 @@ public class HTTPJwtKeyByOpenIdConnectAuthenticatorTest {
 
 		HTTPJwtKeyByOpenIdConnectAuthenticator jwtAuth = new HTTPJwtKeyByOpenIdConnectAuthenticator(settings, null);
 
-		System.out.println("Entering Escape Kid ");
-
 		AuthCredentials creds = jwtAuth.extractCredentials(new FakeRestRequest(
 				ImmutableMap.of("Authorization",  "Bearer " + TestJwts.MC_COY_SIGNED_OCT_1_INVALID_KID), new HashMap<String, String>()), null);
 
