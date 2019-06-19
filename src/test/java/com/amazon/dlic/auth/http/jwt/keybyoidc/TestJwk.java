@@ -33,8 +33,10 @@ class TestJwk {
 	static final JsonWebKey OCT_1 = createOct("kid_a", "HS256", OCT_1_K);
 	static final JsonWebKey OCT_2 = createOct("kid_b", "HS256", OCT_2_K);
 	static final JsonWebKey OCT_3 = createOct("kid_c", "HS256", OCT_3_K);
+	static final JsonWebKey ESCAPED_SLASH_KID_OCT_1 = createOct("kid\\/_a", "HS256", OCT_1_K);
+	static final JsonWebKey FORWARD_SLASH_KID_OCT_1 = createOct("kid/_a", "HS256", OCT_1_K);
 
-	static final JsonWebKeys OCT_1_2_3 = createJwks(OCT_1, OCT_2, OCT_3);
+	static final JsonWebKeys OCT_1_2_3 = createJwks(OCT_1, OCT_2, OCT_3, FORWARD_SLASH_KID_OCT_1,ESCAPED_SLASH_KID_OCT_1);
 
 	static final String RSA_1_D = "On8XGMmdM5Fm5hvuhQk-qAkIP2CoK5QMx0OH5m_WDzKXZv8lZ2eg89I4ehBiOKGdw1h_mjmWwTah-evpXV-BF5QpejPQqxkXS-8s5r2AvietQq32jl-gwIwZWTvfzjpT9On0YJZ4q01tMDj3r-YOLUW2xrz3za9tl6pPU_5kP63C-hoj1ybTwcC7ujbCPwhY6yAopMA1v10uVmCxsjsNikEjB6YePgHixez51wO3Z8mXNwefWukFWYJ5T7t4kHMSf5P_8FJZ14u5yvYZnngE_tJCyHFdIDb6UWsrgxomtlQU-SdZYK_NY6gw6mCkjjlqOoYqlsrRJ16kJ81Ds269oQ";
 	static final String RSA_1_N = "hMSoV74FRtoaU7xpp0llsXbHE4oUseKoSNga-C_YIXuoGc3pajHh1WtJppZQNYM1Xy07nHchLJAdgqL2_q_Lk8cFHmmL1KTjwPflK9zZ9C0-8QTOrrqU9vkp3gT00jWWJ0HJbUvXIGxPGPnxoJoI--ToE0EWsYEWqWyx1TqYol--oUUPlY5r7vXRKIn5UZNz6VGkW8nI4fXaqDUpXH9uVM9A-nJX2B0Xjwu3VOn2zrgkCZeGTHjNgfLISOTFe9m8lHWLKcuxOWPuCZyCN0C6ZdWB1YP2NhxYFQwQfGV8yfnTImgL-DuV4WPSRVj7W_GJr213-oXBrBR0CnQEPbi_3w";
@@ -60,7 +62,7 @@ class TestJwk {
 	static final JsonWebKeys RSA_1_2_PUBLIC = createJwks(RSA_1_PUBLIC, RSA_2_PUBLIC);
 
 	static class Jwks {
-		static final JsonWebKeys ALL = createJwks(OCT_1, OCT_2, OCT_3, RSA_1_PUBLIC, RSA_2_PUBLIC);
+		static final JsonWebKeys ALL = createJwks(OCT_1, OCT_2, OCT_3, FORWARD_SLASH_KID_OCT_1, RSA_1_PUBLIC, RSA_2_PUBLIC);
 		static final JsonWebKeys RSA_1 = createJwks(RSA_1_PUBLIC);
 		static final JsonWebKeys RSA_2 = createJwks(RSA_2_PUBLIC);
 	}
