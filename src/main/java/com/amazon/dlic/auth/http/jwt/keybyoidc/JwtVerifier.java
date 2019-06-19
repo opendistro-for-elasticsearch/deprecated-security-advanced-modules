@@ -50,7 +50,7 @@ public class JwtVerifier {
 				key.setAlgorithm(jwt.getJwsHeaders().getAlgorithm());
 			}
 			
-			JwsSignatureVerifier signatureVerifier = getInitializedSignatureVerifier(key);
+			JwsSignatureVerifier signatureVerifier = getInitializedSignatureVerifier(key, jwt);
 
 
 			boolean signatureValid = jwtConsumer.verifySignatureWith(signatureVerifier);

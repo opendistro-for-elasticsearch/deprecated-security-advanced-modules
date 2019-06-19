@@ -246,12 +246,9 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
     protected void handleApiRequest(RestChannel channel, final RestRequest request, final Client client)
             throws IOException {
 
-        System.out.println("REQUEST METHOD: " + request.method());
-
         if (request.method() == Method.PATCH) {
             handlePatch(channel, request, client);
         } else {
-            System.out.println("Handle API REQUEST WITH: " + request.method());
             super.handleApiRequest(channel, request, client);
         }
     }
