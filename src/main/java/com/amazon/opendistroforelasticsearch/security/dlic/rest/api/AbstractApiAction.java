@@ -120,7 +120,6 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 				case POST:
 					handlePost(channel,request, client, validator.getContentAsNode());break;
 				case PUT:
-					System.out.println("%%%%%%% Handle Put %%%%%%%%");
 					handlePut(channel,request, client, validator.getContentAsNode());break;
 				case GET:
 					handleGet(channel,request, client, validator.getContentAsNode());break;
