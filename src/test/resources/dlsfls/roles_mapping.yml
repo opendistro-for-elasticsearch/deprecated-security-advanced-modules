@@ -97,3 +97,6 @@ opendistro_security_masked_nowc1:
 opendistro_security_prop_replace:
   users:
     - prop_replace
+opendistro_security_date_math:
+  users:
+    - opendistro_security_date_math

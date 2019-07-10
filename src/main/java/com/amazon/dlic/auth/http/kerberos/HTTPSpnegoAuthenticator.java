@@ -236,7 +236,7 @@ public class HTTPSpnegoAuthenticator implements HTTPAuthenticator {
                 } catch (final PrivilegedActionException e) {
                     final Throwable cause = e.getCause();
                     if (cause instanceof GSSException) {
-                        log.warn("Service login not successful due to", e);
+                        log.info("Service login not successful due to", e);
                     } else {
                         log.error("Service login not successful due to", e);
                     }

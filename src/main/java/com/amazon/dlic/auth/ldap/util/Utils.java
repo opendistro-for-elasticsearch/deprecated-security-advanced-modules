@@ -55,7 +55,8 @@ public final class Utils {
             AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
                 @Override
                 public Object run() throws Exception {
-                    connection.close();
+                    connection.close(); //this never throws an exception
+                    //see org.ldaptive.DefaultConnectionFactory.DefaultConnection#close()
                     return null;
                 }
             });

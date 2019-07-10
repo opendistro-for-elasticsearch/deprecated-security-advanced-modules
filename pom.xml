@@ -370,7 +370,7 @@
         <version>3.0.0-M3</version>
         <configuration>
           <argLine>-Xmx3072m</argLine>
-          <rerunFailingTestsCount>3</rerunFailingTestsCount>
+          <rerunFailingTestsCount>1</rerunFailingTestsCount>
           <forkCount>3</forkCount>
           <reuseForks>true</reuseForks>
           <!-- <parallel>methods</parallel> <threadCount>1</threadCount> -->
