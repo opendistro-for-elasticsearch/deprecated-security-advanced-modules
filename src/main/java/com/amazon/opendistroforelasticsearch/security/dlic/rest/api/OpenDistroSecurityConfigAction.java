@@ -53,11 +53,11 @@ public class OpenDistroSecurityConfigAction extends PatchableResourceApiAction {
 			final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator, ThreadPool threadPool, AuditLog auditLog) {
 		super(settings, configPath, controller, client, adminDNs, cl, cs, principalExtractor, evaluator, threadPool, auditLog);
 		allowPutOrPatch = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_UNSUPPORTED_RESTAPI_ALLOW_SECURITYCONFIG_MODIFICATION, false);
-		controller.registerHandler(Method.GET, "/_opendistro/_security/api/config/", this);
+		controller.registerHandler(Method.GET, "/_opendistro/_security/api/securityconfig/", this);
 
 		if (allowPutOrPatch) {
-			controller.registerHandler(Method.PUT, "/_opendistro/_security/api/config/{name}", this);
-			controller.registerHandler(Method.PATCH, "/_opendistro/_security/api/config/", this);
+			controller.registerHandler(Method.PUT, "/_opendistro/_security/api/securityconfig/{name}", this);
+			controller.registerHandler(Method.PATCH, "/_opendistro/_security/api/securityconfig/", this);
 		}
 	}
 
@@ -66,10 +66,8 @@ public class OpenDistroSecurityConfigAction extends PatchableResourceApiAction {
 	@Override
 	protected void handleApiRequest(RestChannel channel, RestRequest request, Client client) throws IOException {
 		if (request.method() == Method.PATCH && !allowPutOrPatch) {
-			System.out.println("========== Not Implemented ==========");
 			notImplemented(channel, Method.PATCH);
 		} else {
-			System.out.println("========== Method Implemented ==========");
 			super.handleApiRequest(channel, request, client);
 		}
 	}
