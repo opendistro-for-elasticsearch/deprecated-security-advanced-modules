@@ -36,7 +36,11 @@ public abstract class AbstractDlsFlsTest extends SingleClusterTest {
     }
 
     protected final void setup() throws Exception {
-        Settings settings = Settings.builder().put(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_TYPE_DEFAULT, "debug").build();
+        setup(Settings.EMPTY);
+    }
+    
+    protected final void setup(Settings override) throws Exception {
+        Settings settings = Settings.builder().put(ConfigConstants.OPENDISTRO_SECURITY_AUDIT_TYPE_DEFAULT, "debug").put(override).build();
         setup(Settings.EMPTY, null, settings, false);
 
         try(TransportClient tc = getInternalTransportClient(this.clusterInfo, Settings.EMPTY)) {

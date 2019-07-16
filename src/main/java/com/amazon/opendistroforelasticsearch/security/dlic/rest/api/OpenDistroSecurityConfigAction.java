@@ -15,8 +15,10 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.SecurityConfigValidator;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.bytes.BytesReference;
@@ -40,43 +42,70 @@ import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvalu
 import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 
-public class OpenDistroSecurityConfigAction extends AbstractApiAction {
+
+public class OpenDistroSecurityConfigAction extends PatchableResourceApiAction {
+
+	private final boolean allowPutOrPatch;
 
 	@Inject
 	public OpenDistroSecurityConfigAction(final Settings settings, final Path configPath, final RestController controller, final Client client,
 			final AdminDNs adminDNs, final IndexBaseConfigurationRepository cl, final ClusterService cs,
 			final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator, ThreadPool threadPool, AuditLog auditLog) {
 		super(settings, configPath, controller, client, adminDNs, cl, cs, principalExtractor, evaluator, threadPool, auditLog);
-		controller.registerHandler(Method.GET, "/_opendistro/_security/api/config/", this);
+		allowPutOrPatch = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_UNSUPPORTED_RESTAPI_ALLOW_SECURITYCONFIG_MODIFICATION, false);
+		controller.registerHandler(Method.GET, "/_opendistro/_security/api/securityconfig/", this);
+
+		if (allowPutOrPatch) {
+			controller.registerHandler(Method.PUT, "/_opendistro/_security/api/securityconfig/{name}", this);
+			controller.registerHandler(Method.PATCH, "/_opendistro/_security/api/securityconfig/", this);
+		}
 	}
 
 
 
 	@Override
-	protected void handleGet(RestChannel channel, RestRequest request, Client client,
-							 final Settings.Builder additionalSettingsBuilder) {
+	protected void handleApiRequest(RestChannel channel, RestRequest request, Client client) throws IOException {
+		if (request.method() == Method.PATCH && !allowPutOrPatch) {
+			notImplemented(channel, Method.PATCH);
+		} else {
+			super.handleApiRequest(channel, request, client);
+		}
+	}
 
+	@Override
+	protected void handleGet(RestChannel channel, RestRequest request, Client client, final Settings.Builder additionalSettingsBuilder) {
 		final Tuple<Long, Settings> configurationSettings = loadAsSettings(getConfigName(), true);
-
-		channel.sendResponse(
-				new BytesRestResponse(RestStatus.OK, convertToJson(channel, configurationSettings.v2())));
+		channel.sendResponse(new BytesRestResponse(RestStatus.OK, convertToJson(channel, configurationSettings.v2())));
 	}
 
 	@Override
-	protected void handlePut(RestChannel channel, final RestRequest request, final Client client,
-							 final Settings.Builder additionalSettings) {
-		notImplemented(channel, Method.PUT);
+	protected void handlePut(RestChannel channel, final RestRequest request, final Client client, final Settings.Builder additionalSettings)
+			throws IOException {
+		if (allowPutOrPatch) {
+			if (!"opendistro_security".equals(request.param("name"))) {
+				badRequestResponse(channel, "name must be opendistro_security");
+				return;
+			}
+			super.handlePut(channel, request, client, additionalSettings);
+		} else {
+			notImplemented(channel, Method.PUT);
+		}
 	}
 
 	@Override
-	protected void handleDelete(RestChannel channel, final RestRequest request, final Client client,
-								final Settings.Builder additionalSettings) {
+	protected void handleDelete(RestChannel channel, final RestRequest request, final Client client, final Settings.Builder additionalSettings) {
 		notImplemented(channel, Method.DELETE);
 	}
 
 	@Override
+	protected void handlePost(RestChannel channel, final RestRequest request, final Client client, final Settings.Builder additionalSetting)
+			throws IOException {
+		notImplemented(channel, Method.POST);
+	}
+
+	@Override
 	protected AbstractConfigurationValidator getValidator(RestRequest request, BytesReference ref, Object... param) {
-		return new NoOpValidator(request, ref, this.settings, param);
+		return new SecurityConfigValidator(request, ref, this.settings, param);
 	}
 
 	@Override

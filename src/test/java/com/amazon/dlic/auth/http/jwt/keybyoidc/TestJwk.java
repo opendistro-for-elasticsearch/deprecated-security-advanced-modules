@@ -50,6 +50,8 @@ class TestJwk {
 
 	static final JsonWebKey RSA_1 = createRsa("kid_1", "RS256", RSA_1_E, RSA_1_N, RSA_1_D);
 	static final JsonWebKey RSA_1_PUBLIC = createRsaPublic("kid_1", "RS256", RSA_1_E, RSA_1_N);
+	static final JsonWebKey RSA_1_PUBLIC_NO_ALG = createRsaPublic("kid_1", null, RSA_1_E, RSA_1_N);
+    static final JsonWebKey RSA_1_PUBLIC_WRONG_ALG = createRsaPublic("kid_1", "HS256", RSA_1_E, RSA_1_N);
 
 	static final JsonWebKey RSA_2 = createRsa("kid_2", "RS256", RSA_2_E, RSA_2_N, RSA_2_D);
 	static final JsonWebKey RSA_2_PUBLIC = createRsaPublic("kid_2", "RS256", RSA_2_E, RSA_2_N);
@@ -63,6 +65,8 @@ class TestJwk {
 		static final JsonWebKeys ALL = createJwks(OCT_1, OCT_2, OCT_3, RSA_1_PUBLIC, RSA_2_PUBLIC);
 		static final JsonWebKeys RSA_1 = createJwks(RSA_1_PUBLIC);
 		static final JsonWebKeys RSA_2 = createJwks(RSA_2_PUBLIC);
+		static final JsonWebKeys RSA_1_NO_ALG = createJwks(RSA_1_PUBLIC_NO_ALG);
+	    static final JsonWebKeys RSA_1_WRONG_ALG = createJwks(RSA_1_PUBLIC_WRONG_ALG);
 	}
 
 
