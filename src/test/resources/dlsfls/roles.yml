@@ -295,6 +295,13 @@ opendistro_security_bbb:
         - f2
         - type
 
+opendistro_security_date_math:
+  indices:
+    'logstash':
+       '*':
+         - '*'
+       _dls_: '{"range":{"@timestamp":{"from":"now-1d","to":"now","format":"strict_date_optional_time","include_lower":true,"include_upper":true,"boost":1.0}}}'
+
 opendistro_security_fls_fields_wc:
   cluster:
     - '*'

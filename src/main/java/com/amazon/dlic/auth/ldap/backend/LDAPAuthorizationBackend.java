@@ -38,7 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
@@ -86,6 +86,7 @@ import io.netty.util.internal.PlatformDependent;
 
 public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
+    private static final AtomicInteger CONNECTION_COUNTER = new AtomicInteger();
     private static final String COM_SUN_JNDI_LDAP_OBJECT_DISABLE_ENDPOINT_IDENTIFICATION = "com.sun.jndi.ldap.object.disableEndpointIdentification";
     private static final List<String> DEFAULT_TLS_PROTOCOLS = Arrays.asList("TLSv1.2", "TLSv1.1");
     static final int ONE_PLACEHOLDER = 1;
@@ -255,11 +256,14 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
                     log.debug("Unable to connect to ldapserver due to ", e);
                 }
                 Utils.unbindAndCloseSilently(connection);
+                connection = null;
                 continue;
             }
         }
 
         if (connection == null || !connection.isOpen()) {
+            Utils.unbindAndCloseSilently(connection); //just in case
+            connection = null;
             if (lastException == null) {
                 throw new LdapException("Unable to connect to any of those ldap servers " + ldapHosts);
             } else {
@@ -271,25 +275,53 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
         final Connection delegate = connection;
 
+        if(log.isDebugEnabled()) {
+            log.debug("Opened a connection, total count is now {}", CONNECTION_COUNTER.incrementAndGet());
+        }
+
         return new Connection() {
 
             @Override
             public Response<Void> reopen(BindRequest request) throws LdapException {
+                if(log.isDebugEnabled()) {
+                    log.debug("Reopened a connection");
+                }
                 return delegate.reopen(request);
             }
 
             @Override
             public Response<Void> reopen() throws LdapException {
+                if(log.isDebugEnabled()) {
+                    log.debug("Reopened a connection");
+                }
                 return delegate.reopen();
             }
 
             @Override
             public Response<Void> open(BindRequest request) throws LdapException {
+                
+                try {
+                    if(log.isDebugEnabled() && delegate != null && delegate.isOpen()) {
+                        log.debug("Opened a connection, total count is now {}", CONNECTION_COUNTER.incrementAndGet());
+                    }
+                } catch (Throwable e) {
+                    //ignore
+                }
+                
                 return delegate.open(request);
             }
 
             @Override
             public Response<Void> open() throws LdapException {
+                
+                try {
+                    if(log.isDebugEnabled() && delegate != null && delegate.isOpen()) {
+                        log.debug("Opened a connection, total count is now {}", CONNECTION_COUNTER.incrementAndGet());
+                    }
+                } catch (Throwable e) {
+                    //ignore
+                }
+                
                 return delegate.open();
             }
 
@@ -310,6 +342,15 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
             @Override
             public void close(RequestControl[] controls) {
+                
+                try {
+                    if(log.isDebugEnabled() && delegate != null && delegate.isOpen()) {
+                        log.debug("Closed a connection, total count is now {}", CONNECTION_COUNTER.decrementAndGet());
+                    }
+                } catch (Throwable e) {
+                    //ignore
+                }
+                
                 try {
                     delegate.close(controls);
                 } finally {
@@ -319,6 +360,15 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
             @Override
             public void close() {
+                
+                try {
+                    if(log.isDebugEnabled() && delegate != null && delegate.isOpen()) {
+                        log.debug("Closed a connection, total count is now {}", CONNECTION_COUNTER.decrementAndGet());
+                    }
+                } catch (Throwable e) {
+                    //ignore
+                }
+                
                 try {
                     delegate.close();
                 } finally {

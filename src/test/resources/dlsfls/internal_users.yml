@@ -69,3 +69,6 @@ prop_replace:
   roles:
     - prole1
     - prole2
+opendistro_security_date_math:
+  #password
+  hash: $2a$12$YCBrpxYyFusK609FurY5Ee3BlmuzWw0qHwpwqEyNhM2.XnQY3Bxpe

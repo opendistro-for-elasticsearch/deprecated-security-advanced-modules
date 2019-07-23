@@ -341,6 +341,10 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 			client.execute(ConfigUpdateAction.INSTANCE, cur, new ActionListener<ConfigUpdateResponse>() {
 				@Override
 				public void onResponse(final ConfigUpdateResponse ur) {
+                    if(ur.hasFailures()) {
+                        delegate.onFailure(ur.failures().get(0));
+                        return;
+                    }
 					delegate.onResponse(response);
 				}
 

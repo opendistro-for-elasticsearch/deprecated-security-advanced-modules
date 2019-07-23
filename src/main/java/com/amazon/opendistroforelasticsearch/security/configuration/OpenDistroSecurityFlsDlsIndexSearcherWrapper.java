@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.LongSupplier;
 
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
@@ -52,6 +53,7 @@ public class OpenDistroSecurityFlsDlsIndexSearcherWrapper extends OpenDistroSecu
     private final IndexService indexService;
     private final ComplianceConfig complianceConfig;
     private final AuditLog auditlog;
+    private final LongSupplier nowInMillis;
 
     public OpenDistroSecurityFlsDlsIndexSearcherWrapper(final IndexService indexService, final Settings settings,
             final AdminDNs adminDNs, final ClusterService clusterService, final AuditLog auditlog,
@@ -62,6 +64,12 @@ public class OpenDistroSecurityFlsDlsIndexSearcherWrapper extends OpenDistroSecu
         this.indexService = indexService;
         this.complianceConfig = complianceConfig;
         this.auditlog = auditlog;
+        final boolean allowNowinDlsQueries = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_UNSUPPORTED_ALLOW_NOW_IN_DLS, false);
+        if (allowNowinDlsQueries) {
+            nowInMillis = () -> System.currentTimeMillis();
+        } else {
+            nowInMillis = () -> {throw new IllegalArgumentException("'now' is not allowed in DLS queries");};
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -99,7 +107,7 @@ public class OpenDistroSecurityFlsDlsIndexSearcherWrapper extends OpenDistroSecu
                 if(unparsedDlsQueries != null && !unparsedDlsQueries.isEmpty()) {
                     final BitsetFilterCache bsfc = this.indexService.cache().bitsetFilterCache();
                     //disable reader optimizations
-                    final Query dlsQuery = DlsQueryParser.parse(unparsedDlsQueries, this.indexService.newQueryShardContext(shardId.getId(), null, null, null)
+                    final Query dlsQuery = DlsQueryParser.parse(unparsedDlsQueries, this.indexService.newQueryShardContext(shardId.getId(), null, nowInMillis, null)
                             , this.indexService.xContentRegistry());
                     bsp = dlsQuery==null?null:bsfc.getBitSetProducer(dlsQuery);
                 }

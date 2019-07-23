@@ -20,11 +20,11 @@
   <parent>
     <groupId>com.amazon.opendistroforelasticsearch</groupId>
     <artifactId>opendistro_security_parent</artifactId>
-    <version>0.9.0.0</version>
+    <version>0.10.0.0</version>
   </parent>
 
   <artifactId>opendistro_security_advanced_modules</artifactId>
-  <version>0.9.0.0</version>
+  <version>0.10.0.0</version>
   <packaging>jar</packaging>
 
   <name>Open Distro For Elasticsearch Advanced Modules</name>
@@ -33,8 +33,8 @@
   <inceptionYear>2016</inceptionYear>
 
   <properties>
-    <security.version>0.9.0.0</security.version>
-    <elasticsearch.version>6.7.1</elasticsearch.version>
+    <security.version>0.10.0.0</security.version>
+    <elasticsearch.version>6.8.1</elasticsearch.version>
 
     <!-- deps -->
     <log4j.version>2.11.1</log4j.version>
@@ -54,7 +54,7 @@
     <url>https://github.com/opendistro-for-elasticsearch/security-advanced-modules</url>
     <connection>scm:git:git@github.com:opendistro-for-elasticsearch/security-advanced-modules.git</connection>
     <developerConnection>scm:git:git@github.com:opendistro-for-elasticsearch/security-advanced-modules.git</developerConnection>
-    <tag>v0.9.0.0</tag>
+    <tag>v0.10.0.0</tag>
   </scm>
 
   <issueManagement>
@@ -370,7 +370,7 @@
         <version>3.0.0-M3</version>
         <configuration>
           <argLine>-Xmx3072m</argLine>
-          <rerunFailingTestsCount>3</rerunFailingTestsCount>
+          <rerunFailingTestsCount>1</rerunFailingTestsCount>
           <forkCount>3</forkCount>
           <reuseForks>true</reuseForks>
           <!-- <parallel>methods</parallel> <threadCount>1</threadCount> -->

@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.apache.cxf.rs.security.jose.jwk.JsonWebKey;
 import org.apache.cxf.rs.security.jose.jws.JwsHeaders;
+import org.apache.cxf.rs.security.jose.jws.JwsSignatureProvider;
 import org.apache.cxf.rs.security.jose.jws.JwsUtils;
 import org.apache.cxf.rs.security.jose.jwt.JoseJwtProducer;
 import org.apache.cxf.rs.security.jose.jwt.JwtClaims;
@@ -39,8 +40,7 @@ class TestJwts {
 
 	static final JwtToken MC_COY = create(MCCOY_SUBJECT, TEST_AUDIENCE, ROLES_CLAIM, TEST_ROLES_STRING);
 
-	static final JwtToken MC_COY_EXPIRED = create(MCCOY_SUBJECT, TEST_AUDIENCE, ROLES_CLAIM, TEST_ROLES_STRING,
-			JwtConstants.CLAIM_EXPIRY, 10);
+    static final JwtToken MC_COY_EXPIRED = create(MCCOY_SUBJECT, TEST_AUDIENCE, ROLES_CLAIM, TEST_ROLES_STRING, JwtConstants.CLAIM_EXPIRY, 10);
 
 	static final String MC_COY_SIGNED_OCT_1 = createSigned(MC_COY, TestJwk.OCT_1);
 
@@ -74,12 +74,16 @@ class TestJwts {
 	}
 
 	static String createSigned(JwtToken baseJwt, JsonWebKey jwk) {
+        return createSigned(baseJwt, jwk, JwsUtils.getSignatureProvider(jwk));
+    }
+
+    static String createSigned(JwtToken baseJwt, JsonWebKey jwk, JwsSignatureProvider signatureProvider) {
 		JwsHeaders jwsHeaders = new JwsHeaders();
 		JwtToken signedToken = new JwtToken(jwsHeaders, baseJwt.getClaims());
 
 		jwsHeaders.setKeyId(jwk.getKeyId());
 
-		return new JoseJwtProducer().processJwt(signedToken, null, JwsUtils.getSignatureProvider(jwk));
+        return new JoseJwtProducer().processJwt(signedToken, null, signatureProvider);
 	}
 
 	static String createSignedWithoutKeyId(JwtToken baseJwt, JsonWebKey jwk) {

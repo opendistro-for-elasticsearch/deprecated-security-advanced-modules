@@ -70,7 +70,12 @@ public class FlushCacheApiAction extends AbstractApiAction {
 				new ActionListener<ConfigUpdateResponse>() {
 
 					@Override
-					public void onResponse(ConfigUpdateResponse response) {
+					public void onResponse(ConfigUpdateResponse ur) {
+					    if(ur.hasFailures()) {
+	                        logger.error("Cannot flush cache due to", ur.failures().get(0));
+	                        internalErrorResponse(channel, "Cannot flush cache due to "+ ur.failures().get(0).getMessage()+".");
+	                        return;
+	                    }
 						successResponse(channel, "Cache flushed successfully.");
 						if (logger.isDebugEnabled()) {
 							logger.debug("cache flushed successfully");

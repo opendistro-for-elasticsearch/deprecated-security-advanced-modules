@@ -15,6 +15,8 @@
 
 package com.amazon.dlic.auth.ldap;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +40,29 @@ public class LdapUser extends User {
         this.originalUsername = originalUsername;
         this.userEntry = userEntry;
         Map<String, String> attributes = getCustomAttributesMap();
+        attributes.putAll(extractLdapAttributes(originalUsername, userEntry, customAttrMaxValueLen, whiteListedAttributes));
+    }
+
+    /**
+     * May return null because ldapEntry is transient
+     * 
+     * @return ldapEntry or null if object was deserialized
+     */
+    public LdapEntry getUserEntry() {
+        return userEntry;
+    }
+
+    public String getDn() {
+        return userEntry.getDn();
+    }
+
+    public String getOriginalUsername() {
+        return originalUsername;
+    }
+    
+    public static Map<String, String> extractLdapAttributes(String originalUsername, final LdapEntry userEntry
+            , int customAttrMaxValueLen, List<String> whiteListedAttributes) {
+        Map<String, String> attributes = new HashMap<>();
         attributes.put("ldap.original.username", originalUsername);
         attributes.put("ldap.dn", userEntry.getDn());
 
@@ -59,22 +84,6 @@ public class LdapUser extends User {
                 }
             }
         }
-    }
-
-    /**
-     * May return null because ldapEntry is transient
-     *
-     * @return ldapEntry or null if object was deserialized
-     */
-    public LdapEntry getUserEntry() {
-        return userEntry;
-    }
-
-    public String getDn() {
-        return userEntry.getDn();
-    }
-
-    public String getOriginalUsername() {
-        return originalUsername;
+        return Collections.unmodifiableMap(attributes);
     }
 }
