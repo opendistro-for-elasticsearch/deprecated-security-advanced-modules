@@ -69,7 +69,6 @@ public class HTTPSamlAuthenticator implements HTTPAuthenticator, Destroyable {
     private String idpMetadataFile;
     private String spSignatureAlgorithm;
     private Boolean useForceAuthn;
-    private PrivateKey spSignaturePrivateKey;
     private Saml2SettingsProvider saml2SettingsProvider;
     private MetadataResolver metadataResolver;
     private AuthTokenProcessorHandler authTokenProcessorHandler;
@@ -86,7 +85,6 @@ public class HTTPSamlAuthenticator implements HTTPAuthenticator, Destroyable {
             idpMetadataUrl = settings.get("idp.metadata_url");
             idpMetadataFile = settings.get("idp.metadata_file");
             spSignatureAlgorithm = settings.get("sp.signature_algorithm", Constants.RSA_SHA256);
-            spSignaturePrivateKey = getSpSignaturePrivateKey(settings, configPath);
             useForceAuthn = settings.getAsBoolean("sp.forceAuthn", null);
 
             if (rolesKey == null || rolesKey.length() == 0) {
@@ -110,7 +108,8 @@ public class HTTPSamlAuthenticator implements HTTPAuthenticator, Destroyable {
 
             this.metadataResolver = createMetadataResolver(settings, configPath);
 
-            this.saml2SettingsProvider = new Saml2SettingsProvider(settings, this.metadataResolver);
+            this.saml2SettingsProvider = new Saml2SettingsProvider(settings, this.metadataResolver, configPath);
+
             this.saml2SettingsProvider.getCached();
 
             this.jwtSettings = this.createJwtAuthenticatorSettings(settings);
@@ -192,22 +191,6 @@ public class HTTPSamlAuthenticator implements HTTPAuthenticator, Destroyable {
         }
 
         return new AuthnRequest(saml2Settings, forceAuthn, false, true);
-    }
-
-    private PrivateKey getSpSignaturePrivateKey(Settings settings, Path configPath) throws Exception {
-        try {
-            PrivateKey result = PemKeyReader.loadKeyFromStream(settings.get("sp.signature_private_key_password"),
-                    PemKeyReader.resolveStream("sp.signature_private_key", settings));
-
-            if (result == null) {
-                result = PemKeyReader.loadKeyFromFile(settings.get("sp.signature_private_key_password"),
-                        PemKeyReader.resolve("sp.signature_private_key_filepath", settings, configPath, false));
-            }
-
-            return result;
-        } catch (Exception e) {
-            throw new Exception("Invalid value for sp.signature_private_key", e);
-        }
     }
 
     private URL getIdpUrl(IdpEndpointType endpointType, Saml2Settings saml2Settings) {
@@ -372,24 +355,25 @@ public class HTTPSamlAuthenticator implements HTTPAuthenticator, Destroyable {
 
     private String getSamlRequestQueryString(String samlRequest) throws Exception {
 
-        if (this.spSignaturePrivateKey == null) {
+        Saml2Settings saml2Settings = this.saml2SettingsProvider.getCached();
+        if (saml2Settings.getSPkey() == null) {
             return "SAMLRequest=" + Util.urlEncoder(samlRequest);
         }
 
         String queryString = "SAMLRequest=" + Util.urlEncoder(samlRequest) + "&SigAlg="
                 + Util.urlEncoder(this.spSignatureAlgorithm);
 
-        String signature = getSamlRequestQueryStringSignature(queryString);
+        String signature = getSamlRequestQueryStringSignature(queryString,saml2Settings.getSPkey());
 
         queryString += "&Signature=" + Util.urlEncoder(signature);
 
         return queryString;
     }
 
-    private String getSamlRequestQueryStringSignature(String samlRequestQueryString) throws Exception {
+    private String getSamlRequestQueryStringSignature(String samlRequestQueryString, PrivateKey spKey) throws Exception {
         try {
             return Util.base64encoder(
-                    Util.sign(samlRequestQueryString, this.spSignaturePrivateKey, this.spSignatureAlgorithm));
+                    Util.sign(samlRequestQueryString, spKey, this.spSignatureAlgorithm));
         } catch (Exception e) {
             throw new Exception("Error while signing SAML request", e);
         }

@@ -15,6 +15,8 @@
 
 package com.amazon.dlic.auth.http.saml;
 
+import java.nio.file.Path;
+import java.security.PrivateKey;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.amazon.opendistroforelasticsearch.security.support.PemKeyReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.settings.Settings;
@@ -54,11 +57,13 @@ public class Saml2SettingsProvider {
     private String idpEntityId;
     private Saml2Settings cachedSaml2Settings;
     private DateTime metadataUpdateTime;
+    private Path configPath;
 
-    Saml2SettingsProvider(Settings esSettings, MetadataResolver metadataResolver) {
+    Saml2SettingsProvider(Settings esSettings, MetadataResolver metadataResolver, Path configPath) {
         this.esSettings = esSettings;
         this.metadataResolver = metadataResolver;
         this.idpEntityId = esSettings.get("idp.entity_id");
+        this.configPath = configPath;
     }
 
     Saml2Settings get() throws SamlConfigException {
@@ -86,6 +91,7 @@ public class Saml2SettingsProvider {
             initSpEndpoints(configProperties);
 
             initMisc(configProperties);
+            initSpSignaturePrivateKey(esSettings,configProperties);
 
             SettingsBuilder settingsBuilder = new SettingsBuilder();
 
@@ -141,6 +147,23 @@ public class Saml2SettingsProvider {
         configProperties.put(SettingsBuilder.SP_ASSERTION_CONSUMER_SERVICE_BINDING_PROPERTY_KEY,
                 "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
         configProperties.put(SettingsBuilder.SP_ENTITYID_PROPERTY_KEY, this.esSettings.get("sp.entity_id"));
+    }
+
+    private void initSpSignaturePrivateKey(Settings settings, HashMap<String, Object> configProperties) throws SamlConfigException {
+        try {
+            PrivateKey result = PemKeyReader.loadKeyFromStream(settings.get("sp.signature_private_key_password"),
+                    PemKeyReader.resolveStream("sp.signature_private_key", settings));
+
+            if (result == null) {
+                result = PemKeyReader.loadKeyFromFile(settings.get("sp.signature_private_key_password"),
+                        PemKeyReader.resolve("sp.signature_private_key_filepath", settings, configPath, false));
+            }
+
+            configProperties.put(SettingsBuilder.SP_PRIVATEKEY_PROPERTY_KEY,result);
+
+        } catch (Exception e) {
+            throw new SamlConfigException("Invalid value for sp.signature_private_key", e);
+        }
     }
 
     private void initIdpEndpoints(IDPSSODescriptor idpSsoDescriptor, HashMap<String, Object> configProperties)
