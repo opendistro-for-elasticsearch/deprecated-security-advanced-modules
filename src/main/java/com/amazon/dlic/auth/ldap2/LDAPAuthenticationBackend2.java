@@ -47,13 +47,9 @@ import com.amazon.opendistroforelasticsearch.security.auth.Destroyable;
 import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
 import com.amazon.opendistroforelasticsearch.security.user.User;
 
-public class LDAPAuthenticationBackend implements AuthenticationBackend, Destroyable {
+public class LDAPAuthenticationBackend2 implements AuthenticationBackend, Destroyable {
 
-    static {
-        Utils.init();
-    }
-
-    protected static final Logger log = LogManager.getLogger(LDAPAuthenticationBackend.class);
+    protected static final Logger log = LogManager.getLogger(LDAPAuthenticationBackend2.class);
 
     private final Settings settings;
 
@@ -61,8 +57,10 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend, Destroy
     private ConnectionFactory connectionFactory;
     private ConnectionFactory authConnectionFactory;
     private LDAPUserSearcher userSearcher;
+    private final int customAttrMaxValueLen;
+    private final List<String> whitelistedAttributes;
 
-    public LDAPAuthenticationBackend(final Settings settings, final Path configPath) throws SSLConfigException {
+    public LDAPAuthenticationBackend2(final Settings settings, final Path configPath) throws SSLConfigException {
         this.settings = settings;
 
         LDAPConnectionFactoryFactory ldapConnectionFactoryFactory = new LDAPConnectionFactoryFactory(settings,
@@ -78,13 +76,16 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend, Destroy
         }
 
         this.userSearcher = new LDAPUserSearcher(settings);
+        customAttrMaxValueLen = settings.getAsInt(ConfigConstants.LDAP_CUSTOM_ATTR_MAXVAL_LEN, 36);
+        whitelistedAttributes = settings.getAsList(ConfigConstants.LDAP_CUSTOM_ATTR_WHITELIST,
+                null);
     }
 
     @Override
     public User authenticate(final AuthCredentials credentials) throws ElasticsearchSecurityException {
 
         Connection ldapConnection = null;
-        final String user = Utils.escapeStringRfc2254(credentials.getUsername());
+        final String user = credentials.getUsername();
         byte[] password = credentials.getPassword();
 
         try {
@@ -123,16 +124,12 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend, Destroy
             String username = dn;
 
             if (usernameAttribute != null && entry.getAttribute(usernameAttribute) != null) {
-                username = entry.getAttribute(usernameAttribute).getStringValue();
+                username = Utils.getSingleStringValue(entry.getAttribute(usernameAttribute));
             }
 
             if (log.isDebugEnabled()) {
                 log.debug("Authenticated username {}", username);
             }
-
-            final int customAttrMaxValueLen = settings.getAsInt(ConfigConstants.LDAP_CUSTOM_ATTR_MAXVAL_LEN, 36);
-            final List<String> whitelistedAttributes = settings.getAsList(ConfigConstants.LDAP_CUSTOM_ATTR_WHITELIST,
-                    null);
 
             // by default all ldap attributes which are not binary and with a max value
             // length of 36 are included in the user object
@@ -170,7 +167,15 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend, Destroy
         try {
             ldapConnection = this.connectionFactory.getConnection();
             ldapConnection.open();
-            return this.userSearcher.exists(ldapConnection, userName) != null;
+            LdapEntry userEntry = this.userSearcher.exists(ldapConnection, userName);
+            
+            boolean exists = userEntry != null;
+            
+            if(exists) {
+                user.addAttributes(LdapUser.extractLdapAttributes(userName, userEntry, customAttrMaxValueLen, whitelistedAttributes));
+            }
+            
+            return exists;
         } catch (final Exception e) {
             log.warn("User {} does not exist due to " + e, userName);
             if (log.isDebugEnabled()) {

@@ -1,0 +1,42 @@
+## 2019-06-21, Version 1.1.0.0 (Current)
+
+- Support for Elasticsearch 7.1
+
+## 2019-06-21, Version 1.0.0.0
+
+- New configuration syntax
+- Streamlined the YAML configuration file syntax and added a migration feature to `securityadmin.sh` to help you move from the old file format to the new format.
+- Request bodies for calls to the REST API are also slightly different.
+
+- Static default roles
+- Previously, all roles were dynamically configured and stored in the Security plugin configuration index, including default roles such as `kibana_read_only` and `logstash`
+- Now, all default roles are static, so permission changes to these roles are automatically applied when you upgrade Open Distro for Elasticsearch.
+
+- New LDAP/Active Directory module
+- We’ve added a new version of the LDAP/Active Directory module that supports querying multiple userbases/rolebases and more sophisticated connection pooling.
+- It replaces the existing module and is fully backward-compatible.
+
+
+PRs:
+https://github.com/opendistro-for-elasticsearch/security-advanced-modules/pull/11
+Algorithm is not mandatory for the key material, so we set it to the same as the JWT. Thanks MichelZ@ for contribution.
+
+https://github.com/opendistro-for-elasticsearch/security-advanced-modules/pull/16
+Allow KID of JWK's to contain forward slashes
+
+## 2019-04-23, Version 0.9.0.0
+
+- Support For Elasticsearch 6.7
+
+## 2019-04-04, Version 0.8.0.0
+
+- Support For  Elasticsearch 6.6
+
+## 2019-03-19, Version 0.7.0.1
+ 
+- Fixed git repo URLs in pom.xml
+- Minor config fixes
+
+## 2019-03-12, Version 0.7.0.0
+
+- Initial launch of security-advanced-modules for opendistro-for-elasticsearch

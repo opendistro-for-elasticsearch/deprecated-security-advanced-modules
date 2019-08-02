@@ -78,13 +78,17 @@ public final class JaasKrbUtil {
      return loginContext.getSubject();
  }
 
- public static Subject loginUsingKeytab(final String principal, final Path keytabPath, final boolean initiator) throws LoginException {
+ public static Subject loginUsingKeytab(final Set<String> principalAsStrings, final Path keytabPath, final boolean initiator) throws LoginException {
      final Set<Principal> principals = new HashSet<Principal>();
-     principals.add(new KerberosPrincipal(principal));
+
+     for(String p: principalAsStrings) {
+         principals.add(new KerberosPrincipal(p));
+     }
+
 
      final Subject subject = new Subject(false, principals, new HashSet<Object>(), new HashSet<Object>());
 
-     final Configuration conf = useKeytab(principal, keytabPath, initiator);
+     final Configuration conf = useKeytab("*", keytabPath, initiator);
      final String confName = "KeytabConf";
      final LoginContext loginContext = new LoginContext(confName, subject, null, conf);
      loginContext.login();

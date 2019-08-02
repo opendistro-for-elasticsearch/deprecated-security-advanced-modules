@@ -24,7 +24,9 @@ import org.elasticsearch.rest.RestRequest;
 public class MockRestRequest extends RestRequest {
 
     public MockRestRequest() {
-        super(NamedXContentRegistry.EMPTY, "", Collections.emptyMap());
+        //NamedXContentRegistry xContentRegistry, Map<String, String> params, String path,
+        //Map<String, List<String>> headers, HttpRequest httpRequest, HttpChannel httpChannel
+        super(NamedXContentRegistry.EMPTY, Collections.emptyMap(), "", Collections.emptyMap(), null, null);
     }
 
     @Override

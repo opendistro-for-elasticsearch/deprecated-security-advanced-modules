@@ -15,42 +15,40 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
+import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
-import org.elasticsearch.rest.RestResponse;
 import org.elasticsearch.threadpool.ThreadPool;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateAction;
 import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateRequest;
 import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateResponse;
 import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
 import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
-import com.amazon.opendistroforelasticsearch.security.configuration.IndexBaseConfigurationRepository;
+import com.amazon.opendistroforelasticsearch.security.configuration.ConfigurationRepository;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.NoOpValidator;
 import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.CType;
 import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
 
 public class FlushCacheApiAction extends AbstractApiAction {
 
 	@Inject
 	public FlushCacheApiAction(final Settings settings, final Path configPath, final RestController controller, final Client client,
-			final AdminDNs adminDNs, final IndexBaseConfigurationRepository cl, final ClusterService cs,
+			final AdminDNs adminDNs, final ConfigurationRepository cl, final ClusterService cs,
             final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator, ThreadPool threadPool, AuditLog auditLog) {
 		super(settings, configPath, controller, client, adminDNs, cl, cs, principalExtractor, evaluator, threadPool, auditLog);
 		controller.registerHandler(Method.DELETE, "/_opendistro/_security/api/cache", this);
@@ -65,64 +63,51 @@ public class FlushCacheApiAction extends AbstractApiAction {
 	}
 
 	@Override
-	protected Tuple<String[], RestResponse> handleDelete(RestRequest request, Client client, Builder additionalSettingsBuilder)
-			throws Throwable {
-
-		final Semaphore sem = new Semaphore(0);
-		final List<Throwable> exception = new ArrayList<Throwable>(1);
+	protected void handleDelete(RestChannel channel,
+	        RestRequest request, Client client, final JsonNode content) throws IOException
+	{
 
 		client.execute(
 				ConfigUpdateAction.INSTANCE,
-				new ConfigUpdateRequest(new String[] { "config", "roles", "rolesmapping", "internalusers", "actiongroups" }),
+				new ConfigUpdateRequest(CType.lcStringValues().toArray(new String[0])),
 				new ActionListener<ConfigUpdateResponse>() {
 
 					@Override
-					public void onResponse(ConfigUpdateResponse response) {
-						sem.release();
-						if (logger.isDebugEnabled()) {
-							logger.debug("cache flushed successfully");
+					public void onResponse(ConfigUpdateResponse ur) {
+					    if(ur.hasFailures()) {
+					        log.error("Cannot flush cache due to", ur.failures().get(0));
+	                        internalErrorResponse(channel, "Cannot flush cache due to "+ ur.failures().get(0).getMessage()+".");
+	                        return;
+	                    }
+						successResponse(channel, "Cache flushed successfully.");
+						if (log.isDebugEnabled()) {
+						    log.debug("cache flushed successfully");
 						}
 					}
 
 					@Override
 					public void onFailure(Exception e) {
-						sem.release();
-						exception.add(e);
-						logger.error("Cannot flush cache due to {}", e.toString(), e);
+					    log.error("Cannot flush cache due to", e);
+						internalErrorResponse(channel, "Cannot flush cache due to "+ e.getMessage()+".");
 					}
 
 				}
 		);
-
-		if (!sem.tryAcquire(30, TimeUnit.SECONDS)) {
-			logger.error("Cannot flush cache due to timeout");
-			return internalErrorResponse("Cannot flush cache due to timeout");
-		}
-
-		if (exception.size() > 0) {
-			logger.error("Cannot flush cache due to", exception.get(0));
-			return internalErrorResponse("Cannot flush cache due to "+ exception.get(0).getMessage());
-		}
-
-		return successResponse("Cache flushed successfully.", new String[0]);
 	}
 
 	@Override
-	protected Tuple<String[], RestResponse> handlePost(final RestRequest request, final Client client,
-			final Settings.Builder additionalSettings) throws Throwable {
-		return notImplemented(Method.POST);
+	protected void handlePost(RestChannel channel, final RestRequest request, final Client client, final JsonNode content)throws IOException {
+		notImplemented(channel, Method.POST);
 	}
 
 	@Override
-	protected Tuple<String[], RestResponse> handleGet(final RestRequest request, final Client client,
-			final Settings.Builder additionalSettings) throws Throwable {
-		return notImplemented(Method.GET);
+	protected void handleGet(RestChannel channel, final RestRequest request, final Client client, final JsonNode content) throws IOException{
+		notImplemented(channel, Method.GET);
 	}
 
 	@Override
-	protected Tuple<String[], RestResponse> handlePut(final RestRequest request, final Client client,
-			final Settings.Builder additionalSettings) throws Throwable {
-		return notImplemented(Method.PUT);
+	protected void handlePut(RestChannel channel, final RestRequest request, final Client client, final JsonNode content) throws IOException{
+		notImplemented(channel, Method.PUT);
 	}
 
 	@Override
@@ -137,8 +122,7 @@ public class FlushCacheApiAction extends AbstractApiAction {
 	}
 
 	@Override
-	protected String getConfigName() {
-		// not needed
+    protected CType getConfigName() {
 		return null;
 	}
 

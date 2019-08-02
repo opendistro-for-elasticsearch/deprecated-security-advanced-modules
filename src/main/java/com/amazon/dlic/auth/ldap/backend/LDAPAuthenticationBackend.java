@@ -41,6 +41,7 @@ import org.ldaptive.Credential;
 import org.ldaptive.LdapEntry;
 import org.ldaptive.LdapException;
 import org.ldaptive.Response;
+import org.ldaptive.SearchFilter;
 import org.ldaptive.SearchScope;
 
 import com.amazon.dlic.auth.ldap.LdapUser;
@@ -53,31 +54,33 @@ import com.amazon.opendistroforelasticsearch.security.user.User;
 
 public class LDAPAuthenticationBackend implements AuthenticationBackend {
 
-    static final String ZERO_PLACEHOLDER = "{0}";
+    static final int ZERO_PLACEHOLDER = 0;
     static final String DEFAULT_USERBASE = "";
     static final String DEFAULT_USERSEARCH_PATTERN = "(sAMAccountName={0})";
-
-    static {
-        Utils.init();
-    }
 
     protected static final Logger log = LogManager.getLogger(LDAPAuthenticationBackend.class);
 
     private final Settings settings;
     private final Path configPath;
     private final List<Map.Entry<String, Settings>> userBaseSettings;
+    private final int customAttrMaxValueLen;
+    private final List<String> whitelistedAttributes;
 
     public LDAPAuthenticationBackend(final Settings settings, final Path configPath) {
         this.settings = settings;
         this.configPath = configPath;
         this.userBaseSettings = getUserBaseSettings(settings);
+
+        customAttrMaxValueLen = settings.getAsInt(ConfigConstants.LDAP_CUSTOM_ATTR_MAXVAL_LEN, 36);
+        whitelistedAttributes = settings.getAsList(ConfigConstants.LDAP_CUSTOM_ATTR_WHITELIST,
+                null);
     }
 
     @Override
     public User authenticate(final AuthCredentials credentials) throws ElasticsearchSecurityException {
 
         Connection ldapConnection = null;
-        final String user = Utils.escapeStringRfc2254(credentials.getUsername());
+        final String user =credentials.getUsername();
         byte[] password = credentials.getPassword();
 
         try {
@@ -123,22 +126,20 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend {
                 });
             } catch (PrivilegedActionException e) {
                 throw e.getException();
+            } finally {
+                Utils.unbindAndCloseSilently(_con);
             }
 
             final String usernameAttribute = settings.get(ConfigConstants.LDAP_AUTHC_USERNAME_ATTRIBUTE, null);
             String username = dn;
 
             if (usernameAttribute != null && entry.getAttribute(usernameAttribute) != null) {
-                username = entry.getAttribute(usernameAttribute).getStringValue();
+                username = Utils.getSingleStringValue(entry.getAttribute(usernameAttribute));
             }
 
             if (log.isDebugEnabled()) {
                 log.debug("Authenticated username {}", username);
             }
-
-            final int customAttrMaxValueLen = settings.getAsInt(ConfigConstants.LDAP_CUSTOM_ATTR_MAXVAL_LEN, 36);
-            final List<String> whitelistedAttributes = settings.getAsList(ConfigConstants.LDAP_CUSTOM_ATTR_WHITELIST,
-                    null);
 
             // by default all ldap attributes which are not binary and with a max value
             // length of 36 are included in the user object
@@ -175,7 +176,15 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend {
 
         try {
             ldapConnection = LDAPAuthorizationBackend.getConnection(settings, configPath);
-            return exists(userName, ldapConnection, settings, userBaseSettings) != null;
+            LdapEntry userEntry = exists(userName, ldapConnection, settings, userBaseSettings);
+            boolean exists = userEntry != null;
+            
+            if(exists) {
+                user.addAttributes(LdapUser.extractLdapAttributes(userName, userEntry, customAttrMaxValueLen, whitelistedAttributes));
+            }
+            
+            return exists;
+            
         } catch (final Exception e) {
             log.warn("User {} does not exist due to " + e, userName);
             if (log.isDebugEnabled()) {
@@ -225,15 +234,18 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend {
 
     private static LdapEntry existsSearchingUntilFirstHit(final String user, Connection ldapConnection,
             List<Map.Entry<String, Settings>> userBaseSettings) throws Exception {
-        final String username = Utils.escapeStringRfc2254(user);
+        final String username = user;
 
         for (Map.Entry<String, Settings> entry : userBaseSettings) {
             Settings baseSettings = entry.getValue();
 
+            SearchFilter f = new SearchFilter();
+            f.setFilter(baseSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_USERSEARCH_PATTERN));
+            f.setParameter(ZERO_PLACEHOLDER, username);
+
             List<LdapEntry> result = LdapHelper.search(ldapConnection,
                     baseSettings.get(ConfigConstants.LDAP_AUTHCZ_BASE, DEFAULT_USERBASE),
-                    baseSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_USERSEARCH_PATTERN)
-                            .replace(ZERO_PLACEHOLDER, username),
+                    f,
                     SearchScope.SUBTREE);
 
             if (log.isDebugEnabled()) {
@@ -250,16 +262,19 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend {
 
     private static LdapEntry existsSearchingAllBases(final String user, Connection ldapConnection,
             List<Map.Entry<String, Settings>> userBaseSettings) throws Exception {
-        final String username = Utils.escapeStringRfc2254(user);
+        final String username = user;
         Set<LdapEntry> result = new HashSet<>();
 
         for (Map.Entry<String, Settings> entry : userBaseSettings) {
             Settings baseSettings = entry.getValue();
 
+            SearchFilter f = new SearchFilter();
+            f.setFilter(baseSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_USERSEARCH_PATTERN));
+            f.setParameter(ZERO_PLACEHOLDER, username);
+
             List<LdapEntry> foundEntries = LdapHelper.search(ldapConnection,
                     baseSettings.get(ConfigConstants.LDAP_AUTHCZ_BASE, DEFAULT_USERBASE),
-                    baseSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_USERSEARCH_PATTERN)
-                            .replace(ZERO_PLACEHOLDER, username),
+                    f,
                     SearchScope.SUBTREE);
 
             if (log.isDebugEnabled()) {

@@ -39,21 +39,23 @@ public class RolesMappingApiTest extends AbstractRestApiUnitTest {
 		rh.sendHTTPClientCertificate = true;
 
 		// check rolesmapping exists, old config api
-		HttpResponse response = rh.executeGetRequest("_opendistro/_security/api/configuration/rolesmapping");
+		HttpResponse response = rh.executeGetRequest("_opendistro/_security/api/rolesmapping");
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 
 		// check rolesmapping exists, new API
 		response = rh.executeGetRequest("_opendistro/_security/api/rolesmapping");
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+		Assert.assertTrue(response.getContentType(), response.isJsonContentType());
 
 		// -- GET
 
 		// GET opendistro_security_role_starfleet, exists
 		response = rh.executeGetRequest("/_opendistro/_security/api/rolesmapping/opendistro_security_role_starfleet", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+		Assert.assertTrue(response.getContentType(), response.isJsonContentType());
 		Settings settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
-		Assert.assertEquals("starfleet", settings.getAsList("opendistro_security_role_starfleet.backendroles").get(0));
-		Assert.assertEquals("captains", settings.getAsList("opendistro_security_role_starfleet.backendroles").get(1));
+		Assert.assertEquals("starfleet", settings.getAsList("opendistro_security_role_starfleet.backend_roles").get(0));
+		Assert.assertEquals("captains", settings.getAsList("opendistro_security_role_starfleet.backend_roles").get(1));
 		Assert.assertEquals("*.starfleetintranet.com", settings.getAsList("opendistro_security_role_starfleet.hosts").get(0));
 		Assert.assertEquals("nagilum", settings.getAsList("opendistro_security_role_starfleet.users").get(0));
 
@@ -64,10 +66,12 @@ public class RolesMappingApiTest extends AbstractRestApiUnitTest {
 		// GET, new URL endpoint in security
 		response = rh.executeGetRequest("/_opendistro/_security/api/rolesmapping/", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+		Assert.assertTrue(response.getContentType(), response.isJsonContentType());
 
 		// GET, new URL endpoint in security
 		response = rh.executeGetRequest("/_opendistro/_security/api/rolesmapping", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+		Assert.assertTrue(response.getContentType(), response.isJsonContentType());
 
 	    // GET, rolesmapping is hidden
         response = rh.executeGetRequest("/_opendistro/_security/api/rolesmapping/opendistro_security_role_internal", new Header[0]);
@@ -154,7 +158,7 @@ public class RolesMappingApiTest extends AbstractRestApiUnitTest {
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 		Assert.assertEquals(AbstractConfigurationValidator.ErrorType.WRONG_DATATYPE.getMessage(), settings.get("reason"));
-		Assert.assertTrue(settings.get("backendroles").equals("Array expected"));
+		Assert.assertTrue(settings.get("backend_roles").equals("Array expected"));		
 		Assert.assertTrue(settings.get("hosts") == null);
 		Assert.assertTrue(settings.get("users") == null);
 
@@ -164,7 +168,7 @@ public class RolesMappingApiTest extends AbstractRestApiUnitTest {
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 		Assert.assertEquals(AbstractConfigurationValidator.ErrorType.WRONG_DATATYPE.getMessage(), settings.get("reason"));
 		Assert.assertTrue(settings.get("hosts").equals("Array expected"));
-		Assert.assertTrue(settings.get("backendroles") == null);
+		Assert.assertTrue(settings.get("backend_roles") == null);
 		Assert.assertTrue(settings.get("users") == null);
 
 		response = rh.executePutRequest("/_opendistro/_security/api/rolesmapping/opendistro_security_role_starfleet_captains",
@@ -174,7 +178,7 @@ public class RolesMappingApiTest extends AbstractRestApiUnitTest {
 		Assert.assertEquals(AbstractConfigurationValidator.ErrorType.WRONG_DATATYPE.getMessage(), settings.get("reason"));
 		Assert.assertTrue(settings.get("hosts").equals("Array expected"));
 		Assert.assertTrue(settings.get("users").equals("Array expected"));
-		Assert.assertTrue(settings.get("backendroles").equals("Array expected"));
+		Assert.assertTrue(settings.get("backend_roles").equals("Array expected"));	
 
 		// Read only role mapping
 		response = rh.executePutRequest("/_opendistro/_security/api/rolesmapping/opendistro_security_role_starfleet_library",
@@ -214,12 +218,12 @@ public class RolesMappingApiTest extends AbstractRestApiUnitTest {
 
         // PATCH
         rh.sendHTTPClientCertificate = true;
-        response = rh.executePatchRequest("/_opendistro/_security/api/rolesmapping/opendistro_security_role_vulcans", "[{ \"op\": \"add\", \"path\": \"/backendroles/-\", \"value\": \"spring\" }]", new Header[0]);
+        response = rh.executePatchRequest("/_opendistro/_security/api/rolesmapping/opendistro_security_role_vulcans", "[{ \"op\": \"add\", \"path\": \"/backend_roles/-\", \"value\": \"spring\" }]", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         response = rh.executeGetRequest("/_opendistro/_security/api/rolesmapping/opendistro_security_role_vulcans", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
-        List<String> permissions = settings.getAsList("opendistro_security_role_vulcans.backendroles");
+        List<String> permissions = settings.getAsList("opendistro_security_role_vulcans.backend_roles");
         Assert.assertNotNull(permissions);
         Assert.assertTrue(permissions.contains("spring"));
 
@@ -247,12 +251,12 @@ public class RolesMappingApiTest extends AbstractRestApiUnitTest {
 
         // PATCH
         rh.sendHTTPClientCertificate = true;
-        response = rh.executePatchRequest("/_opendistro/_security/api/rolesmapping", "[{ \"op\": \"add\", \"path\": \"/bulknew1\", \"value\": {  \"backendroles\":[\"vulcanadmin\"]} }]", new Header[0]);
+        response = rh.executePatchRequest("/_opendistro/_security/api/rolesmapping", "[{ \"op\": \"add\", \"path\": \"/bulknew1\", \"value\": {  \"backend_roles\":[\"vulcanadmin\"]} }]", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         response = rh.executeGetRequest("/_opendistro/_security/api/rolesmapping/bulknew1", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
-        permissions = settings.getAsList("bulknew1.backendroles");
+        permissions = settings.getAsList("bulknew1.backend_roles");
         Assert.assertNotNull(permissions);
         Assert.assertTrue(permissions.contains("vulcanadmin"));
 
@@ -301,21 +305,16 @@ public class RolesMappingApiTest extends AbstractRestApiUnitTest {
 	private void checkAllSfAllowed() throws Exception {
 		rh.sendHTTPClientCertificate = false;
 		checkReadAccess(HttpStatus.SC_OK, "picard", "picard", "sf", "ships", 1);
-		// TODO: only one doctype allowed for ES6
-		// checkReadAccess(HttpStatus.SC_OK, "picard", "picard", "sf", "public", 1);
 		checkWriteAccess(HttpStatus.SC_OK, "picard", "picard", "sf", "ships", 1);
-		// TODO: only one doctype allowed for ES6
-		//checkWriteAccess(HttpStatus.SC_OK, "picard", "picard", "sf", "public", 1);
+
+		// ES7 only supports one doc type, so trying to create a second one leads to 400  BAD REQUEST
+		checkWriteAccess(HttpStatus.SC_BAD_REQUEST, "picard", "picard", "sf", "public", 1);
 	}
 
 	private void checkAllSfForbidden() throws Exception {
 		rh.sendHTTPClientCertificate = false;
 		checkReadAccess(HttpStatus.SC_FORBIDDEN, "picard", "picard", "sf", "ships", 1);
-		// TODO: only one doctype allowed for ES6
-		// checkReadAccess(HttpStatus.SC_FORBIDDEN, "picard", "picard", "sf", "public", 1);
 		checkWriteAccess(HttpStatus.SC_FORBIDDEN, "picard", "picard", "sf", "ships", 1);
-		// TODO: only one doctype allowed for ES6
-		// checkWriteAccess(HttpStatus.SC_FORBIDDEN, "picard", "picard", "sf", "public", 1);
 	}
 
 	private HttpResponse deleteAndputNewMapping(String fileName) throws Exception {

@@ -20,13 +20,18 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
 
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator.DataType;
+
 public class ActionGroupValidator extends AbstractConfigurationValidator {
 
 	public ActionGroupValidator(final RestRequest request, BytesReference ref, final Settings esSettings, Object... param) {
 		super(request, ref, esSettings, param);
 		this.payloadMandatory = true;
-		allowedKeys.put("permissions", DataType.ARRAY);
-		mandatoryKeys.add("permissions");
+		allowedKeys.put("allowed_actions", DataType.ARRAY);
+	    allowedKeys.put("description", DataType.STRING);
+	    allowedKeys.put("type", DataType.STRING);
+
+		mandatoryKeys.add("allowed_actions");
 	}
 
 }

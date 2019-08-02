@@ -90,7 +90,7 @@ final class DlsQueryParser {
                     }
 
                 });
-                final ParsedQuery parsedQuery = queryShardContext.toFilter(qb);
+                final ParsedQuery parsedQuery = queryShardContext.toQuery(qb);
                 final Query dlsQuery = parsedQuery.query();
                 dlsQueryBuilder.add(dlsQuery, Occur.SHOULD);
 

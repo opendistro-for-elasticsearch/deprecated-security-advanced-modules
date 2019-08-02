@@ -1,4 +1,4 @@
 {
   "password": "password",
-  "roles": "role"
+  "backend_roles": "role"
 }

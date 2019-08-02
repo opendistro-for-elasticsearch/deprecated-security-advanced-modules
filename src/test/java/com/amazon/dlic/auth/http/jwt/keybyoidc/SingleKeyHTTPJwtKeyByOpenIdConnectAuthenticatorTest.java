@@ -81,6 +81,58 @@ public class SingleKeyHTTPJwtKeyByOpenIdConnectAuthenticatorTest {
 	}
 
 	@Test
+	public void noAlgTest() throws Exception {
+		MockIpdServer mockIdpServer = new MockIpdServer(TestJwk.Jwks.RSA_1_NO_ALG);
+		try {
+			Settings settings = Settings.builder().put("openid_connect_url", mockIdpServer.getDiscoverUri()).build();
+
+			HTTPJwtKeyByOpenIdConnectAuthenticator jwtAuth = new HTTPJwtKeyByOpenIdConnectAuthenticator(settings, null);
+
+			AuthCredentials creds = jwtAuth.extractCredentials(
+					new FakeRestRequest(ImmutableMap.of("Authorization", TestJwts.MC_COY_SIGNED_RSA_1),
+							new HashMap<String, String>()),
+					null);
+
+			Assert.assertNotNull(creds);
+			Assert.assertEquals(TestJwts.MCCOY_SUBJECT, creds.getUsername());
+			Assert.assertEquals(TestJwts.TEST_AUDIENCE, creds.getAttributes().get("attr.jwt.aud"));
+			Assert.assertEquals(0, creds.getBackendRoles().size());
+			Assert.assertEquals(3, creds.getAttributes().size());
+		} finally {
+			try {
+				mockIdpServer.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Test
+	public void mismatchedAlgTest() throws Exception {
+		MockIpdServer mockIdpServer = new MockIpdServer(TestJwk.Jwks.RSA_1_WRONG_ALG);
+		try {
+			Settings settings = Settings.builder().put("openid_connect_url", mockIdpServer.getDiscoverUri()).build();
+
+			HTTPJwtKeyByOpenIdConnectAuthenticator jwtAuth = new HTTPJwtKeyByOpenIdConnectAuthenticator(settings, null);
+
+			AuthCredentials creds = jwtAuth.extractCredentials(
+					new FakeRestRequest(ImmutableMap.of("Authorization", TestJwts.NoKid.MC_COY_SIGNED_RSA_1),
+							new HashMap<String, String>()),
+					null);
+
+			Assert.assertNull(creds);
+
+		} finally {
+			try {
+				mockIdpServer.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+	@Test
 	public void keyExchangeTest() throws Exception {
 		MockIpdServer mockIdpServer = new MockIpdServer(TestJwk.Jwks.RSA_1);
 

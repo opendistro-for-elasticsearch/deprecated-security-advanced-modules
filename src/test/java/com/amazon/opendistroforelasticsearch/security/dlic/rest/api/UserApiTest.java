@@ -27,6 +27,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.CType;
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
@@ -43,23 +44,23 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 
 		// initial configuration, 5 users
 		HttpResponse response = rh
-				.executeGetRequest("_opendistro/_security/api/configuration/" + ConfigConstants.CONFIGNAME_INTERNAL_USERS);
-		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+				.executeGetRequest("_opendistro/_security/api/" + CType.INTERNALUSERS.toLCString());
+		Assert.assertEquals(response.getBody(), HttpStatus.SC_OK, response.getStatusCode());
 		Settings settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
-		Assert.assertEquals(8, settings.size());
-
+		Assert.assertEquals(30, settings.size());
 		// --- GET
 
 		// GET, user admin, exists
-		response = rh.executeGetRequest("/_opendistro/_security/api/user/admin", new Header[0]);
+		response = rh.executeGetRequest("/_opendistro/_security/api/internalusers/admin", new Header[0]);
 		Assert.assertEquals(response.getBody(), HttpStatus.SC_OK, response.getStatusCode());
+		System.out.println(response.getBody());
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
-		Assert.assertEquals(1, settings.size());
+		Assert.assertEquals(6, settings.size());
 		// hash must be filtered
 		Assert.assertEquals("", settings.get("admin.hash"));
 
 		// GET, user does not exist
-		response = rh.executeGetRequest("/_opendistro/_security/api/user/nothinghthere", new Header[0]);
+		response = rh.executeGetRequest("/_opendistro/_security/api/internalusers/nothinghthere", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
 
 		// GET, new URL endpoint in security
@@ -73,18 +74,18 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 		// -- PUT
 
 		// no username given
-		response = rh.executePutRequest("/_opendistro/_security/api/user/", "{hash: \"123\"}", new Header[0]);
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/", "{\"hash\": \"123\"}", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_METHOD_NOT_ALLOWED, response.getStatusCode());
 
 		// Faulty JSON payload
-		response = rh.executePutRequest("/_opendistro/_security/api/user/nagilum", "{some: \"thing\" asd  other: \"thing\"}",
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/nagilum", "{some: \"thing\" asd  other: \"thing\"}",
 				new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
 		Assert.assertEquals(settings.get("reason"), AbstractConfigurationValidator.ErrorType.BODY_NOT_PARSEABLE.getMessage());
 
 		// Missing quotes in JSON - parseable in 6.x, but wrong config keys
-		response = rh.executePutRequest("/_opendistro/_security/api/user/nagilum", "{some: \"thing\", other: \"thing\"}",
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/nagilum", "{some: \"thing\", other: \"thing\"}",
 				new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
@@ -94,7 +95,7 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 		//Assert.assertTrue(settings.get(AbstractConfigurationValidator.INVALID_KEYS_KEY + ".keys").contains("other"));
 
 		// Wrong config keys
-		response = rh.executePutRequest("/_opendistro/_security/api/user/nagilum", "{\"some\": \"thing\", \"other\": \"thing\"}",
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/nagilum", "{\"some\": \"thing\", \"other\": \"thing\"}",
 				new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
@@ -158,14 +159,14 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 
         // PATCH
         rh.sendHTTPClientCertificate = true;
-        response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"add\", \"path\": \"/bulknew1\", \"value\": {\"password\": \"bla\", \"roles\": [\"vulcan\"] } }]", new Header[0]);
+        response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"add\", \"path\": \"/bulknew1\", \"value\": {\"password\": \"bla\", \"backend_roles\": [\"vulcan\"] } }]", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         response = rh.executeGetRequest("/_opendistro/_security/api/internalusers/bulknew1", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
         Assert.assertFalse(settings.hasValue("bulknew1.password"));
         Assert.assertTrue(settings.hasValue("bulknew1.hash"));
-        List<String> roles = settings.getAsList("bulknew1.roles");
+        List<String> roles = settings.getAsList("bulknew1.backend_roles");
         Assert.assertEquals(1, roles.size());
         Assert.assertTrue(roles.contains("vulcan"));
 
@@ -194,19 +195,19 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 
 		// try remove user, no username
 		rh.sendHTTPClientCertificate = true;
-		response = rh.executeDeleteRequest("/_opendistro/_security/api/user", new Header[0]);
+		response = rh.executeDeleteRequest("/_opendistro/_security/api/internalusers", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_METHOD_NOT_ALLOWED, response.getStatusCode());
 
 		// try remove user, nonexisting user
-		response = rh.executeDeleteRequest("/_opendistro/_security/api/user/picard", new Header[0]);
+		response = rh.executeDeleteRequest("/_opendistro/_security/api/internalusers/picard", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
 
 		// try remove readonly user
-		response = rh.executeDeleteRequest("/_opendistro/_security/api/user/sarek", new Header[0]);
+		response = rh.executeDeleteRequest("/_opendistro/_security/api/internalusers/sarek", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatusCode());
 
         // try remove hidden user
-        response = rh.executeDeleteRequest("/_opendistro/_security/api/user/q", new Header[0]);
+        response = rh.executeDeleteRequest("/_opendistro/_security/api/internalusers/q", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
 
 		// now really remove user
@@ -237,7 +238,7 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 		// update user, do not specify hash or password, hash must remain the same
 		addUserWithoutPasswordOrHash("nagilum", new String[] { "starfleet" }, HttpStatus.SC_OK);
 		// get user, check hash, must be untouched
-		response = rh.executeGetRequest("/_opendistro/_security/api/user/nagilum", new Header[0]);
+		response = rh.executeGetRequest("/_opendistro/_security/api/internalusers/nagilum", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
 		Assert.assertTrue(settings.get("nagilum.hash").equals(""));
@@ -249,36 +250,36 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 
 		// wrong datatypes in roles file
 		rh.sendHTTPClientCertificate = true;
-		response = rh.executePutRequest("/_opendistro/_security/api/user/picard", FileHelper.loadFile("restapi/users_wrong_datatypes.json"), new Header[0]);
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/picard", FileHelper.loadFile("restapi/users_wrong_datatypes.json"), new Header[0]);
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 		Assert.assertEquals(AbstractConfigurationValidator.ErrorType.WRONG_DATATYPE.getMessage(), settings.get("reason"));
-		Assert.assertTrue(settings.get("roles").equals("Array expected"));
+		Assert.assertTrue(settings.get("backend_roles").equals("Array expected"));
 		rh.sendHTTPClientCertificate = false;
 
 		rh.sendHTTPClientCertificate = true;
-		response = rh.executePutRequest("/_opendistro/_security/api/user/picard", FileHelper.loadFile("restapi/users_wrong_datatypes.json"), new Header[0]);
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/picard", FileHelper.loadFile("restapi/users_wrong_datatypes.json"), new Header[0]);
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 		Assert.assertEquals(AbstractConfigurationValidator.ErrorType.WRONG_DATATYPE.getMessage(), settings.get("reason"));
-		Assert.assertTrue(settings.get("roles").equals("Array expected"));
+		Assert.assertTrue(settings.get("backend_roles").equals("Array expected"));
 		rh.sendHTTPClientCertificate = false;
 
 		rh.sendHTTPClientCertificate = true;
-		response = rh.executePutRequest("/_opendistro/_security/api/user/picard", FileHelper.loadFile("restapi/users_wrong_datatypes2.json"), new Header[0]);
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/picard", FileHelper.loadFile("restapi/users_wrong_datatypes2.json"), new Header[0]);
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 		Assert.assertEquals(AbstractConfigurationValidator.ErrorType.WRONG_DATATYPE.getMessage(), settings.get("reason"));
 		Assert.assertTrue(settings.get("password").equals("String expected"));
-		Assert.assertTrue(settings.get("roles") == null);
+		Assert.assertTrue(settings.get("backend_roles") == null);
 		rh.sendHTTPClientCertificate = false;
 
 		rh.sendHTTPClientCertificate = true;
-		response = rh.executePutRequest("/_opendistro/_security/api/user/picard", FileHelper.loadFile("restapi/users_wrong_datatypes3.json"), new Header[0]);
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/picard", FileHelper.loadFile("restapi/users_wrong_datatypes3.json"), new Header[0]);
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 		Assert.assertEquals(AbstractConfigurationValidator.ErrorType.WRONG_DATATYPE.getMessage(), settings.get("reason"));
-		Assert.assertTrue(settings.get("roles").equals("Array expected"));
+		Assert.assertTrue(settings.get("backend_roles").equals("Array expected"));
 		rh.sendHTTPClientCertificate = false;
 
 		// use backendroles when creating user. User picard does not exist in
@@ -297,18 +298,18 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 		checkReadAccess(HttpStatus.SC_OK, "picard", "picard", "sf", "ships", 0);
 		checkWriteAccess(HttpStatus.SC_FORBIDDEN, "picard", "picard", "sf", "ships", 1);
 
-
-		// overwrite user picard, and give him role "starfleet" plus "captains
+		// overwrite user picard, and give him role "starfleet" plus "captains. Now
+		// document can be created.
 		addUserWithPassword("picard", "picard", new String[] { "starfleet", "captains" }, HttpStatus.SC_OK);
 		checkReadAccess(HttpStatus.SC_OK, "picard", "picard", "sf", "ships", 0);
 		checkWriteAccess(HttpStatus.SC_CREATED, "picard", "picard", "sf", "ships", 1);
 
 		rh.sendHTTPClientCertificate = true;
-		response = rh.executeGetRequest("/_opendistro/_security/api/user/picard", new Header[0]);
+		response = rh.executeGetRequest("/_opendistro/_security/api/internalusers/picard", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
 		Assert.assertEquals("", settings.get("picard.hash"));
-		roles = settings.getAsList("picard.roles");
+		roles = settings.getAsList("picard.backend_roles");
 		Assert.assertNotNull(roles);
 		Assert.assertEquals(2, roles.size());
 		Assert.assertTrue(roles.contains("starfleet"));
@@ -316,6 +317,11 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 
 		addUserWithPassword("$1aAAAAAAAAC", "$1aAAAAAAAAC", HttpStatus.SC_CREATED);
 		addUserWithPassword("abc", "abc", HttpStatus.SC_CREATED);
+
+
+		// check tabs in json
+        response = rh.executePutRequest("/_opendistro/_security/api/internalusers/userwithtabs", "\t{\"hash\": \t \"123\"\t}  ", new Header[0]);
+		Assert.assertEquals(response.getBody(), HttpStatus.SC_CREATED, response.getStatusCode());
 	}
 
 	@Test
@@ -323,10 +329,10 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 
 		Settings nodeSettings =
 				Settings.builder()
-				.put(ConfigConstants.OPENDISTRO_SECURITY_RESTAPI_PASSWORD_VALIDATION_ERROR_MESSAGE,"xxx")
-				.put(ConfigConstants.OPENDISTRO_SECURITY_RESTAPI_PASSWORD_VALIDATION_REGEX,
-						"(?=.*[A-Z])(?=.*[^a-zA-Z\\\\d])(?=.*[0-9])(?=.*[a-z]).{8,}")
-				.build();
+						.put(ConfigConstants.OPENDISTRO_SECURITY_RESTAPI_PASSWORD_VALIDATION_ERROR_MESSAGE,"xxx")
+						.put(ConfigConstants.OPENDISTRO_SECURITY_RESTAPI_PASSWORD_VALIDATION_REGEX,
+								"(?=.*[A-Z])(?=.*[^a-zA-Z\\\\d])(?=.*[0-9])(?=.*[a-z]).{8,}")
+						.build();
 
 		setup(nodeSettings);
 
@@ -335,10 +341,11 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 
 		// initial configuration, 5 users
 		HttpResponse response = rh
-				.executeGetRequest("_opendistro/_security/api/configuration/" + ConfigConstants.CONFIGNAME_INTERNAL_USERS);
+				.executeGetRequest("_opendistro/_security/api/" + CType.INTERNALUSERS.toLCString());
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+		System.out.println(response.getBody());
 		Settings settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
-		Assert.assertEquals(8, settings.size());
+		Assert.assertEquals(30, settings.size());
 
 		addUserWithPassword("tooshoort", "123", HttpStatus.SC_BAD_REQUEST);
 		addUserWithPassword("tooshoort", "1234567", HttpStatus.SC_BAD_REQUEST);
@@ -351,70 +358,101 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 		addUserWithPassword("ok3", "$Aa123456789", HttpStatus.SC_CREATED);
 		addUserWithPassword("ok4", "$1aAAAAAAAAA", HttpStatus.SC_CREATED);
 
-        response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"add\", \"path\": \"/ok4\", \"value\": {\"password\": \"bla\", \"roles\": [\"vulcan\"] } }]", new Header[0]);
-        Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
+		response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"add\", \"path\": \"/ok4\", \"value\": {\"password\": \"bla\", \"backend_roles\": [\"vulcan\"] } }]", new Header[0]);
+		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 
-        response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"replace\", \"path\": \"/ok4\", \"value\": {\"password\": \"bla\", \"roles\": [\"vulcan\"] } }]", new Header[0]);
-        Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
+		response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"replace\", \"path\": \"/ok4\", \"value\": {\"password\": \"bla\", \"backend_roles\": [\"vulcan\"] } }]", new Header[0]);
+		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 
-        addUserWithPassword("ok4", "123", HttpStatus.SC_BAD_REQUEST);
+		addUserWithPassword("ok4", "123", HttpStatus.SC_BAD_REQUEST);
 
-        response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"add\", \"path\": \"/ok4\", \"value\": {\"password\": \"$1aAAAAAAAAB\", \"roles\": [\"vulcan\"] } }]", new Header[0]);
-        Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+		response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"add\", \"path\": \"/ok4\", \"value\": {\"password\": \"$1aAAAAAAAAB\", \"backend_roles\": [\"vulcan\"] } }]", new Header[0]);
+		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 
-        addUserWithPassword("ok4", "$1aAAAAAAAAC", HttpStatus.SC_OK);
+		addUserWithPassword("ok4", "$1aAAAAAAAAC", HttpStatus.SC_OK);
 
-        //its not allowed to use the username as password (case insensitive)
-        response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"add\", \"path\": \"/$1aAAAAAAAAB\", \"value\": {\"password\": \"$1aAAAAAAAAB\", \"roles\": [\"vulcan\"] } }]", new Header[0]);
-        Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
-        addUserWithPassword("$1aAAAAAAAAC", "$1aAAAAAAAAC", HttpStatus.SC_BAD_REQUEST);
-        addUserWithPassword("$1aAAAAAAAac", "$1aAAAAAAAAC", HttpStatus.SC_BAD_REQUEST);
-        addUserWithPassword(URLEncoder.encode("$1aAAAAAAAac%", "UTF-8"), "$1aAAAAAAAAC%", HttpStatus.SC_BAD_REQUEST);
-        addUserWithPassword(URLEncoder.encode("$1aAAAAAAAac%!=\"/\\;: test&~@^", "UTF-8"), "$1aAAAAAAAac%!=\\\"/\\\\;: test&~@^", HttpStatus.SC_BAD_REQUEST);
-        addUserWithPassword(URLEncoder.encode("$1aAAAAAAAac%!=\"/\\;: test&", "UTF-8"), "$1aAAAAAAAac%!=\\\"/\\\\;: test&123", HttpStatus.SC_CREATED);
+		//its not allowed to use the username as password (case insensitive)
+		response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"add\", \"path\": \"/$1aAAAAAAAAB\", \"value\": {\"password\": \"$1aAAAAAAAAB\", \"backend_roles\": [\"vulcan\"] } }]", new Header[0]);
+		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
+		addUserWithPassword("$1aAAAAAAAAC", "$1aAAAAAAAAC", HttpStatus.SC_BAD_REQUEST);
+		addUserWithPassword("$1aAAAAAAAac", "$1aAAAAAAAAC", HttpStatus.SC_BAD_REQUEST);
+		addUserWithPassword(URLEncoder.encode("$1aAAAAAAAac%", "UTF-8"), "$1aAAAAAAAAC%", HttpStatus.SC_BAD_REQUEST);
+		addUserWithPassword(URLEncoder.encode("$1aAAAAAAAac%!=\"/\\;: test&~@^", "UTF-8"), "$1aAAAAAAAac%!=\\\"/\\\\;: test&~@^", HttpStatus.SC_BAD_REQUEST);
+		addUserWithPassword(URLEncoder.encode("$1aAAAAAAAac%!=\"/\\;: test&", "UTF-8"), "$1aAAAAAAAac%!=\\\"/\\\\;: test&123", HttpStatus.SC_CREATED);
 
-        response = rh.executeGetRequest("/_opendistro/_security/api/internalusers/nothinghthere?pretty", new Header[0]);
-        Assert.assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
-        Assert.assertTrue(response.getBody().contains("NOT_FOUND"));
+		response = rh.executeGetRequest("/_opendistro/_security/api/internalusers/nothinghthere?pretty", new Header[0]);
+		Assert.assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
+		Assert.assertTrue(response.getBody().contains("NOT_FOUND"));
 
-        String patchPayload="[ "+
-            "{ \"op\": \"add\", \"path\": \"/testuser1\",  \"value\": { \"password\": \"$aA123456789\", \"roles\": [\"testrole1\"] } },"+
-            "{ \"op\": \"add\", \"path\": \"/testuser2\",  \"value\": { \"password\": \"testpassword2\", \"roles\": [\"testrole2\"] } }"+
-         "]";
+		String patchPayload="[ "+
+				"{ \"op\": \"add\", \"path\": \"/testuser1\",  \"value\": { \"password\": \"$aA123456789\", \"backend_roles\": [\"testrole1\"] } },"+
+				"{ \"op\": \"add\", \"path\": \"/testuser2\",  \"value\": { \"password\": \"testpassword2\", \"backend_roles\": [\"testrole2\"] } }"+
+				"]";
 
-        response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", patchPayload, new BasicHeader("Content-Type", "application/json"));
-        Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
-        Assert.assertTrue(response.getBody().contains("error"));
-        Assert.assertTrue(response.getBody().contains("xxx"));
+		response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", patchPayload, new BasicHeader("Content-Type", "application/json"));
+		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
+		Assert.assertTrue(response.getBody().contains("error"));
+		Assert.assertTrue(response.getBody().contains("xxx"));
+	}
+	
+	@Test
+	public void testUserApiWithDots() throws Exception {
+
+		setup();
+
+		rh.keystore = "restapi/kirk-keystore.jks";
+		rh.sendHTTPClientCertificate = true;
+
+		// initial configuration, 5 users
+		HttpResponse response = rh
+				.executeGetRequest("_opendistro/_security/api/" + CType.INTERNALUSERS.toLCString());
+		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+		Settings settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
+		Assert.assertEquals(30, settings.size());
+
+		addUserWithPassword(".my.dotuser0", "$2a$12$n5nubfWATfQjSYHiWtUyeOxMIxFInUHOAx8VMmGmxFNPGpaBmeB.m",
+				HttpStatus.SC_CREATED);
+
+		addUserWithPassword(".my.dot.user0", "12345678",
+				HttpStatus.SC_CREATED);
+
+		addUserWithHash(".my.dotuser1", "$2a$12$n5nubfWATfQjSYHiWtUyeOxMIxFInUHOAx8VMmGmxFNPGpaBmeB.m",
+				HttpStatus.SC_CREATED);
+
+		addUserWithPassword(".my.dot.user2", "12345678",
+				HttpStatus.SC_CREATED);
+
 	}
 
 	@Test
-    public void testUserApiWithDots() throws Exception {
+    public void testUserApiNoPasswordChange() throws Exception {
 
-        setup();
+		setup();
 
-        rh.keystore = "restapi/kirk-keystore.jks";
-        rh.sendHTTPClientCertificate = true;
+		rh.keystore = "restapi/kirk-keystore.jks";
+		rh.sendHTTPClientCertificate = true;
 
-        // initial configuration, 5 users
-        HttpResponse response = rh
-                .executeGetRequest("_opendistro/_security/api/configuration/" + ConfigConstants.CONFIGNAME_INTERNAL_USERS);
-        Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
-        Settings settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
-        Assert.assertEquals(8, settings.size());
+		// initial configuration, 5 users
+		HttpResponse response;
 
-        addDotUserUserWithHash("my.dotuser0", "$2a$12$n5nubfWATfQjSYHiWtUyeOxMIxFInUHOAx8VMmGmxFNPGpaBmeB.m",
-                HttpStatus.SC_BAD_REQUEST, false);
+		addUserWithHash("user1", "$2a$12$n5nubfWATfQjSYHiWtUyeOxMIxFInUHOAx8VMmGmxFNPGpaBmeB.m",
+				HttpStatus.SC_CREATED);
 
-        addDotUserWithPassword("my.dot.user0", "12345678",
-                HttpStatus.SC_BAD_REQUEST, false);
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/user1", "{\"hash\":\"$2a$12$n5nubfWATfQjSYHiWtUyeOxMIxFInUHOAx8VMmGmxFNPGpaBmeB.m\",\"password\":\"\",\"backend_roles\":[\"admin\",\"rolea\"]}");
+		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 
-        addDotUserUserWithHash("my.dotuser1", "$2a$12$n5nubfWATfQjSYHiWtUyeOxMIxFInUHOAx8VMmGmxFNPGpaBmeB.m",
-                HttpStatus.SC_CREATED, true);
+		response = rh.executeGetRequest("/_opendistro/_security/api/internalusers/user1");
+		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 
-        addDotUserWithPassword("my.dot.user2", "12345678",
-                HttpStatus.SC_CREATED, true);
+		addUserWithHash("user2", "$2a$12$n5nubfWATfQjSYHiWtUyeOxMIxFInUHOAx8VMmGmxFNPGpaBmeB.m",
+				HttpStatus.SC_CREATED);
 
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/user2", "{\"password\":\"\",\"backend_roles\":[\"admin\",\"rolex\"]}");
+		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+
+		response = rh.executeGetRequest("/_opendistro/_security/api/internalusers/user2");
+		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 	}
+
 
 }

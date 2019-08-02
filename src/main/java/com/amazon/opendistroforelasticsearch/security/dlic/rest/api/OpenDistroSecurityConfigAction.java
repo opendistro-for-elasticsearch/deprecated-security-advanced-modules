@@ -15,84 +15,128 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.SecurityConfigValidator;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.CType;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.SecurityDynamicConfiguration;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.rest.BytesRestResponse;
+import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
-import org.elasticsearch.rest.RestResponse;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.threadpool.ThreadPool;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
 import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
-import com.amazon.opendistroforelasticsearch.security.configuration.IndexBaseConfigurationRepository;
+import com.amazon.opendistroforelasticsearch.security.configuration.ConfigurationRepository;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.NoOpValidator;
 import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
 import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 
-public class OpenDistroSecurityConfigAction extends AbstractApiAction {
+public class OpenDistroSecurityConfigAction extends PatchableResourceApiAction {
 
-	@Inject
-	public OpenDistroSecurityConfigAction(final Settings settings, final Path configPath, final RestController controller, final Client client,
-			final AdminDNs adminDNs, final IndexBaseConfigurationRepository cl, final ClusterService cs,
-			final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator, ThreadPool threadPool, AuditLog auditLog) {
-		super(settings, configPath, controller, client, adminDNs, cl, cs, principalExtractor, evaluator, threadPool, auditLog);
-		controller.registerHandler(Method.GET, "/_opendistro/_security/api/config/", this);
-	}
+    private final boolean allowPutOrPatch;
+
+    @Inject
+    public OpenDistroSecurityConfigAction(final Settings settings, final Path configPath, final RestController controller, final Client client,
+                          final AdminDNs adminDNs, final ConfigurationRepository cl, final ClusterService cs,
+                          final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator, ThreadPool threadPool, AuditLog auditLog) {
+        super(settings, configPath, controller, client, adminDNs, cl, cs, principalExtractor, evaluator, threadPool, auditLog);
+
+        allowPutOrPatch = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_UNSUPPORTED_RESTAPI_ALLOW_CONFIG_MODIFICATION, false);
+
+
+        controller.registerHandler(Method.GET, "/_opendistro/_security/api/config/", this);
+
+        //controller.registerHandler(Method.GET, "/_opendistro/_security/api/config/", this);
+
+        if(allowPutOrPatch) {
+
+            //deprecated, will be removed with SG 8, use opendistro_security_config instead of sgconfig
+            controller.registerHandler(Method.PUT, "/_opendistro/_security/api/config/{name}", this);
+            controller.registerHandler(Method.PATCH, "/_opendistro/_security/api/config/", this);
+
+
+        }
+    }
 
 
 
-	@Override
-	protected Tuple<String[], RestResponse> handleGet(RestRequest request, Client client,
-			final Settings.Builder additionalSettingsBuilder) throws Throwable {
+    @Override
+    protected void handleGet(RestChannel channel, RestRequest request, Client client, final JsonNode content) throws IOException{
+        //final SgDynamicConfiguration<?> configuration = load(getConfigName(), true);
+        final SecurityDynamicConfiguration<?> configuration = load(getConfigName(), true);
 
-		final Settings configurationSettings = loadAsSettings(getConfigName(), true);
+        filter(configuration);
 
-		return new Tuple<String[], RestResponse>(new String[0],
-				new BytesRestResponse(RestStatus.OK, convertToJson(configurationSettings)));
-	}
+        successResponse(channel, configuration);
+    }
 
-	@Override
-	protected Tuple<String[], RestResponse> handlePut(final RestRequest request, final Client client,
-			final Settings.Builder additionalSettings) throws Throwable {
-		return notImplemented(Method.PUT);
-	}
 
-	@Override
-	protected Tuple<String[], RestResponse> handleDelete(final RestRequest request, final Client client,
-			final Settings.Builder additionalSettings) throws Throwable {
-		return notImplemented(Method.DELETE);
-	}
 
-	@Override
-	protected AbstractConfigurationValidator getValidator(RestRequest request, BytesReference ref, Object... param) {
-		return new NoOpValidator(request, ref, this.settings, param);
-	}
+    @Override
+    protected void handleApiRequest(RestChannel channel, RestRequest request, Client client) throws IOException {
+        if (request.method() == Method.PATCH && !allowPutOrPatch) {
+            notImplemented(channel, Method.PATCH);
+        } else {
+            super.handleApiRequest(channel, request, client);
+        }
+    }
 
-	@Override
-	protected String getConfigName() {
-		return ConfigConstants.CONFIGNAME_CONFIG;
-	}
+    @Override
+    protected void handlePut(RestChannel channel, final RestRequest request, final Client client, final JsonNode content) throws IOException{
+        if (allowPutOrPatch) {
 
-	@Override
-	protected Endpoint getEndpoint() {
-		return Endpoint.CONFIG;
-	}
+            if(!"config".equals(request.param("name"))) {
+                badRequestResponse(channel, "name must be config");
+                return;
+            }
 
-	@Override
-	protected String getResourceName() {
-		// not needed, no single resource
-		return null;
-	}
+            super.handlePut(channel, request, client, content);
+        } else {
+            notImplemented(channel, Method.PUT);
+        }
+    }
+
+    @Override
+    protected void handlePost(RestChannel channel, final RestRequest request, final Client client, final JsonNode content) throws IOException{
+        notImplemented(channel, Method.POST);
+    }
+
+    @Override
+    protected void handleDelete(RestChannel channel, final RestRequest request, final Client client, final JsonNode content) throws IOException{
+        notImplemented(channel, Method.DELETE);
+    }
+
+    @Override
+    protected AbstractConfigurationValidator getValidator(RestRequest request, BytesReference ref, Object... param) {
+        return new SecurityConfigValidator(request, ref, this.settings, param);
+    }
+
+    @Override
+    protected CType getConfigName() {
+        return CType.CONFIG;
+    }
+
+    @Override
+    protected Endpoint getEndpoint() {
+        return Endpoint.CONFIG;
+    }
+
+    @Override
+    protected String getResourceName() {
+        // not needed, no single resource
+        return null;
+    }
 
 }

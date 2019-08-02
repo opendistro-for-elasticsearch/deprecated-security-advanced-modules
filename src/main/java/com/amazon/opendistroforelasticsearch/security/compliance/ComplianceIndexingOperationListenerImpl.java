@@ -98,7 +98,7 @@ public final class ComplianceIndexingOperationListenerImpl extends ComplianceInd
                 try {
 
                     final GetResult getResult = shard.getService().getForUpdate(index.type(), index.id(),
-                            index.version(), index.versionType());
+                            index.getIfSeqNo(), index.getIfPrimaryTerm());
 
                     if (getResult.isExists()) {
                         threadContext.set(new Context(getResult));

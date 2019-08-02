@@ -17,6 +17,7 @@ package com.amazon.dlic.auth.ldap.backend;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.security.AccessController;
 import java.security.KeyStore;
@@ -28,7 +29,6 @@ import java.security.PrivilegedExceptionAction;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,10 +38,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +58,7 @@ import org.ldaptive.LdapAttribute;
 import org.ldaptive.LdapEntry;
 import org.ldaptive.LdapException;
 import org.ldaptive.Response;
+import org.ldaptive.SearchFilter;
 import org.ldaptive.SearchScope;
 import org.ldaptive.control.RequestControl;
 import org.ldaptive.provider.ProviderConnection;
@@ -85,18 +86,15 @@ import io.netty.util.internal.PlatformDependent;
 
 public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
+    private static final AtomicInteger CONNECTION_COUNTER = new AtomicInteger();
     private static final String COM_SUN_JNDI_LDAP_OBJECT_DISABLE_ENDPOINT_IDENTIFICATION = "com.sun.jndi.ldap.object.disableEndpointIdentification";
     private static final List<String> DEFAULT_TLS_PROTOCOLS = Arrays.asList("TLSv1.2", "TLSv1.1");
-    static final String ONE_PLACEHOLDER = "{1}";
-    static final String TWO_PLACEHOLDER = "{2}";
+    static final int ONE_PLACEHOLDER = 1;
+    static final int TWO_PLACEHOLDER = 2;
     static final String DEFAULT_ROLEBASE = "";
     static final String DEFAULT_ROLESEARCH = "(member={0})";
     static final String DEFAULT_ROLENAME = "name";
     static final String DEFAULT_USERROLENAME = "memberOf";
-
-    static {
-        Utils.init();
-    }
 
     protected static final Logger log = LogManager.getLogger(LDAPAuthorizationBackend.class);
     private final Settings settings;
@@ -247,6 +245,9 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
                 if (connection != null && connection.isOpen()) {
                     break;
+                } else {
+                    Utils.unbindAndCloseSilently(connection);
+                    connection = null;
                 }
             } catch (final Exception e) {
                 lastException = e;
@@ -255,11 +256,14 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
                     log.debug("Unable to connect to ldapserver due to ", e);
                 }
                 Utils.unbindAndCloseSilently(connection);
+                connection = null;
                 continue;
             }
         }
 
         if (connection == null || !connection.isOpen()) {
+            Utils.unbindAndCloseSilently(connection); //just in case
+            connection = null;
             if (lastException == null) {
                 throw new LdapException("Unable to connect to any of those ldap servers " + ldapHosts);
             } else {
@@ -271,25 +275,53 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
         final Connection delegate = connection;
 
+        if(log.isDebugEnabled()) {
+            log.debug("Opened a connection, total count is now {}", CONNECTION_COUNTER.incrementAndGet());
+        }
+
         return new Connection() {
 
             @Override
             public Response<Void> reopen(BindRequest request) throws LdapException {
+                if(log.isDebugEnabled()) {
+                    log.debug("Reopened a connection");
+                }
                 return delegate.reopen(request);
             }
 
             @Override
             public Response<Void> reopen() throws LdapException {
+                if(log.isDebugEnabled()) {
+                    log.debug("Reopened a connection");
+                }
                 return delegate.reopen();
             }
 
             @Override
             public Response<Void> open(BindRequest request) throws LdapException {
+                
+                try {
+                    if(log.isDebugEnabled() && delegate != null && delegate.isOpen()) {
+                        log.debug("Opened a connection, total count is now {}", CONNECTION_COUNTER.incrementAndGet());
+                    }
+                } catch (Throwable e) {
+                    //ignore
+                }
+                
                 return delegate.open(request);
             }
 
             @Override
             public Response<Void> open() throws LdapException {
+                
+                try {
+                    if(log.isDebugEnabled() && delegate != null && delegate.isOpen()) {
+                        log.debug("Opened a connection, total count is now {}", CONNECTION_COUNTER.incrementAndGet());
+                    }
+                } catch (Throwable e) {
+                    //ignore
+                }
+                
                 return delegate.open();
             }
 
@@ -310,6 +342,15 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
             @Override
             public void close(RequestControl[] controls) {
+                
+                try {
+                    if(log.isDebugEnabled() && delegate != null && delegate.isOpen()) {
+                        log.debug("Closed a connection, total count is now {}", CONNECTION_COUNTER.decrementAndGet());
+                    }
+                } catch (Throwable e) {
+                    //ignore
+                }
+                
                 try {
                     delegate.close(controls);
                 } finally {
@@ -319,6 +360,15 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
             @Override
             public void close() {
+                
+                try {
+                    if(log.isDebugEnabled() && delegate != null && delegate.isOpen()) {
+                        log.debug("Closed a connection, total count is now {}", CONNECTION_COUNTER.decrementAndGet());
+                    }
+                } catch (Throwable e) {
+                    //ignore
+                }
+                
                 try {
                     delegate.close();
                 } finally {
@@ -522,14 +572,23 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
         LdapEntry entry = null;
         String dn = null;
 
+        if(log.isDebugEnabled()){
+            log.debug("DBGTRACE (2): username="+user.getName()+" -> "+Arrays.toString(user.getName().getBytes(StandardCharsets.UTF_8)));
+        }
+
         if (user instanceof LdapUser) {
             entry = ((LdapUser) user).getUserEntry();
             authenticatedUser = entry.getDn();
             originalUserName = ((LdapUser) user).getOriginalUsername();
         } else {
-            authenticatedUser = Utils.escapeStringRfc2254(user.getName());
+            authenticatedUser = user.getName();
             originalUserName = user.getName();
         }
+
+        if(log.isDebugEnabled()){
+            log.debug("DBGTRACE (3): authenticatedUser="+authenticatedUser+" -> "+Arrays.toString(authenticatedUser.getBytes(StandardCharsets.UTF_8)));
+        }
+
 
         final boolean rolesearchEnabled = settings.getAsBoolean(ConfigConstants.LDAP_AUTHZ_ROLESEARCH_ENABLED, true);
 
@@ -569,6 +628,10 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
                         log.trace("{} is a valid DN", authenticatedUser);
                     }
 
+                    if(log.isDebugEnabled()){
+                        log.debug("DBGTRACE (4): authenticatedUser="+authenticatedUser+" -> "+Arrays.toString(authenticatedUser.getBytes(StandardCharsets.UTF_8)));
+                    }
+
                     entry = LdapHelper.lookup(connection, authenticatedUser);
 
                     if (entry == null) {
@@ -576,6 +639,10 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
                     }
 
                 } else {
+
+                    if(log.isDebugEnabled())
+                        log.debug("DBGTRACE (5): authenticatedUser="+user.getName()+" -> "+Arrays.toString(user.getName().getBytes(StandardCharsets.UTF_8)));
+
                     entry = LDAPAuthenticationBackend.exists(user.getName(), connection, settings, userBaseSettings);
 
                     if (log.isTraceEnabled()) {
@@ -592,6 +659,11 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
                 if (log.isTraceEnabled()) {
                     log.trace("User found with DN {}", dn);
                 }
+
+                if(log.isDebugEnabled()){
+                    log.debug("DBGTRACE (6): dn"+dn+" -> "+Arrays.toString(dn.getBytes(StandardCharsets.UTF_8)));
+                }
+
             }
 
             final Set<LdapName> ldapRoles = new HashSet<>(150);
@@ -612,6 +684,11 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
                 if (entry.getAttribute(roleName) != null) {
                     final Collection<String> userRoles = entry.getAttribute(roleName).getStringValues();
                     for (final String possibleRoleDN : userRoles) {
+
+                        if(log.isDebugEnabled()){
+                            log.debug("DBGTRACE (7): possibleRoleDN"+possibleRoleDN);
+                        }
+
                         if (isValidDn(possibleRoleDN)) {
                             LdapName ldapName = new LdapName(possibleRoleDN);
                             ldapRoles.add(ldapName);
@@ -656,21 +733,29 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
             final LdapAttribute userRoleAttribute = entry.getAttribute(userRoleAttributeName);
 
             if (userRoleAttribute != null) {
-                userRoleAttributeValue = userRoleAttribute.getStringValue();
+                userRoleAttributeValue = Utils.getSingleStringValue(userRoleAttribute);
             }
 
             if (rolesearchEnabled) {
-                String escapedDn = Utils.escapeStringRfc2254(dn);
+                String escapedDn = dn;
+
+                if(log.isDebugEnabled()){
+                    log.debug("DBGTRACE (8): escapedDn"+escapedDn);
+                }
 
                 for (Map.Entry<String, Settings> roleSearchSettingsEntry : roleBaseSettings) {
                     Settings roleSearchSettings = roleSearchSettingsEntry.getValue();
 
+                    SearchFilter f = new SearchFilter();
+                    f.setFilter(roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_ROLESEARCH));
+                    f.setParameter(LDAPAuthenticationBackend.ZERO_PLACEHOLDER, escapedDn);
+                    f.setParameter(ONE_PLACEHOLDER, originalUserName);
+                    f.setParameter(TWO_PLACEHOLDER,
+                            userRoleAttributeValue == null ? TWO_PLACEHOLDER : userRoleAttributeValue);
+
                     List<LdapEntry> rolesResult = LdapHelper.search(connection,
                             roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_BASE, DEFAULT_ROLEBASE),
-                            roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_ROLESEARCH)
-                                    .replace(LDAPAuthenticationBackend.ZERO_PLACEHOLDER, escapedDn)
-                                    .replace(ONE_PLACEHOLDER, originalUserName).replace(TWO_PLACEHOLDER,
-                                            userRoleAttributeValue == null ? TWO_PLACEHOLDER : userRoleAttributeValue),
+                            f,
                             SearchScope.SUBTREE);
 
                     if (log.isTraceEnabled()) {
@@ -726,7 +811,7 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
                 }
 
                 for (final LdapName roleLdapName : nestedReturn) {
-                    final String role = getRoleFromAttribute(roleLdapName, roleName);
+                    final String role = getRoleFromEntry(connection, roleLdapName, roleName);
 
                     if (!Strings.isNullOrEmpty(role)) {
                         user.addRole(role);
@@ -738,7 +823,7 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
             } else {
                 // DN roles, extract rolename according to config
                 for (final LdapName roleLdapName : ldapRoles) {
-                    final String role = getRoleFromAttribute(roleLdapName, roleName);
+                    final String role = getRoleFromEntry(connection, roleLdapName, roleName);
 
                     if (!Strings.isNullOrEmpty(role)) {
                         user.addRole(role);
@@ -798,6 +883,11 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
             final Collection<String> userRoles = e0.getAttribute(userRoleName).getStringValues();
 
             for (final String possibleRoleDN : userRoles) {
+
+                if(log.isDebugEnabled()){
+                    log.debug("DBGTRACE (10): possibleRoleDN"+possibleRoleDN);
+                }
+
                 if (isValidDn(possibleRoleDN)) {
                     try {
                         LdapName ldapName = new LdapName(possibleRoleDN);
@@ -819,17 +909,25 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
         }
 
         if (rolesearchEnabled) {
-            String escapedDn = Utils.escapeStringRfc2254(roleDn.toString());
+            String escapedDn = roleDn.toString();
+
+            if(log.isDebugEnabled()){
+                log.debug("DBGTRACE (10): escapedDn"+escapedDn);
+            }
+
 
             for (Map.Entry<String, Settings> roleSearchBaseSettingsEntry : Utils
                     .getOrderedBaseSettings(roleSearchBaseSettingsSet)) {
                 Settings roleSearchSettings = roleSearchBaseSettingsEntry.getValue();
 
+                SearchFilter f = new SearchFilter();
+                f.setFilter(roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_ROLESEARCH));
+                f.setParameter(LDAPAuthenticationBackend.ZERO_PLACEHOLDER, escapedDn);
+                f.setParameter(ONE_PLACEHOLDER, escapedDn);
+
                 List<LdapEntry> foundEntries = LdapHelper.search(ldapConnection,
                         roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_BASE, DEFAULT_ROLEBASE),
-                        roleSearchSettings.get(ConfigConstants.LDAP_AUTHCZ_SEARCH, DEFAULT_ROLESEARCH)
-                                .replace(LDAPAuthenticationBackend.ZERO_PLACEHOLDER, escapedDn)
-                                .replace(ONE_PLACEHOLDER, escapedDn),
+                        f,
                         SearchScope.SUBTREE);
 
                 if (log.isTraceEnabled()) {
@@ -898,30 +996,27 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
         return true;
     }
 
-    private String getRoleFromAttribute(final LdapName ldapName, final String role) {
+    private String getRoleFromEntry(final Connection ldapConnection, final LdapName ldapName, final String role) {
 
         if (ldapName == null || Strings.isNullOrEmpty(role)) {
             return null;
         }
 
-        if ("dn".equalsIgnoreCase(role)) {
+        if("dn".equalsIgnoreCase(role)) {
             return ldapName.toString();
         }
 
-        List<Rdn> rdns = new ArrayList<>(ldapName.getRdns().size());
-        rdns.addAll(ldapName.getRdns());
+        try {
+            final LdapEntry roleEntry = LdapHelper.lookup(ldapConnection, ldapName.toString());
 
-        Collections.reverse(rdns);
-
-        for (Rdn rdn : rdns) {
-            if (role.equalsIgnoreCase(rdn.getType())) {
-
-                if (rdn.getValue() == null) {
-                    return null;
+            if(roleEntry != null) {
+                final LdapAttribute roleAttribute = roleEntry.getAttribute(role);
+                if(roleAttribute != null) {
+                    return Utils.getSingleStringValue(roleAttribute);
                 }
-
-                return String.valueOf(rdn.getValue());
             }
+        } catch (LdapException e) {
+            log.error("Unable to handle role {} because of ",ldapName, e.toString(), e);
         }
 
         return null;

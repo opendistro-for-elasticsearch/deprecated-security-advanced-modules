@@ -13,11 +13,18 @@
  *  permissions and limitations under the License.
  */
 
-package com.amazon.opendistroforelasticsearch.security;
+package com.amazon.opendistroforelasticsearch.security.dlic.rest.validation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.rest.RestRequest;
 
-public class DefaultObjectMapper {
-    public static final ObjectMapper objectMapper = new ObjectMapper();
+public class SecurityConfigValidator extends AbstractConfigurationValidator {
+
+	public SecurityConfigValidator(final RestRequest request, BytesReference ref, final Settings esSettings, Object... param) {
+		super(request, ref, esSettings, param);
+		this.payloadMandatory = true;
+	    allowedKeys.put("dynamic", DataType.OBJECT);
+	}
+
 }
-

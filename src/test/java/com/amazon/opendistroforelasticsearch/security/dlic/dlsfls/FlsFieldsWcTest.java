@@ -32,18 +32,7 @@ import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelpe
 public class FlsFieldsWcTest extends AbstractDlsFlsTest{
 
 
-    protected void populate(TransportClient tc) {
-
-        tc.index(new IndexRequest(".opendistro_security").type("security").id("config").setRefreshPolicy(RefreshPolicy.IMMEDIATE)
-                .source("config", FileHelper.readYamlContent("dlsfls/config.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("internalusers")
-                .source("internalusers", FileHelper.readYamlContent("dlsfls/internal_users.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").id("roles").setRefreshPolicy(RefreshPolicy.IMMEDIATE)
-                .source("roles", FileHelper.readYamlContent("dlsfls/roles.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("rolesmapping")
-                .source("rolesmapping", FileHelper.readYamlContent("dlsfls/roles_mapping.yml"))).actionGet();
-        tc.index(new IndexRequest(".opendistro_security").type("security").setRefreshPolicy(RefreshPolicy.IMMEDIATE).id("actiongroups")
-                .source("actiongroups", FileHelper.readYamlContent("dlsfls/action_groups.yml"))).actionGet();
+    protected void populateData(TransportClient tc) {
 
         tc.admin().indices().create(new CreateIndexRequest("deals")
         .mapping("deals", "timestamp","type=date","@timestamp","type=date")).actionGet();

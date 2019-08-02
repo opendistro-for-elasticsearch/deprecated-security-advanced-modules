@@ -39,7 +39,9 @@ public class FakeRestRequest extends RestRequest {
     }
 
     private FakeRestRequest(Map<String, String> headers, Map<String, String> params, BytesReference content, Method method, String path) {
-        super(null, params, path, convert(headers));
+        //NamedXContentRegistry xContentRegistry, Map<String, String> params, String path,
+        //Map<String, List<String>> headers, HttpRequest httpRequest, HttpChannel httpChannel
+        super(null, params, path, convert(headers), null, null);
         //this.headers = headers;
         this.content = content;
         this.method = method;

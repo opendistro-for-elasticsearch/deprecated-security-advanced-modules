@@ -59,9 +59,6 @@ public final class AuditMessage {
     public static final String REQUEST_INITIATING_USER = "audit_request_initiating_user";
     public static final String UTC_TIMESTAMP = "@timestamp";
 
-    @Deprecated
-    private static final String UTC_TIMESTAMP_DEPRECATED = "audit_utc_timestamp";
-
     public static final String CLUSTER_NAME = "audit_cluster_name";
     public static final String NODE_ID = "audit_node_id";
     public static final String NODE_HOST_ADDRESS = "audit_node_host_address";
@@ -81,7 +78,7 @@ public final class AuditMessage {
     public static final String TRANSPORT_REQUEST_HEADERS = "audit_transport_headers";
 
     public static final String ID = "audit_trace_doc_id";
-    public static final String TYPES = "audit_trace_doc_types";
+    //public static final String TYPES = "audit_trace_doc_types";
     //public static final String SOURCE = "audit_trace_doc_source";
     public static final String INDICES = "audit_trace_indices";
     public static final String SHARD_ID = "audit_trace_shard_id";
@@ -114,10 +111,9 @@ public final class AuditMessage {
     public AuditMessage(final Category msgCategory, final ClusterService clusterService, final Origin origin, final Origin layer) {
         this.msgCategory = Objects.requireNonNull(msgCategory);
         final String currentTime = currentTime();
-        auditInfo.put(FORMAT_VERSION, 3);
+        auditInfo.put(FORMAT_VERSION, 4);
         auditInfo.put(CATEGORY, Objects.requireNonNull(msgCategory));
         auditInfo.put(UTC_TIMESTAMP, currentTime);
-        auditInfo.put(UTC_TIMESTAMP_DEPRECATED, currentTime);
         auditInfo.put(NODE_HOST_ADDRESS, Objects.requireNonNull(clusterService).localNode().getHostAddress());
         auditInfo.put(NODE_ID, Objects.requireNonNull(clusterService).localNode().getId());
         auditInfo.put(NODE_HOST_NAME, Objects.requireNonNull(clusterService).localNode().getHostName());
@@ -229,7 +225,7 @@ public final class AuditMessage {
         }
     }
 
-    public void addTypes(String[] types) {
+    /*public void addTypes(String[] types) {
         if (types != null && types.length > 0) {
             auditInfo.put(TYPES, types);
         }
@@ -239,7 +235,7 @@ public final class AuditMessage {
         if (type != null) {
             auditInfo.put(TYPES, new String[] { type });
         }
-    }
+    }*/
 
     public void addFileInfos(Map<String, Path> paths) {
         if (paths != null && !paths.isEmpty()) {
@@ -440,7 +436,7 @@ public final class AuditMessage {
         COMPLIANCE_DOC_WRITE,
         COMPLIANCE_EXTERNAL_CONFIG,
         COMPLIANCE_INTERNAL_CONFIG_READ,
-        COMPLIANCE_INTERNAL_CONFIG_WRITE;
+        COMPLIANCE_INTERNAL_CONFIG_WRITE
     }
 
 }

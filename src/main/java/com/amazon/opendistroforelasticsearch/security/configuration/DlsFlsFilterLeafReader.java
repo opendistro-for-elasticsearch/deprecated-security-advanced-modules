@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils;
 import org.apache.lucene.index.BinaryDocValues;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.FieldInfo;
@@ -106,9 +107,9 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
 
 
     DlsFlsFilterLeafReader(final LeafReader delegate, final Set<String> includesExcludes,
-            final BitSetProducer bsp, final IndexService indexService, final ThreadContext threadContext,
-            final ClusterService clusterService, final ComplianceConfig complianceConfig,
-            final AuditLog auditlog, final Set<String> maskedFields, final ShardId shardId) {
+                           final BitSetProducer bsp, final IndexService indexService, final ThreadContext threadContext,
+                           final ClusterService clusterService, final ComplianceConfig complianceConfig,
+                           final AuditLog auditlog, final Set<String> maskedFields, final ShardId shardId) {
         super(delegate);
 
         maskFields = (complianceConfig.isEnabled() && maskedFields != null && maskedFields.size() > 0);
@@ -239,9 +240,9 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
         private final ShardId shardId;
 
         public DlsFlsSubReaderWrapper(final Set<String> includes, final BitSetProducer bsp,
-                final IndexService indexService, final ThreadContext threadContext,
-                final ClusterService clusterService, final ComplianceConfig complianceConfig,
-                final AuditLog auditlog, final Set<String> maskedFields, ShardId shardId) {
+                                      final IndexService indexService, final ThreadContext threadContext,
+                                      final ClusterService clusterService, final ComplianceConfig complianceConfig,
+                                      final AuditLog auditlog, final Set<String> maskedFields, ShardId shardId) {
             this.includes = includes;
             this.bsp = bsp;
             this.indexService = indexService;
@@ -273,9 +274,9 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
         private final ShardId shardId;
 
         public DlsFlsDirectoryReader(final DirectoryReader in, final Set<String> includes, final BitSetProducer bsp,
-                final IndexService indexService, final ThreadContext threadContext,
-                final ClusterService clusterService, final ComplianceConfig complianceConfig,
-                final AuditLog auditlog, final Set<String> maskedFields, ShardId shardId) throws IOException {
+                                     final IndexService indexService, final ThreadContext threadContext,
+                                     final ClusterService clusterService, final ComplianceConfig complianceConfig,
+                                     final AuditLog auditlog, final Set<String> maskedFields, ShardId shardId) throws IOException {
             super(in, new DlsFlsSubReaderWrapper(includes, bsp, indexService, threadContext, clusterService, complianceConfig, auditlog, maskedFields, shardId));
             this.includes = includes;
             this.bsp = bsp;
@@ -671,12 +672,16 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
     private BinaryDocValues wrapBinaryDocValues(final String field, final BinaryDocValues binaryDocValues) {
 
         final Map<String, MaskedField> rtMask;
+        final String matchedPattern;
 
-        if (binaryDocValues != null && (rtMask=getRuntimeMaskedFieldInfo())!=null) {
+        if (binaryDocValues != null && (rtMask=getRuntimeMaskedFieldInfo())!=null
+                && (matchedPattern = WildcardMatcher.getFirstMatchingPattern(rtMask.keySet(), handleKeyword(field)).orElse(null)) != null) {
 
-            final Optional<String> matchedPattern = WildcardMatcher.getFirstMatchingPattern(rtMask.keySet(), handleKeyword(field));
-            assert matchedPattern.isPresent();
-            final MaskedField mf = rtMask.get(matchedPattern.get());
+            final MaskedField mf = rtMask.get(matchedPattern);
+
+            if(mf == null) {
+                return binaryDocValues;
+            }
 
             return new BinaryDocValues() {
 
@@ -724,13 +729,16 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
     private SortedDocValues wrapSortedDocValues(final String field, final SortedDocValues sortedDocValues) {
 
         final Map<String, MaskedField> rtMask;
+        final String matchedPattern;
 
-        if (sortedDocValues != null && (rtMask=getRuntimeMaskedFieldInfo())!=null) {
+        if (sortedDocValues != null && (rtMask=getRuntimeMaskedFieldInfo())!=null
+                && (matchedPattern = WildcardMatcher.getFirstMatchingPattern(rtMask.keySet(), handleKeyword(field)).orElse(null)) != null) {
 
-            final Optional<String> matchedPattern = WildcardMatcher.getFirstMatchingPattern(rtMask.keySet(), handleKeyword(field));
-            assert matchedPattern.isPresent();
-            final MaskedField mf = rtMask.get(matchedPattern.get());
+            final MaskedField mf = rtMask.get(matchedPattern);
 
+            if(mf == null) {
+                return sortedDocValues;
+            }
 
             return new SortedDocValues() {
 
@@ -813,12 +821,16 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
     private SortedSetDocValues wrapSortedSetDocValues(final String field, final SortedSetDocValues sortedSetDocValues) {
 
         final Map<String, MaskedField> rtMask;
+        final String matchedPattern;
 
-        if (sortedSetDocValues != null && (rtMask=getRuntimeMaskedFieldInfo())!=null) {
+        if (sortedSetDocValues != null && (rtMask=getRuntimeMaskedFieldInfo()) !=null
+                && (matchedPattern = WildcardMatcher.getFirstMatchingPattern(rtMask.keySet(), handleKeyword(field)).orElse(null)) != null) {
 
-            final Optional<String> matchedPattern = WildcardMatcher.getFirstMatchingPattern(rtMask.keySet(), handleKeyword(field));
-            assert matchedPattern.isPresent();
-            final MaskedField mf =  rtMask.get(matchedPattern.get());
+            final MaskedField mf = rtMask.get(matchedPattern);
+
+            if(mf == null) {
+                return sortedSetDocValues;
+            }
 
             return new SortedSetDocValues() {
 
@@ -906,11 +918,6 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
         }
     }
 
-    //@Override
-    //public LeafMetaData getMetaData() {
-    //    return in.getMetaData();
-    //}
-
     @Override
     public Bits getLiveDocs() {
 
@@ -983,16 +990,6 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
         return in.numDocs();
     }
 
-    //@Override
-    //public LeafReader getDelegate() {
-    //    return in;
-    //}
-
-    //@Override
-    //public int maxDoc() {
-    //    return in.maxDoc();
-    //}
-
     @Override
     public CacheHelper getCoreCacheHelper() {
         return in.getCoreCacheHelper();
@@ -1005,7 +1002,7 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
 
     @Override
     public boolean hasDeletions() {
-        return true;
+        return dlsEnabled?true:in.hasDeletions();
     }
 
     @SuppressWarnings("unchecked")
@@ -1016,7 +1013,7 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
         }
 
         final Map<String, Set<String>> maskedFieldsMap = (Map<String, Set<String>>) HeaderHelper.deserializeSafeFromHeader(threadContext,
-        ConfigConstants.OPENDISTRO_SECURITY_MASKED_FIELD_HEADER);
+                ConfigConstants.OPENDISTRO_SECURITY_MASKED_FIELD_HEADER);
         final String maskedEval = OpenDistroSecurityUtils.evalMap(maskedFieldsMap, indexService.index().getName());
 
         if(maskedEval != null) {
