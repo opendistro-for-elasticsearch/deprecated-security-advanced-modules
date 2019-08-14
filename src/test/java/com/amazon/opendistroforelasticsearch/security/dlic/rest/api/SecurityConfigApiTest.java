@@ -35,19 +35,19 @@ public class SecurityConfigApiTest extends AbstractRestApiUnitTest {
 		rh.keystore = "restapi/kirk-keystore.jks";
 		rh.sendHTTPClientCertificate = true;
 
-		HttpResponse response = rh.executeGetRequest("/_opendistro/_security/api/config", new Header[0]);
+		HttpResponse response = rh.executeGetRequest("", new Header[0]);
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 
-		response = rh.executePutRequest("/_opendistro/_security/api/config", "{\"xxx\": 1}", new Header[0]);
+		response = rh.executePutRequest("/_opendistro/_security/api/securityconfig", "{\"xxx\": 1}", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_METHOD_NOT_ALLOWED, response.getStatusCode());
 
-        response = rh.executePostRequest("/_opendistro/_security/api/config", "{\"xxx\": 1}", new Header[0]);
+        response = rh.executePostRequest("/_opendistro/_security/api/securityconfig", "{\"xxx\": 1}", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_METHOD_NOT_ALLOWED, response.getStatusCode());
         
-        response = rh.executePatchRequest("/_opendistro/_security/api/config", "{\"xxx\": 1}", new Header[0]);
+        response = rh.executePatchRequest("/_opendistro/_security/api/securityconfig", "{\"xxx\": 1}", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_METHOD_NOT_ALLOWED, response.getStatusCode());
         
-        response = rh.executeDeleteRequest("/_opendistro/_security/api/config", new Header[0]);
+        response = rh.executeDeleteRequest("/_opendistro/_security/api/securityconfig", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_METHOD_NOT_ALLOWED, response.getStatusCode());
         
 	}
@@ -61,7 +61,7 @@ public class SecurityConfigApiTest extends AbstractRestApiUnitTest {
         rh.keystore = "restapi/kirk-keystore.jks";
         rh.sendHTTPClientCertificate = true;
 
-        HttpResponse response = rh.executeGetRequest("/_opendistro/_security/api/config", new Header[0]);
+        HttpResponse response = rh.executeGetRequest("/_opendistro/_security/api/securityconfig", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 
         response = rh.executePutRequest("/_opendistro/_security/api/securityconfig/xxx", FileHelper.loadFile("restapi/securityconfig.json"), new Header[0]);
@@ -75,16 +75,16 @@ public class SecurityConfigApiTest extends AbstractRestApiUnitTest {
         Assert.assertTrue(response.getContentType(), response.isJsonContentType());
         Assert.assertTrue(response.getBody().contains("Unrecognized field"));
 
-        response = rh.executeGetRequest("/_opendistro/_security/api/config", new Header[0]);
+        response = rh.executeGetRequest("/_opendistro/_security/api/securityconfig", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 
-        response = rh.executePostRequest("/_opendistro/_security/api/config", "{\"xxx\": 1}", new Header[0]);
+        response = rh.executePostRequest("/_opendistro/_security/api/securityconfig", "{\"xxx\": 1}", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_METHOD_NOT_ALLOWED, response.getStatusCode());
         
-        response = rh.executePatchRequest("/_opendistro/_security/api/config", "[{\"op\": \"replace\",\"path\": \"/config/dynamic/hosts_resolver_mode\",\"value\": \"other\"}]", new Header[0]);
+        response = rh.executePatchRequest("/_opendistro/_security/api/securityconfig", "[{\"op\": \"replace\",\"path\": \"/config/dynamic/hosts_resolver_mode\",\"value\": \"other\"}]", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         
-        response = rh.executeDeleteRequest("/_opendistro/_security/api/config", new Header[0]);
+        response = rh.executeDeleteRequest("/_opendistro/_security/api/securityconfig", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_METHOD_NOT_ALLOWED, response.getStatusCode());
         
     }
