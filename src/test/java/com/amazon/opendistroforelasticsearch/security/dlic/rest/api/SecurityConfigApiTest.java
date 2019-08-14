@@ -64,13 +64,13 @@ public class SecurityConfigApiTest extends AbstractRestApiUnitTest {
         HttpResponse response = rh.executeGetRequest("/_opendistro/_security/api/config", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 
-        response = rh.executePutRequest("/_opendistro/_security/api/config/xxx", FileHelper.loadFile("restapi/securityconfig.json"), new Header[0]);
+        response = rh.executePutRequest("/_opendistro/_security/api/securityconfig/xxx", FileHelper.loadFile("restapi/securityconfig.json"), new Header[0]);
         Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
         
-        response = rh.executePutRequest("/_opendistro/_security/api/config/config", FileHelper.loadFile("restapi/securityconfig.json"), new Header[0]);
+        response = rh.executePutRequest("/_opendistro/_security/api/securityconfig", FileHelper.loadFile("restapi/securityconfig.json"), new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         
-        response = rh.executePutRequest("/_opendistro/_security/api/config/config", FileHelper.loadFile("restapi/invalid_config.json"), new Header[0]);
+        response = rh.executePutRequest("/_opendistro/_security/api/securityconfig", FileHelper.loadFile("restapi/invalid_config.json"), new Header[0]);
         Assert.assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, response.getStatusCode());
         Assert.assertTrue(response.getContentType(), response.isJsonContentType());
         Assert.assertTrue(response.getBody().contains("Unrecognized field"));
