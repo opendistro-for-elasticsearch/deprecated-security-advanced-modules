@@ -70,7 +70,7 @@ public class SecurityConfigApiTest extends AbstractRestApiUnitTest {
         response = rh.executePutRequest("/_opendistro/_security/api/securityconfig", FileHelper.loadFile("restapi/securityconfig.json"), new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         
-        response = rh.executePutRequest("securityconfig", FileHelper.loadFile("restapi/invalid_config.json"), new Header[0]);
+        response = rh.executePutRequest("/_opendistro/_security/api/securityconfig", FileHelper.loadFile("restapi/invalid_config.json"), new Header[0]);
         Assert.assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, response.getStatusCode());
         Assert.assertTrue(response.getContentType(), response.isJsonContentType());
         Assert.assertTrue(response.getBody().contains("Unrecognized field"));
