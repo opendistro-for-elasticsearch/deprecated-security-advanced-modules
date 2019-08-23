@@ -20,11 +20,11 @@
   <parent>
     <groupId>com.amazon.opendistroforelasticsearch</groupId>
     <artifactId>opendistro_security_parent</artifactId>
-    <version>1.0.0.2</version>
+    <version>1.0.0.3</version>
   </parent>
 
   <artifactId>opendistro_security_advanced_modules</artifactId>
-  <version>1.0.0.2</version>
+  <version>1.0.0.3</version>
   <packaging>jar</packaging>
 
   <name>Open Distro For Elasticsearch Advanced Modules</name>
@@ -33,7 +33,7 @@
   <inceptionYear>2016</inceptionYear>
 
   <properties>
-    <security.version>1.0.0.2</security.version>
+    <security.version>1.0.0.3</security.version>
     <elasticsearch.version>7.0.1</elasticsearch.version>
 
     <!-- deps -->
@@ -54,7 +54,7 @@
     <url>https://github.com/opendistro-for-elasticsearch/security-advanced-modules</url>
     <connection>scm:git:git@github.com:opendistro-for-elasticsearch/security-advanced-modules.git</connection>
     <developerConnection>scm:git:git@github.com:opendistro-for-elasticsearch/security-advanced-modules.git</developerConnection>
-    <tag>v1.0.0.2</tag>
+    <tag>v1.0.0.3</tag>
   </scm>
 
   <issueManagement>
