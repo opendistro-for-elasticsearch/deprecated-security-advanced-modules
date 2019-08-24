@@ -56,15 +56,15 @@ public class OpenDistroSecurityConfigAction extends PatchableResourceApiAction {
         allowPutOrPatch = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_UNSUPPORTED_RESTAPI_ALLOW_SECURITYCONFIG_MODIFICATION, false);
 
 
-        controller.registerHandler(Method.GET, "/_opendistro/_security/api/config/", this);
+        controller.registerHandler(Method.GET, "/_opendistro/_security/api/securityconfig/", this);
 
         //controller.registerHandler(Method.GET, "/_opendistro/_security/api/config/", this);
 
         if(allowPutOrPatch) {
 
             //deprecated, will be removed with SG 8, use opendistro_security_config instead of sgconfig
-            controller.registerHandler(Method.PUT, "/_opendistro/_security/api/config/{name}", this);
-            controller.registerHandler(Method.PATCH, "/_opendistro/_security/api/config/", this);
+            controller.registerHandler(Method.PUT, "/_opendistro/_security/api/securityconfig/{name}", this);
+            controller.registerHandler(Method.PATCH, "/_opendistro/_security/api/securityconfig/", this);
 
 
         }
