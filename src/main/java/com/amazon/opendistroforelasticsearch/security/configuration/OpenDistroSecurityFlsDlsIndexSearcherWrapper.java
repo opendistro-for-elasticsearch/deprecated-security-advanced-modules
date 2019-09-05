@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.LongSupplier;
 
+import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -57,8 +58,8 @@ public class OpenDistroSecurityFlsDlsIndexSearcherWrapper extends OpenDistroSecu
 
     public OpenDistroSecurityFlsDlsIndexSearcherWrapper(final IndexService indexService, final Settings settings,
             final AdminDNs adminDNs, final ClusterService clusterService, final AuditLog auditlog,
-            final ComplianceIndexingOperationListener ciol, final ComplianceConfig complianceConfig) {
-        super(indexService, settings, adminDNs);
+            final ComplianceIndexingOperationListener ciol, final ComplianceConfig complianceConfig, final PrivilegesEvaluator evaluator) {
+        super(indexService, settings, adminDNs, evaluator);
         ciol.setIs(indexService);
         this.clusterService = clusterService;
         this.indexService = indexService;
