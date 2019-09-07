@@ -1,0 +1,33 @@
+## 2019-09-06, Version 0.9.0.3 (Current)
+
+- Add the ability to block indices and index patterns to certain roles, adding another level of protection for these indices
+
+## 2019-08-21, Version 0.9.0.2
+
+- Fix API path naming issue
+
+## 2019-07-15, Version 0.9.0.1
+
+- Add PUT and PATCH method for securityconfig
+    /_opendistro/_security/api/securityconfig
+
+## 2019-04-23, Version 0.9.0.0
+
+- Support For Elasticsearch 6.7
+- Handle attributes when impersonating user
+
+## 2019-04-04, Version 0.8.0.0
+
+- Support For  Elasticsearch 6.6
+
+## 2019-03-19, Version 0.7.0.1
+ 
+- Fixed git repo URLs in pom.xml
+- Handle overridden Transport channels.
+- Fixed "opendistro_security.advanced_modules_enabled" configuration parameter
+- Fixed sample configuration and UTs
+
+
+## 2019-03-12, Version 0.7.0.0
+
+- Initial launch of security for opendistro-for-elasticsearch
