@@ -534,6 +534,11 @@ public class HTTPSamlAuthenticatorTest {
         }
 
         @Override
+        public XContentBuilder newBuilder(XContentType xContentType, XContentType xType, boolean useFiltering) throws IOException {
+            return null;
+        }
+
+        @Override
         public BytesStreamOutput bytesOutput() {
             return null;
         }
