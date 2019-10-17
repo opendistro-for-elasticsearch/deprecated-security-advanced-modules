@@ -39,16 +39,20 @@ import org.apache.lucene.index.FieldInfos;
 import org.apache.lucene.index.Fields;
 import org.apache.lucene.index.FilterDirectoryReader;
 import org.apache.lucene.index.FilterLeafReader;
+import org.apache.lucene.index.ImpactsEnum;
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.index.PointValues;
+import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.SortedDocValues;
 import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.index.SortedSetDocValues;
 import org.apache.lucene.index.StoredFieldVisitor;
+import org.apache.lucene.index.TermState;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.DocIdSetIterator;
+import org.apache.lucene.util.AttributeSource;
 import org.apache.lucene.search.join.BitSetProducer;
 import org.apache.lucene.util.BitSet;
 import org.apache.lucene.util.BitSetIterator;
@@ -755,12 +759,12 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
 
                 @Override
                 public TermsEnum termsEnum() throws IOException {
-                    return sortedDocValues.termsEnum();
+                    return new MaskedTermsEnum(sortedDocValues.termsEnum(), mf);
                 }
 
                 @Override
                 public TermsEnum intersect(CompiledAutomaton automaton) throws IOException {
-                    return sortedDocValues.intersect(automaton);
+                   return new MaskedTermsEnum(sortedDocValues.intersect(automaton), mf);
                 }
 
                 @Override
@@ -841,13 +845,13 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
 
                 @Override
                 public TermsEnum termsEnum() throws IOException {
-                    return sortedSetDocValues.termsEnum();
-                }
+                    return new MaskedTermsEnum(sortedSetDocValues.termsEnum(), mf);
+		}
 
                 @Override
                 public TermsEnum intersect(CompiledAutomaton automaton) throws IOException {
-                    return sortedSetDocValues.intersect(automaton);
-                }
+                    return new MaskedTermsEnum(sortedSetDocValues.intersect(automaton), mf);
+		}
 
                 @Override
                 public int nextDoc() throws IOException {
@@ -1032,6 +1036,84 @@ class DlsFlsFilterLeafReader extends FilterLeafReader {
             return field.substring(0, field.length()-KEYWORD.length());
         }
         return field;
+    }
+
+   private static class MaskedTermsEnum extends TermsEnum {
+
+        private final TermsEnum delegate;
+        private final MaskedField mf;
+
+        public MaskedTermsEnum(TermsEnum delegate, MaskedField mf) {
+            super();
+            this.delegate = delegate;
+            this.mf = mf;
+        }
+
+        @Override
+        public BytesRef next() throws IOException {
+            return delegate.next(); //no masking here
+        }
+
+        @Override
+        public AttributeSource attributes() {
+            return delegate.attributes();
+        }
+
+        @Override
+        public boolean seekExact(BytesRef text) throws IOException {
+            return delegate.seekExact(text);
+        }
+
+        @Override
+        public SeekStatus seekCeil(BytesRef text) throws IOException {
+            return delegate.seekCeil(text);
+        }
+
+        @Override
+        public void seekExact(long ord) throws IOException {
+            delegate.seekExact(ord);
+        }
+
+        @Override
+        public void seekExact(BytesRef term, TermState state) throws IOException {
+            delegate.seekExact(term, state);
+        }
+
+        @Override
+        public BytesRef term() throws IOException {
+            return mf.mask(delegate.term());
+        }
+
+        @Override
+        public long ord() throws IOException {
+            return delegate.ord();
+        }
+
+        @Override
+        public int docFreq() throws IOException {
+            return delegate.docFreq();
+        }
+
+        @Override
+        public long totalTermFreq() throws IOException {
+            return delegate.totalTermFreq();
+        }
+
+        @Override
+        public PostingsEnum postings(PostingsEnum reuse, int flags) throws IOException {
+            return delegate.postings(reuse, flags);
+        }
+
+        @Override
+        public ImpactsEnum impacts(int flags) throws IOException {
+            return delegate.impacts(flags);
+        }
+
+        @Override
+        public TermState termState() throws IOException {
+            return delegate.termState();
+        }
+
     }
 
 }
