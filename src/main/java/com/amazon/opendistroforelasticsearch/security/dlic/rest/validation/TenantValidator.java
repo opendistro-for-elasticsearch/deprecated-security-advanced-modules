@@ -10,7 +10,7 @@ public class TenantValidator extends AbstractConfigurationValidator {
 
     public TenantValidator(final RestRequest request, BytesReference ref, final Settings esSettings, Object... param) {
         super(request, ref, esSettings, param);
-        this.payloadMandatory = false;
+        this.payloadMandatory = true;
         allowedKeys.put("description", DataType.STRING);
     }
 
