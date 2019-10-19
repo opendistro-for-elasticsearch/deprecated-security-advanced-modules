@@ -77,7 +77,7 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 	protected final ConfigurationRepository cl;
 	protected final ClusterService cs;
 	final ThreadPool threadPool;
-  protected String opendistroIndex;
+ 	  protected String opendistroIndex;
 	private final RestApiPrivilegesEvaluator restApiPrivilegesEvaluator;
 	protected final AuditLog auditLog;
 	protected final Settings settings;
@@ -307,7 +307,7 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 		}
 	}
 
-  protected static class ConfigUpdatingActionListener<Response> implements ActionListener<Response>{
+	protected static class ConfigUpdatingActionListener<Response> implements ActionListener<Response>{
 
 		private final Client client;
 		private final ActionListener<Response> delegate;
