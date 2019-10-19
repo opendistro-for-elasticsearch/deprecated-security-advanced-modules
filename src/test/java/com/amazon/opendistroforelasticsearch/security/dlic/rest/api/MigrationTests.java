@@ -47,14 +47,14 @@ public class MigrationTests extends SingleClusterTest {
     }
 
     @Test
-    public void testSgMigrateInvalid() throws Exception {
+    public void testSecurityMigrateInvalid() throws Exception {
         final Settings settings = Settings.builder().put(SSLConfigConstants.OPENDISTRO_SECURITY_SSL_HTTP_CLIENTAUTH_MODE, "REQUIRE")
                 .put("searchguard.ssl.http.enabled", true)
                 .put("searchguard.ssl.http.keystore_filepath", FileHelper.getAbsoluteFilePathFromClassPath("node-0-keystore.jks"))
                 .put("searchguard.ssl.http.truststore_filepath", FileHelper.getAbsoluteFilePathFromClassPath("truststore.jks"))
                 .put(ConfigConstants.OPENDISTRO_SECURITY_UNSUPPORTED_ACCEPT_INVALID_CONFIG, true)
                 .build();
-        setup(Settings.EMPTY, new DynamicSecurityConfig().setSecurityInternalUsers("sg_internal_users2.yml").setLegacy(), settings, true);
+        setup(Settings.EMPTY, new DynamicSecurityConfig().setSecurityInternalUsers("security_internal_users2.yml").setLegacy(), settings, true);
         final RestHelper rh = restHelper(); //ssl resthelper
 
         rh.enableHTTPClientSSL = true;
@@ -104,7 +104,7 @@ public class MigrationTests extends SingleClusterTest {
                 .put("searchguard.ssl.http.truststore_filepath", FileHelper.getAbsoluteFilePathFromClassPath("truststore.jks"))
                 .put(ConfigConstants.OPENDISTRO_SECURITY_UNSUPPORTED_ACCEPT_INVALID_CONFIG, true)
                 .build();
-        setup(Settings.EMPTY, new DynamicSecurityConfig().setSecurityInternalUsers("sg_internal_users2.yml").setLegacy(), settings, true);
+        setup(Settings.EMPTY, new DynamicSecurityConfig().setSecurityInternalUsers("security_internal_users2.yml").setLegacy(), settings, true);
         final RestHelper rh = restHelper(); //ssl resthelper
 
         rh.enableHTTPClientSSL = true;
