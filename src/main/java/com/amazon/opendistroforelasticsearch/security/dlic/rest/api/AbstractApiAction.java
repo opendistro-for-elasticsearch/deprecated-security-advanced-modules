@@ -25,12 +25,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.cluster.service.ClusterService;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.util.concurrent.ThreadContext.StoredContext;
@@ -75,7 +77,7 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 	protected final ConfigurationRepository cl;
 	protected final ClusterService cs;
 	final ThreadPool threadPool;
-	private String opendistroIndex;
+	protected String opendistroIndex;
 	private final RestApiPrivilegesEvaluator restApiPrivilegesEvaluator;
 	protected final AuditLog auditLog;
 	protected final Settings settings;
@@ -251,6 +253,11 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 		return DynamicConfigFactory.addStatics(loaded);
 	}
 
+	protected final SecurityDynamicConfiguration<?> load(final CType config, boolean logComplianceEvent, boolean acceptInvalid) {
+		SecurityDynamicConfiguration<?> loaded = cl.getConfigurationsFromIndex(Collections.singleton(config), logComplianceEvent, acceptInvalid).get(config).deepClone();
+        return DynamicConfigFactory.addStatics(loaded);
+    }
+
 	protected boolean ensureIndexExists() {
 		if (!cs.state().metaData().hasConcreteIndex(this.opendistroIndex)) {
 			return false;
@@ -300,7 +307,7 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 		}
 	}
 
-	private static class ConfigUpdatingActionListener<Response> implements ActionListener<Response>{
+	protected static class ConfigUpdatingActionListener<Response> implements ActionListener<Response>{
 
 		private final Client client;
 		private final ActionListener<Response> delegate;
@@ -348,7 +355,7 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 		// not 400
 		consumeParameters(request);
 
-		// check if SG index has been initialized
+		// check if Security index has been initialized
 		if (!ensureIndexExists()) {
 			return channel -> internalErrorResponse(channel, ErrorType.SECURITY_NOT_INITIALIZED.getMessage());
 		}
@@ -512,7 +519,7 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 	/**
 	 * Consume all defined parameters for the request. Before we handle the
 	 * request in subclasses where we actually need the parameter, some global
-	 * checks are performed, e.g. check whether the SG index exists. Thus, the
+	 * checks are performed, e.g. check whether the Security index exists. Thus, the
 	 * parameter(s) have not been consumed, and ES will always return a 400 with
 	 * an internal error message.
 	 *
