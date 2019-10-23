@@ -15,14 +15,13 @@
 
 package com.amazon.dlic.auth.ldap2;
 
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-
+import io.netty.util.internal.PlatformDependent;
 import org.elasticsearch.SpecialPermission;
 import org.ldaptive.ssl.ThreadLocalTLSSocketFactory;
 
-import io.netty.util.internal.PlatformDependent;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 public class MakeJava9Happy {
 

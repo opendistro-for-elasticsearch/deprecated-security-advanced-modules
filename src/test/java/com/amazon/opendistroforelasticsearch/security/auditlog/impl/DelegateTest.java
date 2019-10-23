@@ -15,17 +15,14 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.impl;
 
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.settings.Settings.Builder;
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.amazon.opendistroforelasticsearch.security.auditlog.helper.MyOwnAuditLog;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditLogImpl;
 import com.amazon.opendistroforelasticsearch.security.auditlog.sink.AuditLogSink;
 import com.amazon.opendistroforelasticsearch.security.auditlog.sink.DebugSink;
 import com.amazon.opendistroforelasticsearch.security.auditlog.sink.ExternalESSink;
 import com.amazon.opendistroforelasticsearch.security.auditlog.sink.InternalESSink;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
+import org.junit.Test;
 
 public class DelegateTest {
 	@Test

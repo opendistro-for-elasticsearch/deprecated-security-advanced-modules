@@ -15,19 +15,17 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.routing;
 
-import org.elasticsearch.common.settings.Settings;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import com.amazon.opendistroforelasticsearch.security.auditlog.AbstractAuditlogiUnitTest;
 import com.amazon.opendistroforelasticsearch.security.auditlog.helper.LoggingSink;
 import com.amazon.opendistroforelasticsearch.security.auditlog.helper.MockAuditMessageFactory;
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
-import com.amazon.opendistroforelasticsearch.security.auditlog.routing.AuditMessageRouter;
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import org.elasticsearch.common.settings.Settings;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 
 
 

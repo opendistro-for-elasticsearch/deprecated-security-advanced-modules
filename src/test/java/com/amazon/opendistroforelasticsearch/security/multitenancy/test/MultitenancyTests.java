@@ -15,9 +15,12 @@
 
 package com.amazon.opendistroforelasticsearch.security.multitenancy.test;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.support.WildcardMatcher;
+import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
+import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.message.BasicHeader;
 import org.elasticsearch.action.admin.indices.alias.Alias;
@@ -32,12 +35,8 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.support.WildcardMatcher;
-import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
-import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MultitenancyTests extends SingleClusterTest {
 

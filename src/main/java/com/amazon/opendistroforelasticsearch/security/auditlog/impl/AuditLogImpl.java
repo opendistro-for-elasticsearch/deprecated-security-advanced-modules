@@ -15,12 +15,8 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.impl;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.Map;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.routing.AuditMessageRouter;
+import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceConfig;
 import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
@@ -38,8 +34,11 @@ import org.elasticsearch.tasks.Task;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportRequest;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.routing.AuditMessageRouter;
-import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceConfig;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.Map;
 
 public final class AuditLogImpl extends AbstractAuditLog {
 

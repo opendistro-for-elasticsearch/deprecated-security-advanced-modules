@@ -15,13 +15,21 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Objects;
-
 import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
+import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
+import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
+import com.amazon.opendistroforelasticsearch.security.configuration.ConfigurationRepository;
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.InternalUsersValidator;
+import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
+import com.amazon.opendistroforelasticsearch.security.securityconf.Hashed;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.CType;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.SecurityDynamicConfiguration;
+import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
+import com.amazon.opendistroforelasticsearch.security.support.SecurityJsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.bouncycastle.crypto.generators.OpenBSDBCrypt;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
@@ -36,20 +44,11 @@ import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
 import org.elasticsearch.threadpool.ThreadPool;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
-import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
-import com.amazon.opendistroforelasticsearch.security.configuration.ConfigurationRepository;
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.InternalUsersValidator;
-import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
-import com.amazon.opendistroforelasticsearch.security.securityconf.Hashed;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.CType;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.SecurityDynamicConfiguration;
-import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
-import com.amazon.opendistroforelasticsearch.security.support.SecurityJsonNode;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class InternalUsersApiAction extends PatchableResourceApiAction {
 

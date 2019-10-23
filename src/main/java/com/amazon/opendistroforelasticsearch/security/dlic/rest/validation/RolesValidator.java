@@ -15,15 +15,14 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.validation;
 
-import java.util.List;
-
+import com.amazon.opendistroforelasticsearch.security.configuration.MaskedField;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.ReadContext;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.rest.RestRequest;
 
-import com.amazon.opendistroforelasticsearch.security.configuration.MaskedField;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.ReadContext;
+import java.util.List;
 
 public class RolesValidator extends AbstractConfigurationValidator {
 

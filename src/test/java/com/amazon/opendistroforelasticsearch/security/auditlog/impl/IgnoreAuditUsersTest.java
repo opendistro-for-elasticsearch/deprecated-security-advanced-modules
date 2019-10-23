@@ -15,11 +15,9 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.impl;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.net.InetSocketAddress;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.integration.TestAuditlogImpl;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.user.User;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -32,11 +30,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AbstractAuditLog;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditLogImpl;
-import com.amazon.opendistroforelasticsearch.security.auditlog.integration.TestAuditlogImpl;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.user.User;
+import java.net.InetSocketAddress;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by martin.stange on 19.04.2017.

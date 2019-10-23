@@ -15,12 +15,6 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.integration;
 
-import org.apache.http.HttpStatus;
-import org.elasticsearch.common.settings.Settings;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.amazon.opendistroforelasticsearch.security.auditlog.AbstractAuditlogiUnitTest;
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
@@ -30,6 +24,11 @@ import com.amazon.opendistroforelasticsearch.security.test.helper.cluster.Cluste
 import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.elasticsearch.common.settings.Settings;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class SSLAuditlogTest extends AbstractAuditlogiUnitTest {
 

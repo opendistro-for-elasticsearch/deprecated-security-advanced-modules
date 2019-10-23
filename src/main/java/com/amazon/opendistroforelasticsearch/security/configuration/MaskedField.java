@@ -15,6 +15,11 @@
 
 package com.amazon.opendistroforelasticsearch.security.configuration;
 
+import com.google.common.base.Splitter;
+import org.apache.lucene.util.BytesRef;
+import org.bouncycastle.crypto.digests.Blake2bDigest;
+import org.bouncycastle.util.encoders.Hex;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -22,12 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
-import org.apache.lucene.util.BytesRef;
-import org.bouncycastle.crypto.digests.Blake2bDigest;
-import org.bouncycastle.util.encoders.Hex;
-
-import com.google.common.base.Splitter;
 
 public class MaskedField {
 

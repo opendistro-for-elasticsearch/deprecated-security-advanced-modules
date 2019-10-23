@@ -15,24 +15,18 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
-import java.io.IOException;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.Properties;
-
-import org.apache.kafka.clients.producer.Callback;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.common.settings.Settings;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.Properties;
 
 public class KafkaSink extends AuditLogSink {
 

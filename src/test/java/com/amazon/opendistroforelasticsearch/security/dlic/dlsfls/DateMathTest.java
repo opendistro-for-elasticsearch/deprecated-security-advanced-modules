@@ -15,11 +15,8 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.dlsfls;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils;
+import com.amazon.opendistroforelasticsearch.security.support.OpenDistroSecurityUtils;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
@@ -28,8 +25,9 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.support.OpenDistroSecurityUtils;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class DateMathTest extends AbstractDlsFlsTest{
 

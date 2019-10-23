@@ -15,16 +15,13 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.impl;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
+import com.amazon.opendistroforelasticsearch.security.auditlog.helper.MockRestRequest;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
+import com.amazon.opendistroforelasticsearch.security.auditlog.integration.TestAuditlogImpl;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import com.amazon.opendistroforelasticsearch.security.test.AbstractSecurityUnitTest;
+import com.google.common.base.Joiner;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.cluster.service.ClusterService;
@@ -36,12 +33,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
-import com.amazon.opendistroforelasticsearch.security.auditlog.helper.MockRestRequest;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
-import com.amazon.opendistroforelasticsearch.security.auditlog.integration.TestAuditlogImpl;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.google.common.base.Joiner;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class DisabledCategoriesTest {
 

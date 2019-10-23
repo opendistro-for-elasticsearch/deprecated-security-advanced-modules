@@ -15,16 +15,15 @@
 
 package com.amazon.opendistroforelasticsearch.security.cache;
 
-import java.nio.file.Path;
-
+import com.amazon.opendistroforelasticsearch.security.auth.HTTPAuthenticator;
+import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
 import org.elasticsearch.ElasticsearchSecurityException;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.util.concurrent.ThreadContext;
 import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestRequest;
 
-import com.amazon.opendistroforelasticsearch.security.auth.HTTPAuthenticator;
-import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
+import java.nio.file.Path;
 
 public class DummyHTTPAuthenticator implements HTTPAuthenticator {
 

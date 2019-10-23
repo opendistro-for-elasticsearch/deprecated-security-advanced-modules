@@ -15,11 +15,11 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.helper;
 
-import java.util.Collections;
-
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.rest.RestRequest;
+
+import java.util.Collections;
 
 public class MockRestRequest extends RestRequest {
 

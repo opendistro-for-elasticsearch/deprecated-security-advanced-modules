@@ -15,22 +15,20 @@
 
 package com.amazon.dlic.auth.ldap;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-
+import com.amazon.dlic.auth.ldap.backend.LDAPAuthenticationBackend;
+import com.amazon.dlic.auth.ldap.util.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.ssl.util.ExceptionUtils;
+import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.amazon.dlic.auth.ldap.LdapUser;
-import com.amazon.dlic.auth.ldap.backend.LDAPAuthenticationBackend;
-import com.amazon.dlic.auth.ldap.util.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.ssl.util.ExceptionUtils;
-import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 @Ignore
 public class LdapBackendTestClientCert {

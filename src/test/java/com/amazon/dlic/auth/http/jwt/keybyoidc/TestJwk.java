@@ -15,12 +15,12 @@
 
 package com.amazon.dlic.auth.http.jwt.keybyoidc;
 
-import java.util.Arrays;
-
 import org.apache.cxf.rs.security.jose.jwk.JsonWebKey;
 import org.apache.cxf.rs.security.jose.jwk.JsonWebKeys;
 import org.apache.cxf.rs.security.jose.jwk.KeyType;
 import org.apache.cxf.rs.security.jose.jwk.PublicKeyUse;
+
+import java.util.Arrays;
 
 class TestJwk {
 

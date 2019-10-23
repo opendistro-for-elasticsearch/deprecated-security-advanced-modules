@@ -15,12 +15,12 @@
 
 package com.amazon.dlic.auth.http.jwt;
 
-import java.nio.file.Path;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.Collection;
-import java.util.Map.Entry;
-
+import com.amazon.dlic.auth.http.jwt.keybyoidc.AuthenticatorUnavailableException;
+import com.amazon.dlic.auth.http.jwt.keybyoidc.BadCredentialsException;
+import com.amazon.dlic.auth.http.jwt.keybyoidc.JwtVerifier;
+import com.amazon.dlic.auth.http.jwt.keybyoidc.KeyProvider;
+import com.amazon.opendistroforelasticsearch.security.auth.HTTPAuthenticator;
+import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
 import org.apache.cxf.rs.security.jose.jwt.JwtClaims;
 import org.apache.cxf.rs.security.jose.jwt.JwtToken;
 import org.apache.logging.log4j.LogManager;
@@ -35,12 +35,11 @@ import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestStatus;
 
-import com.amazon.dlic.auth.http.jwt.keybyoidc.AuthenticatorUnavailableException;
-import com.amazon.dlic.auth.http.jwt.keybyoidc.BadCredentialsException;
-import com.amazon.dlic.auth.http.jwt.keybyoidc.JwtVerifier;
-import com.amazon.dlic.auth.http.jwt.keybyoidc.KeyProvider;
-import com.amazon.opendistroforelasticsearch.security.auth.HTTPAuthenticator;
-import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
+import java.nio.file.Path;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.Collection;
+import java.util.Map.Entry;
 
 public abstract class AbstractHTTPJwtAuthenticator implements HTTPAuthenticator {
     private final static Logger log = LogManager.getLogger(AbstractHTTPJwtAuthenticator.class);

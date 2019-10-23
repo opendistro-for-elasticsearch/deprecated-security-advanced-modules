@@ -15,8 +15,10 @@
 
 package com.amazon.opendistroforelasticsearch.security.configuration;
 
-import java.util.Map;
-
+import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesInterceptor;
+import com.amazon.opendistroforelasticsearch.security.resolver.IndexResolverReplacer.Resolved;
+import com.amazon.opendistroforelasticsearch.security.securityconf.DynamicConfigModel;
+import com.amazon.opendistroforelasticsearch.security.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
@@ -44,10 +46,7 @@ import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.threadpool.ThreadPool;
 
-import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesInterceptor;
-import com.amazon.opendistroforelasticsearch.security.resolver.IndexResolverReplacer.Resolved;
-import com.amazon.opendistroforelasticsearch.security.securityconf.DynamicConfigModel;
-import com.amazon.opendistroforelasticsearch.security.user.User;
+import java.util.Map;
 
 public class PrivilegesInterceptorImpl extends PrivilegesInterceptor {
 

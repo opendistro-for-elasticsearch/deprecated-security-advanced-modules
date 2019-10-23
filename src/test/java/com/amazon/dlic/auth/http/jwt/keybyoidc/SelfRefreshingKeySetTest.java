@@ -15,19 +15,14 @@
 
 package com.amazon.dlic.auth.http.jwt.keybyoidc;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import org.apache.cxf.rs.security.jose.jwk.JsonWebKey;
 import org.apache.cxf.rs.security.jose.jwk.JsonWebKeys;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.amazon.dlic.auth.http.jwt.keybyoidc.AuthenticatorUnavailableException;
-import com.amazon.dlic.auth.http.jwt.keybyoidc.BadCredentialsException;
-import com.amazon.dlic.auth.http.jwt.keybyoidc.KeySetProvider;
-import com.amazon.dlic.auth.http.jwt.keybyoidc.SelfRefreshingKeySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class SelfRefreshingKeySetTest {
 

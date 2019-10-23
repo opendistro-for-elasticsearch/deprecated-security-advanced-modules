@@ -15,13 +15,12 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.helper;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.elasticsearch.common.settings.Settings;
-
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
 import com.amazon.opendistroforelasticsearch.security.auditlog.sink.AuditLogSink;
+import org.elasticsearch.common.settings.Settings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class LoggingSink extends AuditLogSink {
 

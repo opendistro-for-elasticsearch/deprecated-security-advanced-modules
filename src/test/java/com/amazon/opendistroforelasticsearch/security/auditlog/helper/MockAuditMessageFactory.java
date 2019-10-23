@@ -15,19 +15,18 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.helper;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.net.InetSocketAddress;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog.Origin;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.transport.TransportAddress;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog.Origin;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
+import java.net.InetSocketAddress;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class MockAuditMessageFactory {
 

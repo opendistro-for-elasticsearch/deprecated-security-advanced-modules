@@ -15,11 +15,6 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
-import org.apache.http.HttpStatus;
-import org.elasticsearch.common.settings.Settings;
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.amazon.opendistroforelasticsearch.security.ssl.util.SSLConfigConstants;
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
@@ -27,16 +22,69 @@ import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
 import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpStatus;
+import org.elasticsearch.common.settings.Settings;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.StringWriter;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 
 public class MigrationTests extends SingleClusterTest {
 
     @Test
     public void testSecurityMigrate() throws Exception {
 
+        URL fileUrl = FileHelper.class.getClassLoader().getResource("node-0-keystore.jks");
+        URL trust = FileHelper.class.getClassLoader().getResource("truststore.jks");
+        File node = File.createTempFile("node", ".jks");
+        File trustF = File.createTempFile("trust", ".jks");
+        node.deleteOnExit();
+        trustF.deleteOnExit();
+        FileUtils.copyInputStreamToFile(fileUrl.openStream(), node);
+        FileUtils.copyInputStreamToFile(trust.openStream(), trustF);
+        StringWriter sw = new StringWriter();
+        IOUtils.copy(FileHelper.class.getResourceAsStream('/' + "node-0-keystore.jks"), sw, StandardCharsets.UTF_8);
+        String out = sw.toString();
+//        System.out.println(out);
+//        System.out.println(node.getAbsolutePath());
+
+        System.out.println(FileHelper.getAbsoluteFilePathFromClassPath("migration/node-0-keystore.jks"));
+        System.out.println(FileHelper.getAbsoluteFilePathFromClassPath("migration/truststore.jks"));
+        File file = null;
+        Path path = null;
+        if (fileUrl != null) {
+            file = new File(fileUrl.toExternalForm());
+
+
+
+            System.out.println(fileUrl.toExternalForm());
+//            System.out.println(file.getAbsolutePath());
+//            path = Paths.get(file.getAbsolutePath());
+//            System.out.println("path: ");
+//            System.out.println(path);
+
+
+            if(!file.exists()){
+                System.out.println("does not exist");
+            }
+            if(!file.canRead()){
+                System.out.println("cannot read");
+            }
+            if (file.exists() && file.canRead()) {
+                System.out.println("can read");
+            }
+        }
+
         final Settings settings = Settings.builder().put(SSLConfigConstants.OPENDISTRO_SECURITY_SSL_HTTP_CLIENTAUTH_MODE, "REQUIRE")
                 .put("opendistro_security.ssl.http.enabled", true)
-                .put("opendistro_security.ssl.http.keystore_filepath", FileHelper.getAbsoluteFilePathFromClassPath("node-0-keystore.jks"))
-                .put("opendistro_security.ssl.http.truststore_filepath", FileHelper.getAbsoluteFilePathFromClassPath("truststore.jks")).build();
+                .put("opendistro_security.ssl.http.keystore_filepath", FileHelper.getAbsoluteFilePathFromClassPath("migration/node-0-keystore.jks"))
+                .put("opendistro_security.ssl.http.truststore_filepath",FileHelper.getAbsoluteFilePathFromClassPath("migration/truststore.jks")).build();
         setup(Settings.EMPTY, new DynamicSecurityConfig().setLegacy(), settings, true);
         final RestHelper rh = restHelper(); //ssl resthelper
 

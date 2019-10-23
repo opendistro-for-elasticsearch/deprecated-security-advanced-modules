@@ -15,16 +15,14 @@
 
 package com.amazon.dlic.auth.http.jwt.keybyoidc;
 
-import java.util.HashMap;
-
+import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
+import com.amazon.opendistroforelasticsearch.security.util.FakeRestRequest;
+import com.google.common.collect.ImmutableMap;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.amazon.dlic.auth.http.jwt.keybyoidc.HTTPJwtKeyByOpenIdConnectAuthenticator;
-import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
-import com.amazon.opendistroforelasticsearch.security.util.FakeRestRequest;
-import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
 
 public class SingleKeyHTTPJwtKeyByOpenIdConnectAuthenticatorTest {
 

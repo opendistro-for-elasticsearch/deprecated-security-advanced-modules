@@ -15,13 +15,23 @@
 
 package com.amazon.dlic.auth.http.saml;
 
-import java.net.URL;
-import java.nio.file.Path;
-import java.security.AccessController;
-import java.security.PrivateKey;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-
+import com.amazon.dlic.auth.http.jwt.AbstractHTTPJwtAuthenticator;
+import com.amazon.dlic.auth.http.jwt.keybyoidc.AuthenticatorUnavailableException;
+import com.amazon.dlic.auth.http.jwt.keybyoidc.BadCredentialsException;
+import com.amazon.dlic.auth.http.jwt.keybyoidc.KeyProvider;
+import com.amazon.opendistroforelasticsearch.security.auth.Destroyable;
+import com.amazon.opendistroforelasticsearch.security.auth.HTTPAuthenticator;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.support.PemKeyReader;
+import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
+import com.google.common.base.Strings;
+import com.onelogin.saml2.authn.AuthnRequest;
+import com.onelogin.saml2.logout.LogoutRequest;
+import com.onelogin.saml2.settings.Saml2Settings;
+import com.onelogin.saml2.util.Constants;
+import com.onelogin.saml2.util.Util;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.component.DestructableComponent;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.cxf.rs.security.jose.jwk.JsonWebKey;
 import org.apache.logging.log4j.LogManager;
@@ -39,24 +49,12 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.metadata.resolver.impl.AbstractReloadingMetadataResolver;
 
-import com.amazon.dlic.auth.http.jwt.AbstractHTTPJwtAuthenticator;
-import com.amazon.dlic.auth.http.jwt.keybyoidc.AuthenticatorUnavailableException;
-import com.amazon.dlic.auth.http.jwt.keybyoidc.BadCredentialsException;
-import com.amazon.dlic.auth.http.jwt.keybyoidc.KeyProvider;
-import com.amazon.opendistroforelasticsearch.security.auth.Destroyable;
-import com.amazon.opendistroforelasticsearch.security.auth.HTTPAuthenticator;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.support.PemKeyReader;
-import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
-import com.google.common.base.Strings;
-import com.onelogin.saml2.authn.AuthnRequest;
-import com.onelogin.saml2.logout.LogoutRequest;
-import com.onelogin.saml2.settings.Saml2Settings;
-import com.onelogin.saml2.util.Constants;
-import com.onelogin.saml2.util.Util;
-
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import net.shibboleth.utilities.java.support.component.DestructableComponent;
+import java.net.URL;
+import java.nio.file.Path;
+import java.security.AccessController;
+import java.security.PrivateKey;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 public class HTTPSamlAuthenticator implements HTTPAuthenticator, Destroyable {
     protected final static Logger log = LogManager.getLogger(HTTPSamlAuthenticator.class);

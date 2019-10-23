@@ -15,10 +15,7 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.dlsfls;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
@@ -31,7 +28,9 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Ignore
 public class FlsPerfTest extends AbstractDlsFlsTest{

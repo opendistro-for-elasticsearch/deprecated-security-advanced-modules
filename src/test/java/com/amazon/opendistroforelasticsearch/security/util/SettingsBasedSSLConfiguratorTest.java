@@ -15,32 +15,10 @@
 
 package com.amazon.opendistroforelasticsearch.security.util;
 
-import static org.hamcrest.CoreMatchers.either;
-import static org.hamcrest.CoreMatchers.instanceOf;
-
-import java.io.Closeable;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
-import java.net.SocketException;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
-import java.nio.file.Path;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.cert.Certificate;
-import java.util.Map;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManagerFactory;
-
+import com.amazon.dlic.util.SettingsBasedSSLConfigurator;
+import com.amazon.dlic.util.SettingsBasedSSLConfigurator.SSLConfig;
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.network.SocketUtils;
 import org.apache.http.HttpConnectionFactory;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
@@ -71,10 +49,23 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.amazon.dlic.util.SettingsBasedSSLConfigurator;
-import com.amazon.dlic.util.SettingsBasedSSLConfigurator.SSLConfig;
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
-import com.amazon.opendistroforelasticsearch.security.test.helper.network.SocketUtils;
+import javax.net.ssl.*;
+import java.io.Closeable;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+import java.net.SocketException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.file.Path;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.either;
+import static org.hamcrest.CoreMatchers.instanceOf;
 
 public class SettingsBasedSSLConfiguratorTest {
 

@@ -15,9 +15,9 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.support.HeaderHelper;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
 import org.elasticsearch.client.Client;
@@ -28,9 +28,8 @@ import org.elasticsearch.threadpool.ThreadPool;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.support.HeaderHelper;
+import java.io.IOException;
+import java.nio.file.Path;
 
 public final class InternalESSink extends AuditLogSink {
 

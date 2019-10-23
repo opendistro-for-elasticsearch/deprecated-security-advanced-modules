@@ -15,9 +15,6 @@
 
 package com.amazon.opendistroforelasticsearch.security.configuration;
 
-import java.util.Map;
-import java.util.Set;
-
 import org.elasticsearch.ElasticsearchSecurityException;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
@@ -31,7 +28,8 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
-import com.amazon.opendistroforelasticsearch.security.configuration.DlsFlsRequestValve;
+import java.util.Map;
+import java.util.Set;
 
 public class DlsFlsValveImpl implements DlsFlsRequestValve {
 

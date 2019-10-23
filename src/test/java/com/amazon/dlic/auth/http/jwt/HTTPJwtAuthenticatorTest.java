@@ -15,26 +15,19 @@
 
 package com.amazon.dlic.auth.http.jwt;
 
+import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
+import com.amazon.opendistroforelasticsearch.security.util.FakeRestRequest;
+import com.google.common.io.BaseEncoding;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.amazon.dlic.auth.http.jwt.HTTPJwtAuthenticator;
-import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
-import com.amazon.opendistroforelasticsearch.security.util.FakeRestRequest;
-import com.google.common.io.BaseEncoding;
+import java.security.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HTTPJwtAuthenticatorTest {
 

@@ -15,15 +15,13 @@
 
 package com.amazon.opendistroforelasticsearch.security.cache;
 
-import java.nio.file.Path;
-
+import com.amazon.opendistroforelasticsearch.security.auth.AuthenticationBackend;
+import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
+import com.amazon.opendistroforelasticsearch.security.user.User;
 import org.elasticsearch.ElasticsearchSecurityException;
 import org.elasticsearch.common.settings.Settings;
 
-import com.amazon.opendistroforelasticsearch.security.auth.AuthenticationBackend;
-import com.amazon.opendistroforelasticsearch.security.auth.AuthorizationBackend;
-import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
-import com.amazon.opendistroforelasticsearch.security.user.User;
+import java.nio.file.Path;
 
 
 public class DummyAuthenticationBackend implements AuthenticationBackend {

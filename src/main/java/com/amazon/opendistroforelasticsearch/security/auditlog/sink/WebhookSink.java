@@ -15,16 +15,10 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.security.AccessController;
-import java.security.KeyStore;
-import java.security.PrivilegedAction;
-import java.security.cert.X509Certificate;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import com.amazon.opendistroforelasticsearch.security.ssl.util.SSLConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.support.PemKeyReader;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -42,10 +36,15 @@ import org.apache.http.ssl.TrustStrategy;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.settings.Settings;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
-import com.amazon.opendistroforelasticsearch.security.ssl.util.SSLConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.support.PemKeyReader;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.security.AccessController;
+import java.security.KeyStore;
+import java.security.PrivilegedAction;
+import java.security.cert.X509Certificate;
 
 public class WebhookSink extends AuditLogSink {
 

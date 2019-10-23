@@ -15,9 +15,8 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.validation;
 
-import java.util.Map;
-import java.util.regex.Pattern;
-
+import com.amazon.opendistroforelasticsearch.security.ssl.util.Utils;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.compress.NotXContentException;
 import org.elasticsearch.common.settings.Settings;
@@ -26,8 +25,8 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
 
-import com.amazon.opendistroforelasticsearch.security.ssl.util.Utils;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class InternalUsersValidator extends AbstractConfigurationValidator {
 

@@ -15,30 +15,17 @@
 
 package com.amazon.dlic.auth.ldap2;
 
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-
 import org.elasticsearch.SpecialPermission;
-import org.ldaptive.AddRequest;
-import org.ldaptive.BindRequest;
-import org.ldaptive.CompareRequest;
-import org.ldaptive.ConnectionConfig;
-import org.ldaptive.DeleteRequest;
-import org.ldaptive.LdapException;
-import org.ldaptive.ModifyDnRequest;
-import org.ldaptive.ModifyRequest;
-import org.ldaptive.Response;
-import org.ldaptive.SearchRequest;
+import org.ldaptive.*;
 import org.ldaptive.control.RequestControl;
 import org.ldaptive.extended.ExtendedRequest;
 import org.ldaptive.extended.UnsolicitedNotificationListener;
-import org.ldaptive.provider.Provider;
-import org.ldaptive.provider.ProviderConnection;
-import org.ldaptive.provider.ProviderConnectionFactory;
-import org.ldaptive.provider.SearchIterator;
-import org.ldaptive.provider.SearchListener;
+import org.ldaptive.provider.*;
 import org.ldaptive.provider.jndi.JndiProviderConfig;
+
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 public class PrivilegedProvider implements Provider<JndiProviderConfig> {
 

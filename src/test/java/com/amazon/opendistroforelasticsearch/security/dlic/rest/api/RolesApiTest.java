@@ -15,20 +15,19 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
-import java.util.List;
-
 import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
-import org.apache.http.Header;
-import org.apache.http.HttpStatus;
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator.ErrorType;
 import com.amazon.opendistroforelasticsearch.security.support.SecurityJsonNode;
 import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.List;
 
 public class RolesApiTest extends AbstractRestApiUnitTest {
 

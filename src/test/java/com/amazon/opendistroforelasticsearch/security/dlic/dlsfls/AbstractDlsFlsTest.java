@@ -15,17 +15,12 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.dlsfls;
 
-import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateAction;
-import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateRequest;
-import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateResponse;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
 import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
-import org.junit.Assert;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
 
 public abstract class AbstractDlsFlsTest extends SingleClusterTest {
 

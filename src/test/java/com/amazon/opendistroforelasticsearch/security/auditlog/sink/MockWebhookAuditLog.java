@@ -17,9 +17,6 @@ package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
 import org.elasticsearch.common.settings.Settings;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.AuditLogSink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.WebhookSink;
-
 public class MockWebhookAuditLog extends WebhookSink {
 
 	public String payload = null;

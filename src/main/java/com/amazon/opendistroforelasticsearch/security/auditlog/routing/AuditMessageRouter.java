@@ -15,21 +15,6 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.routing;
 
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.threadpool.ThreadPool;
-
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
 import com.amazon.opendistroforelasticsearch.security.auditlog.sink.AuditLogSink;
@@ -37,6 +22,15 @@ import com.amazon.opendistroforelasticsearch.security.auditlog.sink.SinkProvider
 import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceConfig;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils;
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.threadpool.ThreadPool;
+
+import java.nio.file.Path;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class AuditMessageRouter {
 

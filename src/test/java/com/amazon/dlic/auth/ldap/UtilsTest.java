@@ -15,13 +15,11 @@
 
 package com.amazon.dlic.auth.ldap;
 
-import javax.naming.InvalidNameException;
-import javax.naming.ldap.LdapName;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.amazon.dlic.auth.ldap.util.Utils;
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
 
 public class UtilsTest {
 

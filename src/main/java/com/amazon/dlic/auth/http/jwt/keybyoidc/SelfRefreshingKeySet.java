@@ -15,19 +15,14 @@
 
 package com.amazon.dlic.auth.http.jwt.keybyoidc;
 
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
+import com.google.common.base.Strings;
 import org.apache.cxf.rs.security.jose.jwk.JsonWebKey;
 import org.apache.cxf.rs.security.jose.jwk.JsonWebKeys;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.google.common.base.Strings;
+import java.util.List;
+import java.util.concurrent.*;
 
 public class SelfRefreshingKeySet implements KeyProvider {
 	private static final Logger log = LogManager.getLogger(SelfRefreshingKeySet.class);

@@ -15,15 +15,13 @@
 
 package com.amazon.opendistroforelasticsearch.security.httpclient;
 
-import org.elasticsearch.common.settings.Settings;
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.amazon.opendistroforelasticsearch.security.httpclient.HttpClient;
 import com.amazon.opendistroforelasticsearch.security.ssl.util.SSLConfigConstants;
 import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
 import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
 import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import org.elasticsearch.common.settings.Settings;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class HttpClientTest extends SingleClusterTest {
 

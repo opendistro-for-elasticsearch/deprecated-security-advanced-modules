@@ -15,25 +15,23 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.routing;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.elasticsearch.common.settings.Settings;
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.amazon.opendistroforelasticsearch.security.auditlog.AbstractAuditlogiUnitTest;
 import com.amazon.opendistroforelasticsearch.security.auditlog.helper.FailingSink;
 import com.amazon.opendistroforelasticsearch.security.auditlog.helper.LoggingSink;
 import com.amazon.opendistroforelasticsearch.security.auditlog.helper.MockAuditMessageFactory;
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
-import com.amazon.opendistroforelasticsearch.security.auditlog.routing.AuditMessageRouter;
 import com.amazon.opendistroforelasticsearch.security.auditlog.sink.AuditLogSink;
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import org.elasticsearch.common.settings.Settings;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class FallbackTest extends AbstractAuditlogiUnitTest {
 

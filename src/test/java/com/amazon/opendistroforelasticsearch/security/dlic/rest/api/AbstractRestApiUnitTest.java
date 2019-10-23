@@ -15,20 +15,7 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
-import org.apache.http.Header;
-import org.apache.http.HttpStatus;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.plugins.Plugin;
-import org.junit.Assert;
-
 import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
 import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
 import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
@@ -37,6 +24,18 @@ import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelpe
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.plugins.Plugin;
+import org.junit.Assert;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class AbstractRestApiUnitTest extends SingleClusterTest {
 

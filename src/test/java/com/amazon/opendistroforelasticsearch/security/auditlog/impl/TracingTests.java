@@ -15,8 +15,13 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.impl;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
+import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
+import com.amazon.opendistroforelasticsearch.security.test.helper.cluster.ClusterConfiguration;
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest.AliasActions;
@@ -29,13 +34,7 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
-import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
-import com.amazon.opendistroforelasticsearch.security.test.helper.cluster.ClusterConfiguration;
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
+import java.lang.Thread.UncaughtExceptionHandler;
 
 public class TracingTests extends SingleClusterTest {
 

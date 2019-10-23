@@ -15,18 +15,13 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.helper;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.RequestLine;
+import org.apache.http.*;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class TestHttpHandler implements HttpRequestHandler {
 	public String method;

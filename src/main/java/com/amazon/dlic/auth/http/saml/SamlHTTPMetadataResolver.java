@@ -15,11 +15,9 @@
 
 package com.amazon.dlic.auth.http.saml;
 
-import java.nio.file.Path;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-
+import com.amazon.dlic.util.SettingsBasedSSLConfigurator;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -27,10 +25,10 @@ import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.common.settings.Settings;
 import org.opensaml.saml.metadata.resolver.impl.HTTPMetadataResolver;
 
-import com.amazon.dlic.util.SettingsBasedSSLConfigurator;
-
-import net.shibboleth.utilities.java.support.resolver.ResolverException;
-import net.shibboleth.utilities.java.support.xml.BasicParserPool;
+import java.nio.file.Path;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 public class SamlHTTPMetadataResolver extends HTTPMetadataResolver {
     private static int componentIdCounter = 0;

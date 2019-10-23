@@ -15,17 +15,14 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
-import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.helper.LoggingSink;
+import com.amazon.opendistroforelasticsearch.security.auditlog.helper.MockAuditMessageFactory;
+import com.amazon.opendistroforelasticsearch.security.auditlog.helper.TestHttpHandler;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
+import com.amazon.opendistroforelasticsearch.security.auditlog.sink.WebhookSink.WebhookFormat;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.bootstrap.HttpServer;
 import org.apache.http.impl.bootstrap.ServerBootstrap;
@@ -35,16 +32,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.helper.LoggingSink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.helper.MockAuditMessageFactory;
-import com.amazon.opendistroforelasticsearch.security.auditlog.helper.TestHttpHandler;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.AuditLogSink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.WebhookSink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.WebhookSink.WebhookFormat;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.util.concurrent.TimeUnit;
 
 public class WebhookAuditLogTest {
 

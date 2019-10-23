@@ -15,18 +15,17 @@
 
 package com.amazon.dlic.auth.http.saml;
 
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import net.shibboleth.utilities.java.support.xml.BasicParserPool;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.env.Environment;
+import org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.env.Environment;
-import org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver;
-
-import net.shibboleth.utilities.java.support.resolver.ResolverException;
-import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 
 public class SamlFilesystemMetadataResolver extends FilesystemMetadataResolver {
     private static int componentIdCounter = 0;

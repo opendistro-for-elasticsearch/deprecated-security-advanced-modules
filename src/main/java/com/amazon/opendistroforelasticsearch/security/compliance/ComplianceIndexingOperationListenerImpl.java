@@ -15,8 +15,7 @@
 
 package com.amazon.opendistroforelasticsearch.security.compliance;
 
-import java.util.Objects;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
@@ -29,9 +28,7 @@ import org.elasticsearch.index.get.GetResult;
 import org.elasticsearch.index.shard.IndexShard;
 import org.elasticsearch.index.shard.ShardId;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
-import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceConfig;
-import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceIndexingOperationListener;
+import java.util.Objects;
 
 public final class ComplianceIndexingOperationListenerImpl extends ComplianceIndexingOperationListener {
 

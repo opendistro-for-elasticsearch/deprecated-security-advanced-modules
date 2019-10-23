@@ -15,26 +15,12 @@
 
 package com.amazon.dlic.auth.http.saml;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.net.ssl.KeyManagerFactory;
-
 import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
+import com.amazon.opendistroforelasticsearch.security.util.FakeRestRequest;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.ImmutableMap;
 import org.apache.cxf.rs.security.jose.jws.JwsJwtCompactConsumer;
 import org.apache.cxf.rs.security.jose.jwt.JwtToken;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -54,11 +40,19 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.saml.saml2.core.NameIDType;
 
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
-import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
-import com.amazon.opendistroforelasticsearch.security.util.FakeRestRequest;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.common.collect.ImmutableMap;
+import javax.net.ssl.KeyManagerFactory;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HTTPSamlAuthenticatorTest {
     protected static MockSamlIdpServer mockSamlIdpServer;

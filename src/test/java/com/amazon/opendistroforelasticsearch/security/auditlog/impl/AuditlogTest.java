@@ -15,9 +15,10 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.impl;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.helper.RetrySink;
+import com.amazon.opendistroforelasticsearch.security.auditlog.integration.TestAuditlogImpl;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.test.AbstractSecurityUnitTest;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.cluster.ClusterName;
@@ -28,10 +29,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.helper.RetrySink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.integration.TestAuditlogImpl;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.test.AbstractSecurityUnitTest;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AuditlogTest {
 

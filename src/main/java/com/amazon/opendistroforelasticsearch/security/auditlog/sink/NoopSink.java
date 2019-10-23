@@ -15,9 +15,8 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
-import org.elasticsearch.common.settings.Settings;
-
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import org.elasticsearch.common.settings.Settings;
 
 public final class NoopSink extends AuditLogSink {
 

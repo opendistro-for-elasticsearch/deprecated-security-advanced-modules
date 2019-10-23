@@ -15,15 +15,11 @@
 
 package com.amazon.opendistroforelasticsearch.security.compliance;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
+import com.amazon.opendistroforelasticsearch.security.support.HeaderHelper;
+import com.amazon.opendistroforelasticsearch.security.support.SourceFieldsContext;
+import com.amazon.opendistroforelasticsearch.security.support.WildcardMatcher;
+import com.github.wnameless.json.flattener.JsonFlattener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.FieldInfo;
@@ -41,12 +37,9 @@ import org.elasticsearch.index.IndexService;
 import org.elasticsearch.index.mapper.Uid;
 import org.elasticsearch.index.shard.ShardId;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
-import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceConfig;
-import com.amazon.opendistroforelasticsearch.security.support.HeaderHelper;
-import com.amazon.opendistroforelasticsearch.security.support.SourceFieldsContext;
-import com.amazon.opendistroforelasticsearch.security.support.WildcardMatcher;
-import com.github.wnameless.json.flattener.JsonFlattener;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.function.Function;
 
 //TODO  We need to deal with caching!!
 //Currently we disable caching (and realtime requests) when FLS or DLS is applied

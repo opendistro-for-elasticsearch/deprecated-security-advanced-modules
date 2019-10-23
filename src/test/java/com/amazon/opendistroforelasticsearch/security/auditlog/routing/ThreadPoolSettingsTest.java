@@ -15,13 +15,11 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.routing;
 
+import com.amazon.opendistroforelasticsearch.security.auditlog.AbstractAuditlogiUnitTest;
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.amazon.opendistroforelasticsearch.security.auditlog.AbstractAuditlogiUnitTest;
-import com.amazon.opendistroforelasticsearch.security.auditlog.routing.AuditMessageRouter;
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 
 public class ThreadPoolSettingsTest extends AbstractAuditlogiUnitTest {
 

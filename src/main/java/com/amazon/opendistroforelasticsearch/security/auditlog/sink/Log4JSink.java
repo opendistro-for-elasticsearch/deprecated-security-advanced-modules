@@ -15,12 +15,11 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.settings.Settings;
-
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
 
 public final class Log4JSink extends AuditLogSink {
 

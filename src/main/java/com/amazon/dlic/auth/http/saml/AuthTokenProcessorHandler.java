@@ -15,21 +15,18 @@
 
 package com.amazon.dlic.auth.http.saml;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
 import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.api.AuthTokenProcessorAction;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Strings;
+import com.onelogin.saml2.authn.SamlResponse;
+import com.onelogin.saml2.exception.SettingsException;
+import com.onelogin.saml2.exception.ValidationError;
+import com.onelogin.saml2.settings.Saml2Settings;
+import com.onelogin.saml2.util.Util;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.json.basic.JsonMapObjectReaderWriter;
 import org.apache.cxf.rs.security.jose.jwk.JsonWebKey;
@@ -55,17 +52,18 @@ import org.elasticsearch.rest.RestStatus;
 import org.joda.time.DateTime;
 import org.xml.sax.SAXException;
 
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.api.AuthTokenProcessorAction;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Strings;
-import com.onelogin.saml2.authn.SamlResponse;
-import com.onelogin.saml2.exception.SettingsException;
-import com.onelogin.saml2.exception.ValidationError;
-import com.onelogin.saml2.settings.Saml2Settings;
-import com.onelogin.saml2.util.Util;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class AuthTokenProcessorHandler {
     private static final Logger log = LogManager.getLogger(AuthTokenProcessorHandler.class);

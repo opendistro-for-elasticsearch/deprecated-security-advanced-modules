@@ -15,8 +15,8 @@
 
 package com.amazon.dlic.auth.http.jwt.keybyoidc;
 
-import java.io.IOException;
-
+import com.amazon.dlic.auth.http.jwt.oidc.json.OpenIdProviderConfiguration;
+import com.amazon.dlic.util.SettingsBasedSSLConfigurator.SSLConfig;
 import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
 import org.apache.cxf.rs.security.jose.jwk.JsonWebKeys;
 import org.apache.cxf.rs.security.jose.jwk.JwkUtils;
@@ -36,8 +36,7 @@ import org.apache.http.impl.client.cache.CachingHttpClients;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.amazon.dlic.auth.http.jwt.oidc.json.OpenIdProviderConfiguration;
-import com.amazon.dlic.util.SettingsBasedSSLConfigurator.SSLConfig;
+import java.io.IOException;
 
 
 public class KeySetRetriever implements KeySetProvider {

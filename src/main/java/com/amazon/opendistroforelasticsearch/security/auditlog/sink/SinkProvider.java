@@ -15,19 +15,18 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.threadpool.ThreadPool;
 
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class SinkProvider {
 

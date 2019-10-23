@@ -15,9 +15,19 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
+import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
+import com.amazon.opendistroforelasticsearch.security.configuration.ConfigurationRepository;
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.NoOpValidator;
+import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
+import com.amazon.opendistroforelasticsearch.security.securityconf.Migration;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.CType;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.SecurityDynamicConfiguration;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v6.*;
+import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v7.*;
+import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.elasticsearch.Version;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -42,28 +52,8 @@ import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
 import org.elasticsearch.threadpool.ThreadPool;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
-import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
-import com.amazon.opendistroforelasticsearch.security.configuration.ConfigurationRepository;
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.NoOpValidator;
-import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
-import com.amazon.opendistroforelasticsearch.security.securityconf.Migration;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.CType;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.SecurityDynamicConfiguration;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v6.ActionGroupsV6;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v6.ConfigV6;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v6.InternalUserV6;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v6.RoleMappingsV6;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v6.RoleV6;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v7.ActionGroupsV7;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v7.ConfigV7;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v7.InternalUserV7;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v7.RoleMappingsV7;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v7.RoleV7;
-import com.amazon.opendistroforelasticsearch.security.securityconf.impl.v7.TenantV7;
-import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
+import java.io.IOException;
+import java.nio.file.Path;
 
 public class MigrateApiAction extends AbstractApiAction {
 

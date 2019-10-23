@@ -15,29 +15,6 @@
 
 package com.amazon.dlic.auth.ldap2;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.elasticsearch.ElasticsearchSecurityException;
-import org.elasticsearch.SpecialPermission;
-import org.elasticsearch.common.settings.Settings;
-import org.ldaptive.BindRequest;
-import org.ldaptive.Connection;
-import org.ldaptive.ConnectionFactory;
-import org.ldaptive.Credential;
-import org.ldaptive.LdapEntry;
-import org.ldaptive.LdapException;
-import org.ldaptive.Response;
-import org.ldaptive.pool.ConnectionPool;
-
 import com.amazon.dlic.auth.ldap.LdapUser;
 import com.amazon.dlic.auth.ldap.util.ConfigConstants;
 import com.amazon.dlic.auth.ldap.util.Utils;
@@ -46,6 +23,22 @@ import com.amazon.opendistroforelasticsearch.security.auth.AuthenticationBackend
 import com.amazon.opendistroforelasticsearch.security.auth.Destroyable;
 import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
 import com.amazon.opendistroforelasticsearch.security.user.User;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.elasticsearch.ElasticsearchSecurityException;
+import org.elasticsearch.SpecialPermission;
+import org.elasticsearch.common.settings.Settings;
+import org.ldaptive.*;
+import org.ldaptive.pool.ConnectionPool;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public class LDAPAuthenticationBackend2 implements AuthenticationBackend, Destroyable {
 

@@ -15,13 +15,9 @@
 
 package com.amazon.dlic.auth.ldap2;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.amazon.dlic.auth.ldap.util.ConfigConstants;
+import com.amazon.dlic.auth.ldap.util.LdapHelper;
+import com.amazon.dlic.auth.ldap.util.Utils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,9 +27,7 @@ import org.ldaptive.LdapEntry;
 import org.ldaptive.SearchFilter;
 import org.ldaptive.SearchScope;
 
-import com.amazon.dlic.auth.ldap.util.ConfigConstants;
-import com.amazon.dlic.auth.ldap.util.LdapHelper;
-import com.amazon.dlic.auth.ldap.util.Utils;
+import java.util.*;
 
 public class LDAPUserSearcher {
     protected static final Logger log = LogManager.getLogger(LDAPUserSearcher.class);

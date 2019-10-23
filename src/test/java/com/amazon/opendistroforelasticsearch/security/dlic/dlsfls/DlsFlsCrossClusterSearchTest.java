@@ -15,6 +15,13 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.dlsfls;
 
+import com.amazon.opendistroforelasticsearch.security.test.AbstractSecurityUnitTest;
+import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
+import com.amazon.opendistroforelasticsearch.security.test.helper.cluster.ClusterConfiguration;
+import com.amazon.opendistroforelasticsearch.security.test.helper.cluster.ClusterHelper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.cluster.ClusterInfo;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
@@ -28,14 +35,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-
-import com.amazon.opendistroforelasticsearch.security.test.AbstractSecurityUnitTest;
-import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
-import com.amazon.opendistroforelasticsearch.security.test.helper.cluster.ClusterConfiguration;
-import com.amazon.opendistroforelasticsearch.security.test.helper.cluster.ClusterHelper;
-import com.amazon.opendistroforelasticsearch.security.test.helper.cluster.ClusterInfo;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 
 @RunWith(Parameterized.class)
 public class DlsFlsCrossClusterSearchTest extends AbstractSecurityUnitTest {

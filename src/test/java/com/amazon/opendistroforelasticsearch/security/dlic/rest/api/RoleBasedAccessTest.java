@@ -16,15 +16,14 @@
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
 import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
+import com.amazon.opendistroforelasticsearch.security.support.SecurityJsonNode;
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.amazon.opendistroforelasticsearch.security.support.SecurityJsonNode;
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 
 public class RoleBasedAccessTest extends AbstractRestApiUnitTest {
 

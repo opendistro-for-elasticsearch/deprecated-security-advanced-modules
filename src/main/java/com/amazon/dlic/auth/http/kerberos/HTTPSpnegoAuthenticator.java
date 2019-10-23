@@ -15,24 +15,11 @@
 
 package com.amazon.dlic.auth.http.kerberos;
 
-import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.AccessController;
-import java.security.Principal;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-
-import javax.security.auth.Subject;
-import javax.security.auth.login.LoginException;
-
+import com.amazon.dlic.auth.http.kerberos.util.JaasKrbUtil;
+import com.amazon.dlic.auth.http.kerberos.util.KrbConstants;
+import com.amazon.opendistroforelasticsearch.security.auth.HTTPAuthenticator;
+import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
+import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ExceptionsHelper;
@@ -42,23 +29,25 @@ import org.elasticsearch.common.util.concurrent.ThreadContext;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.env.Environment;
-//import org.elasticsearch.env.Environment;
 import org.elasticsearch.rest.BytesRestResponse;
 import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestStatus;
-import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
-import org.ietf.jgss.GSSManager;
-import org.ietf.jgss.GSSName;
-import org.ietf.jgss.Oid;
+import org.ietf.jgss.*;
 
-import com.amazon.dlic.auth.http.kerberos.util.JaasKrbUtil;
-import com.amazon.dlic.auth.http.kerberos.util.KrbConstants;
-import com.amazon.opendistroforelasticsearch.security.auth.HTTPAuthenticator;
-import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
-import com.google.common.base.Strings;
+import javax.security.auth.Subject;
+import javax.security.auth.login.LoginException;
+import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+//import org.elasticsearch.env.Environment;
 
 public class HTTPSpnegoAuthenticator implements HTTPAuthenticator {
 

@@ -15,19 +15,12 @@
 
 package com.amazon.opendistroforelasticsearch.security.configuration;
 
-import java.io.IOException;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
+import com.amazon.opendistroforelasticsearch.security.support.OpenDistroSecurityDeprecationHandler;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.ConstantScoreQuery;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.PrefixQuery;
-import org.apache.lucene.search.Query;
+import org.apache.lucene.search.*;
 import org.apache.lucene.search.join.BitSetProducer;
 import org.apache.lucene.search.join.ToChildBlockJoinQuery;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
@@ -38,9 +31,11 @@ import org.elasticsearch.index.query.ParsedQuery;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryShardContext;
 
-import com.amazon.opendistroforelasticsearch.security.support.OpenDistroSecurityDeprecationHandler;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 
 final class DlsQueryParser {

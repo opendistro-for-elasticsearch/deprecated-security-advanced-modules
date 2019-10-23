@@ -15,28 +15,9 @@
 
 package com.amazon.dlic.util;
 
-import java.net.Socket;
-import java.nio.file.Path;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
+import com.amazon.opendistroforelasticsearch.security.ssl.util.SSLConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.support.PemKeyReader;
+import com.google.common.collect.ImmutableList;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -49,9 +30,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.settings.Settings;
 
-import com.amazon.opendistroforelasticsearch.security.ssl.util.SSLConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.support.PemKeyReader;
-import com.google.common.collect.ImmutableList;
+import javax.net.ssl.*;
+import java.net.Socket;
+import java.nio.file.Path;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class SettingsBasedSSLConfigurator {
     private static final Logger log = LogManager.getLogger(SettingsBasedSSLConfigurator.class);

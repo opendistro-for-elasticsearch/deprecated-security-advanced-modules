@@ -15,55 +15,25 @@
 
 package com.amazon.dlic.auth.ldap2;
 
+import com.amazon.dlic.auth.ldap.util.ConfigConstants;
+import com.amazon.dlic.util.SettingsBasedSSLConfigurator;
+import com.amazon.dlic.util.SettingsBasedSSLConfigurator.SSLConfigException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.elasticsearch.common.settings.Settings;
+import org.ldaptive.*;
+import org.ldaptive.pool.*;
+import org.ldaptive.provider.Provider;
+import org.ldaptive.provider.jndi.JndiProviderConfig;
+import org.ldaptive.sasl.ExternalConfig;
+import org.ldaptive.ssl.*;
+
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.elasticsearch.common.settings.Settings;
-import org.ldaptive.ActivePassiveConnectionStrategy;
-import org.ldaptive.BindConnectionInitializer;
-import org.ldaptive.CompareRequest;
-import org.ldaptive.Connection;
-import org.ldaptive.ConnectionConfig;
-import org.ldaptive.ConnectionFactory;
-import org.ldaptive.ConnectionInitializer;
-import org.ldaptive.ConnectionStrategy;
-import org.ldaptive.Credential;
-import org.ldaptive.DefaultConnectionFactory;
-import org.ldaptive.LdapAttribute;
-import org.ldaptive.RandomConnectionStrategy;
-import org.ldaptive.ReturnAttributes;
-import org.ldaptive.RoundRobinConnectionStrategy;
-import org.ldaptive.SearchFilter;
-import org.ldaptive.SearchRequest;
-import org.ldaptive.SearchScope;
-import org.ldaptive.pool.AbstractConnectionPool;
-import org.ldaptive.pool.BlockingConnectionPool;
-import org.ldaptive.pool.CompareValidator;
-import org.ldaptive.pool.ConnectionPool;
-import org.ldaptive.pool.IdlePruneStrategy;
-import org.ldaptive.pool.PoolConfig;
-import org.ldaptive.pool.PooledConnectionFactory;
-import org.ldaptive.pool.SearchValidator;
-import org.ldaptive.pool.SoftLimitConnectionPool;
-import org.ldaptive.pool.Validator;
-import org.ldaptive.provider.Provider;
-import org.ldaptive.provider.jndi.JndiProviderConfig;
-import org.ldaptive.sasl.ExternalConfig;
-import org.ldaptive.ssl.AllowAnyHostnameVerifier;
-import org.ldaptive.ssl.AllowAnyTrustManager;
-import org.ldaptive.ssl.CredentialConfig;
-import org.ldaptive.ssl.CredentialConfigFactory;
-import org.ldaptive.ssl.SslConfig;
-
-import com.amazon.dlic.auth.ldap.util.ConfigConstants;
-import com.amazon.dlic.util.SettingsBasedSSLConfigurator;
-import com.amazon.dlic.util.SettingsBasedSSLConfigurator.SSLConfigException;
 
 public class LDAPConnectionFactoryFactory {
 

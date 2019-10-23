@@ -15,15 +15,7 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Collection;
-
 import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
-import org.apache.http.Header;
-import org.elasticsearch.common.settings.Settings;
-
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
 import com.amazon.opendistroforelasticsearch.security.auditlog.routing.AuditMessageRouter;
 import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceConfig;
@@ -32,6 +24,13 @@ import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
 import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.http.Header;
+import org.elasticsearch.common.settings.Settings;
+
+import java.util.Collection;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public abstract class AbstractAuditlogiUnitTest extends SingleClusterTest {
 

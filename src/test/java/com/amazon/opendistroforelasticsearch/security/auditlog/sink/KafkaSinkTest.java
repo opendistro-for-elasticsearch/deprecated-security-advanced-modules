@@ -15,9 +15,10 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
-import java.util.Arrays;
-import java.util.Properties;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.AbstractAuditlogiUnitTest;
+import com.amazon.opendistroforelasticsearch.security.auditlog.helper.MockAuditMessageFactory;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.elasticsearch.common.settings.Settings;
@@ -26,16 +27,10 @@ import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.kafka.test.rule.KafkaEmbedded;
-
 import scala.util.Random;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.AbstractAuditlogiUnitTest;
-import com.amazon.opendistroforelasticsearch.security.auditlog.helper.MockAuditMessageFactory;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.AuditLogSink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.KafkaSink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.SinkProvider;
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import java.util.Arrays;
+import java.util.Properties;
 
 public class KafkaSinkTest extends AbstractAuditlogiUnitTest {
 

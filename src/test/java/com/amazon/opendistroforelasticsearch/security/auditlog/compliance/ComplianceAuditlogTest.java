@@ -15,7 +15,11 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.compliance;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import com.amazon.opendistroforelasticsearch.security.auditlog.AbstractAuditlogiUnitTest;
+import com.amazon.opendistroforelasticsearch.security.auditlog.integration.TestAuditlogImpl;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.index.IndexRequest;
@@ -24,12 +28,6 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.amazon.opendistroforelasticsearch.security.auditlog.AbstractAuditlogiUnitTest;
-import com.amazon.opendistroforelasticsearch.security.auditlog.integration.TestAuditlogImpl;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 
 public class ComplianceAuditlogTest extends AbstractAuditlogiUnitTest {
 

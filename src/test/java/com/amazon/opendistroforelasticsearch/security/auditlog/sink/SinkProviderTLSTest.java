@@ -15,14 +15,11 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.security.KeyStore;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.helper.MockAuditMessageFactory;
+import com.amazon.opendistroforelasticsearch.security.auditlog.helper.TestHttpHandler;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import org.apache.http.impl.bootstrap.HttpServer;
 import org.apache.http.impl.bootstrap.ServerBootstrap;
 import org.elasticsearch.common.settings.Settings;
@@ -32,13 +29,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.helper.MockAuditMessageFactory;
-import com.amazon.opendistroforelasticsearch.security.auditlog.helper.TestHttpHandler;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.SinkProvider;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.WebhookSink;
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.KeyStore;
 
 public class SinkProviderTLSTest {
 

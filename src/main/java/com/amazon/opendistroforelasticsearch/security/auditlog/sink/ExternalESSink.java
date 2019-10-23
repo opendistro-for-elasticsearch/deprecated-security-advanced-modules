@@ -15,6 +15,16 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import com.amazon.opendistroforelasticsearch.security.httpclient.HttpClient;
+import com.amazon.opendistroforelasticsearch.security.httpclient.HttpClient.HttpClientBuilder;
+import com.amazon.opendistroforelasticsearch.security.ssl.util.SSLConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.support.PemKeyReader;
+import org.elasticsearch.common.settings.Settings;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.KeyStore;
@@ -23,17 +33,6 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.elasticsearch.common.settings.Settings;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
-import com.amazon.opendistroforelasticsearch.security.httpclient.HttpClient;
-import com.amazon.opendistroforelasticsearch.security.httpclient.HttpClient.HttpClientBuilder;
-import com.amazon.opendistroforelasticsearch.security.ssl.util.SSLConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.support.PemKeyReader;
 
 public final class ExternalESSink extends AuditLogSink {
 

@@ -15,13 +15,13 @@
 
 package com.amazon.opendistroforelasticsearch.security.util;
 
+import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.rest.RestRequest;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.rest.RestRequest;
 
 public class FakeRestRequest extends RestRequest {
 

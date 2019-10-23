@@ -15,6 +15,11 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.integration;
 
+import com.amazon.opendistroforelasticsearch.security.auditlog.AbstractAuditlogiUnitTest;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.apache.http.NoHttpResponseException;
@@ -32,12 +37,6 @@ import org.elasticsearch.common.util.concurrent.ThreadContext.StoredContext;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.amazon.opendistroforelasticsearch.security.auditlog.AbstractAuditlogiUnitTest;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 
 public class BasicAuditlogTest extends AbstractAuditlogiUnitTest {
 

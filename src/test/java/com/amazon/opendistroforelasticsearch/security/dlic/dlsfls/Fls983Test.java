@@ -15,6 +15,8 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.dlsfls;
 
+import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
@@ -22,9 +24,6 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 
 public class Fls983Test extends AbstractDlsFlsTest{
 

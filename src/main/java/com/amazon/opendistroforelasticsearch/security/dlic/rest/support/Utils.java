@@ -15,24 +15,18 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.support;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
+import com.amazon.opendistroforelasticsearch.security.support.OpenDistroSecurityDeprecationHandler;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.elasticsearch.ElasticsearchParseException;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.common.xcontent.NamedXContentRegistry;
-import org.elasticsearch.common.xcontent.ToXContent;
-import org.elasticsearch.common.xcontent.XContentHelper;
-import org.elasticsearch.common.xcontent.XContentParser;
-import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.common.xcontent.*;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
-import com.amazon.opendistroforelasticsearch.security.support.OpenDistroSecurityDeprecationHandler;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Utils {
 

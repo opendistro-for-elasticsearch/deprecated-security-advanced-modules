@@ -15,10 +15,9 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
-import java.io.IOException;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.settings.Settings;
@@ -26,9 +25,9 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
-import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AuditLogSink {
 

@@ -15,18 +15,11 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 import org.apache.logging.log4j.Level;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.AuditLogSink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.DebugSink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.ExternalESSink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.InternalESSink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.Log4JSink;
-import com.amazon.opendistroforelasticsearch.security.auditlog.sink.SinkProvider;
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
 
 public class SinkProviderTest {
 

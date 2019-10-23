@@ -15,10 +15,9 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.helper;
 
-import org.elasticsearch.common.settings.Settings;
-
 import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage;
 import com.amazon.opendistroforelasticsearch.security.auditlog.sink.AuditLogSink;
+import org.elasticsearch.common.settings.Settings;
 
 public class SlowSink extends AuditLogSink{
 

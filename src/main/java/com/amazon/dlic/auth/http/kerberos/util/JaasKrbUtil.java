@@ -18,14 +18,6 @@ package com.amazon.dlic.auth.http.kerberos.util;
 //Source: Apache Kerby project
 //https://directory.apache.org/kerby/
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -36,6 +28,13 @@ import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
 * JAAS utilities for Kerberos login.

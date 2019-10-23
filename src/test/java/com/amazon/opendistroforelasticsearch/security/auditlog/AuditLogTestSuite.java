@@ -15,16 +15,9 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-
 import com.amazon.opendistroforelasticsearch.security.auditlog.compliance.ComplianceAuditlogTest;
 import com.amazon.opendistroforelasticsearch.security.auditlog.compliance.RestApiComplianceAuditlogTest;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditlogTest;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.DelegateTest;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.DisabledCategoriesTest;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.IgnoreAuditUsersTest;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.TracingTests;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.*;
 import com.amazon.opendistroforelasticsearch.security.auditlog.integration.BasicAuditlogTest;
 import com.amazon.opendistroforelasticsearch.security.auditlog.integration.SSLAuditlogTest;
 import com.amazon.opendistroforelasticsearch.security.auditlog.routing.FallbackTest;
@@ -35,6 +28,8 @@ import com.amazon.opendistroforelasticsearch.security.auditlog.sink.KafkaSinkTes
 import com.amazon.opendistroforelasticsearch.security.auditlog.sink.SinkProviderTLSTest;
 import com.amazon.opendistroforelasticsearch.security.auditlog.sink.SinkProviderTest;
 import com.amazon.opendistroforelasticsearch.security.auditlog.sink.WebhookAuditLogTest;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 

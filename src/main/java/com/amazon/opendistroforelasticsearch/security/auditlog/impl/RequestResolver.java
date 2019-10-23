@@ -15,15 +15,10 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog.Origin;
+import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils;
+import com.amazon.opendistroforelasticsearch.security.support.WildcardMatcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.DocWriteRequest;
@@ -58,10 +53,8 @@ import org.elasticsearch.index.reindex.UpdateByQueryRequest;
 import org.elasticsearch.tasks.Task;
 import org.elasticsearch.transport.TransportRequest;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog.Origin;
-import com.amazon.opendistroforelasticsearch.security.auditlog.impl.AuditMessage.Category;
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils;
-import com.amazon.opendistroforelasticsearch.security.support.WildcardMatcher;
+import java.io.IOException;
+import java.util.*;
 
 public final class RequestResolver {
 

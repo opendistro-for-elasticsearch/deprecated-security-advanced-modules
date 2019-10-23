@@ -15,11 +15,14 @@
 
 package com.amazon.dlic.auth.ldap;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.TreeSet;
-
+import com.amazon.dlic.auth.ldap.backend.LDAPAuthenticationBackend;
+import com.amazon.dlic.auth.ldap.backend.LDAPAuthorizationBackend;
+import com.amazon.dlic.auth.ldap.srv.EmbeddedLDAPServer;
+import com.amazon.dlic.auth.ldap.util.ConfigConstants;
+import com.amazon.dlic.auth.ldap.util.LdapHelper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
+import com.amazon.opendistroforelasticsearch.security.user.User;
 import org.elasticsearch.ElasticsearchSecurityException;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.AfterClass;
@@ -30,15 +33,10 @@ import org.ldaptive.Connection;
 import org.ldaptive.LdapAttribute;
 import org.ldaptive.LdapEntry;
 
-import com.amazon.dlic.auth.ldap.LdapUser;
-import com.amazon.dlic.auth.ldap.backend.LDAPAuthenticationBackend;
-import com.amazon.dlic.auth.ldap.backend.LDAPAuthorizationBackend;
-import com.amazon.dlic.auth.ldap.srv.EmbeddedLDAPServer;
-import com.amazon.dlic.auth.ldap.util.ConfigConstants;
-import com.amazon.dlic.auth.ldap.util.LdapHelper;
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
-import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
-import com.amazon.opendistroforelasticsearch.security.user.User;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.TreeSet;
 
 public class LdapBackendTest {
 

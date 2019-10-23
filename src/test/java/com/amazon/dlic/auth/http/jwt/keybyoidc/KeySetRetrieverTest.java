@@ -15,15 +15,10 @@
 
 package com.amazon.dlic.auth.http.jwt.keybyoidc;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
-import java.security.KeyStore;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Map;
-
+import com.amazon.dlic.util.SettingsBasedSSLConfigurator;
+import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.network.SocketUtils;
+import com.google.common.hash.Hashing;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -38,11 +33,14 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.amazon.dlic.auth.http.jwt.keybyoidc.KeySetRetriever;
-import com.amazon.dlic.util.SettingsBasedSSLConfigurator;
-import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelper;
-import com.amazon.opendistroforelasticsearch.security.test.helper.network.SocketUtils;
-import com.google.common.hash.Hashing;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+import java.security.KeyStore;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Map;
 
 public class KeySetRetrieverTest {
     protected static MockIpdServer mockIdpServer;

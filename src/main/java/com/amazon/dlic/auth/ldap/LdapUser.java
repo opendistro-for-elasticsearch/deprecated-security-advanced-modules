@@ -15,18 +15,17 @@
 
 package com.amazon.dlic.auth.ldap;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.ldaptive.LdapAttribute;
-import org.ldaptive.LdapEntry;
-
 import com.amazon.dlic.auth.ldap.util.Utils;
 import com.amazon.opendistroforelasticsearch.security.support.WildcardMatcher;
 import com.amazon.opendistroforelasticsearch.security.user.AuthCredentials;
 import com.amazon.opendistroforelasticsearch.security.user.User;
+import org.ldaptive.LdapAttribute;
+import org.ldaptive.LdapEntry;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LdapUser extends User {
 

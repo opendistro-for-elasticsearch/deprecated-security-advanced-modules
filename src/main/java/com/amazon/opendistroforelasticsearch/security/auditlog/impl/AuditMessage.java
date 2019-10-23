@@ -15,19 +15,9 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.impl;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog.Operation;
+import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog.Origin;
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.elasticsearch.ExceptionsHelper;
@@ -45,9 +35,14 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog.Operation;
-import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog.Origin;
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public final class AuditMessage {
 

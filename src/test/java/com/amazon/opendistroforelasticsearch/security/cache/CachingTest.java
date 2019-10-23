@@ -15,17 +15,16 @@
 
 package com.amazon.opendistroforelasticsearch.security.cache;
 
+import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
+import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
+import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.message.BasicHeader;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.amazon.opendistroforelasticsearch.security.test.DynamicSecurityConfig;
-import com.amazon.opendistroforelasticsearch.security.test.SingleClusterTest;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper;
-import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelper.HttpResponse;
 
 public class CachingTest extends SingleClusterTest{
 
