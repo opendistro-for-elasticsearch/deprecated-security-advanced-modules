@@ -30,11 +30,12 @@ import com.amazon.opendistroforelasticsearch.security.ssl.util.Utils;
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 
 public class InternalUsersValidator extends AbstractConfigurationValidator {
-
-    public InternalUsersValidator(final RestRequest request, BytesReference ref, final Settings esSettings,
+    public boolean isNew;
+    public InternalUsersValidator(final RestRequest request, BytesReference ref, boolean userExisted, final Settings esSettings,
             Object... param) {
         super(request, ref, esSettings, param);
         this.payloadMandatory = true;
+	isNew = userExisted;
         allowedKeys.put("hash", DataType.STRING);
         allowedKeys.put("password", DataType.STRING);
         allowedKeys.put("backend_roles", DataType.ARRAY);
@@ -60,14 +61,14 @@ public class InternalUsersValidator extends AbstractConfigurationValidator {
                 if(contentAsMap != null && contentAsMap.containsKey("password")) {
                     final String password = (String) contentAsMap.get("password");
 
-                    if(password == null || password.isEmpty()) {
+                    if(!isNew && (password == null || password.isEmpty())) {
                         if(log.isDebugEnabled()) {
                             log.debug("Unable to validate password because no password is given");
                         }
                         return false;
                     }
 
-                    if(!regex.isEmpty() && !Pattern.compile("^"+regex+"$").matcher(password).matches()) {
+                    if(!(password == null || password.isEmpty()) && !regex.isEmpty() && !Pattern.compile("^"+regex+"$").matcher(password).matches()) {
                         if(log.isDebugEnabled()) {
                             log.debug("Regex does not match password");
                         }

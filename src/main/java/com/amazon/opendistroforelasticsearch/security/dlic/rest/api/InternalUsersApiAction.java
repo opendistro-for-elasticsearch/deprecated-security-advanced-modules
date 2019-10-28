@@ -229,6 +229,9 @@ public class InternalUsersApiAction extends PatchableResourceApiAction {
 
     @Override
     protected AbstractConfigurationValidator getValidator(RestRequest request, BytesReference ref, Object... params) {
-        return new InternalUsersValidator(request, ref, this.settings, params);
+        // check if user exists
+        final SecurityDynamicConfiguration<?> internaluser = load(CType.INTERNALUSERS, false);
+        final boolean userExisted = internaluser.exists(request.param("name"));
+        return new InternalUsersValidator(request, ref, userExisted, this.settings, params);
     }
 }
