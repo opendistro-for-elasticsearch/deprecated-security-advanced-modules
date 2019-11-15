@@ -62,7 +62,7 @@ import org.ldaptive.SearchFilter;
 import org.ldaptive.SearchScope;
 import org.ldaptive.control.RequestControl;
 import org.ldaptive.provider.ProviderConnection;
-import org.ldaptive.sasl.ExternalConfig;
+import org.ldaptive.provider.jndi.JndiConnection;
 import org.ldaptive.ssl.AllowAnyHostnameVerifier;
 import org.ldaptive.ssl.AllowAnyTrustManager;
 import org.ldaptive.ssl.CredentialConfig;
@@ -107,6 +107,35 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
         this.configPath = configPath;
         this.roleBaseSettings = getRoleSearchSettings(settings);
         this.userBaseSettings = LDAPAuthenticationBackend.getUserBaseSettings(settings);
+    }
+
+    public static void checkConnection(final ConnectionConfig connectionConfig, String bindDn, byte[] password) throws Exception {
+
+        final SecurityManager sm = System.getSecurityManager();
+
+        if (sm != null) {
+            sm.checkPermission(new SpecialPermission());
+        }
+
+        try {
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+                @Override
+                public Void run() throws Exception {
+                    boolean isJava9OrHigher = PlatformDependent.javaVersion() >= 9;
+                    ClassLoader originalClassloader = null;
+                    if (isJava9OrHigher) {
+                        originalClassloader = Thread.currentThread().getContextClassLoader();
+                        Thread.currentThread().setContextClassLoader(new Java9CL());
+                    }
+
+                    checkConnection0(connectionConfig, bindDn, password, originalClassloader, isJava9OrHigher);
+                    return null;
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            throw e.getException();
+        }
+
     }
 
     public static Connection getConnection(final Settings settings, final Path configPath) throws Exception {
@@ -165,6 +194,53 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
     }
 
     @SuppressWarnings("unchecked")
+    private static void checkConnection0(final ConnectionConfig connectionConfig, String bindDn, byte[] password, final ClassLoader cl,
+                                         final boolean needRestore) throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
+                                         FileNotFoundException, IOException, LdapException {
+
+        Connection connection = null;
+
+        try {
+
+            if (log.isDebugEnabled()) {
+                log.debug("bindDn {}, password {}", bindDn, password != null && password.length > 0 ? "****" : "<not set>");
+            }
+
+            if (bindDn != null && (password == null || password.length == 0)) {
+                throw new LdapException("no bindDn or no Password");
+            }
+
+            final Map<String, Object> props = new HashMap<>();
+
+            props.put(JndiConnection.AUTHENTICATION, "simple");
+            props.put(JndiConnection.PRINCIPAL, bindDn);
+            props.put(JndiConnection.CREDENTIALS, password);
+
+            DefaultConnectionFactory connFactory = new DefaultConnectionFactory(connectionConfig);
+            connFactory.getProvider().getProviderConfig().setProperties(props);
+            connection = connFactory.getConnection();
+
+            connection.open();
+        } finally {
+            Utils.unbindAndCloseSilently(connection);
+            connection = null;
+            if (needRestore) {
+                try {
+                    AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+                        @Override
+                        public Void run() throws Exception {
+                            Thread.currentThread().setContextClassLoader(cl);
+                            return null;
+                        }
+                    });
+                } catch (PrivilegedActionException e) {
+                    log.warn("Unable to restore classloader because of " + e.getException(), e.getException());
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     private static Connection getConnection0(final Settings settings, final Path configPath, final ClassLoader cl,
             final boolean needRestore) throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
             FileNotFoundException, IOException, LdapException {
@@ -203,10 +279,6 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
                 final Map<String, Object> props = configureSSL(config, settings, configPath);
 
-                DefaultConnectionFactory connFactory = new DefaultConnectionFactory(config);
-                connFactory.getProvider().getProviderConfig().setProperties(props);
-                connection = connFactory.getConnection();
-
                 final String bindDn = settings.get(ConfigConstants.LDAP_BIND_DN, null);
                 final String password = settings.get(ConfigConstants.LDAP_PASSWORD, null);
 
@@ -235,18 +307,29 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
                     }
                 }
 
-                BindRequest br = enableClientAuth ? new BindRequest(new ExternalConfig()) : new BindRequest();
-
                 if (bindDn != null && password != null && password.length() > 0) {
-                    br = new BindRequest(bindDn, new Credential(password));
+                    props.put(JndiConnection.AUTHENTICATION, "simple");
+                    props.put(JndiConnection.PRINCIPAL, bindDn);
+                    props.put(JndiConnection.CREDENTIALS, password.getBytes(StandardCharsets.UTF_8));
+                } else if (enableClientAuth) {
+                    props.put(JndiConnection.AUTHENTICATION, "EXTERNAL");
+                } else {
+                    props.put(JndiConnection.AUTHENTICATION, "none");
                 }
 
-                connection.open(br);
+                DefaultConnectionFactory connFactory = new DefaultConnectionFactory(config);
+                connFactory.getProvider().getProviderConfig().setProperties(props);
+                connection = connFactory.getConnection();
+
+                connection.open();
 
                 if (connection != null && connection.isOpen()) {
                     break;
                 } else {
                     Utils.unbindAndCloseSilently(connection);
+                    if (needRestore) {
+                        restoreClassLoader0(cl);
+                    }
                     connection = null;
                 }
             } catch (final Exception e) {
@@ -256,13 +339,19 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
                     log.debug("Unable to connect to ldapserver due to ", e);
                 }
                 Utils.unbindAndCloseSilently(connection);
+                if (needRestore) {
+                    restoreClassLoader0(cl);
+                }
                 connection = null;
                 continue;
             }
         }
 
         if (connection == null || !connection.isOpen()) {
-            Utils.unbindAndCloseSilently(connection); //just in case
+            Utils.unbindAndCloseSilently(connection);  //just in case
+            if (needRestore) {
+                restoreClassLoader0(cl);
+            }
             connection = null;
             if (lastException == null) {
                 throw new LdapException("Unable to connect to any of those ldap servers " + ldapHosts);
@@ -378,20 +467,24 @@ public class LDAPAuthorizationBackend implements AuthorizationBackend {
 
             private void restoreClassLoader() {
                 if (needRestore) {
-                    try {
-                        AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-                            @Override
-                            public Void run() throws Exception {
-                                Thread.currentThread().setContextClassLoader(cl);
-                                return null;
-                            }
-                        });
-                    } catch (PrivilegedActionException e) {
-                        log.warn("Unable to restore classloader because of " + e.getException(), e.getException());
-                    }
+                    restoreClassLoader0(cl);
                 }
             }
         };
+    }
+
+    private static void restoreClassLoader0(final ClassLoader cl) {
+        try {
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+                @Override
+                public Void run() throws Exception {
+                    Thread.currentThread().setContextClassLoader(cl);
+                    return null;
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            log.warn("Unable to restore classloader because of " + e.getException(), e.getException());
+        }
     }
 
     private static Map<String, Object> configureSSL(final ConnectionConfig config, final Settings settings,
