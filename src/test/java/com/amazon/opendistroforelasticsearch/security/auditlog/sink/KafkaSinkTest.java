@@ -40,7 +40,7 @@ import com.amazon.opendistroforelasticsearch.security.test.helper.file.FileHelpe
 public class KafkaSinkTest extends AbstractAuditlogiUnitTest {
 
 	@ClassRule
-	public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true, 1, "compliance");
+	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, true, 1, "compliance");
 
 	@Test
 	public void testKafka() throws Exception {
@@ -57,7 +57,7 @@ public class KafkaSinkTest extends AbstractAuditlogiUnitTest {
 	            Assert.assertEquals(KafkaSink.class, sink.getClass());
     	        boolean success = sink.doStore(MockAuditMessageFactory.validAuditMessage(Category.MISSING_PRIVILEGES));
     	        Assert.assertTrue(success);
-    	        ConsumerRecords<Long, String> records = consumer.poll(10000);
+    	        ConsumerRecords<Long, String> records = consumer.poll(Duration.ofSeconds(10));
     	        Assert.assertEquals(1, records.count());
 	        } finally {
 	            sink.close();
@@ -68,7 +68,7 @@ public class KafkaSinkTest extends AbstractAuditlogiUnitTest {
 
 	private KafkaConsumer<Long, String> createConsumer() {
 		Properties props = new Properties();
-		props.put("bootstrap.servers", embeddedKafka.getBrokersAsString());
+		props.put("bootstrap.servers", embeddedKafka.getEmbeddedKafka().getBrokersAsString());
 		props.put("auto.offset.reset", "earliest");
 		props.put("group.id", "mygroup"+System.currentTimeMillis()+"_"+new Random().nextDouble());
 		props.put("key.deserializer", "org.apache.kafka.common.serialization.LongDeserializer");

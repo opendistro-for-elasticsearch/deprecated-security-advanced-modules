@@ -62,7 +62,7 @@ public class OpenDistroSecurityConfigAction extends PatchableResourceApiAction {
 
         if(allowPutOrPatch) {
 
-            //deprecated, will be removed with SG 8, use opendistro_security_config instead of sgconfig
+            //deprecated, will be removed with ODFE 8, use opendistro_security_config instead of config
             controller.registerHandler(Method.PUT, "/_opendistro/_security/api/securityconfig/{name}", this);
             controller.registerHandler(Method.PATCH, "/_opendistro/_security/api/securityconfig/", this);
 
@@ -74,7 +74,6 @@ public class OpenDistroSecurityConfigAction extends PatchableResourceApiAction {
 
     @Override
     protected void handleGet(RestChannel channel, RestRequest request, Client client, final JsonNode content) throws IOException{
-        //final SgDynamicConfiguration<?> configuration = load(getConfigName(), true);
         final SecurityDynamicConfiguration<?> configuration = load(getConfigName(), true);
 
         filter(configuration);

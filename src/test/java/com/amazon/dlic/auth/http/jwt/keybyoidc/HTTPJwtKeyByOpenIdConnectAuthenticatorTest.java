@@ -157,4 +157,21 @@ public class HTTPJwtKeyByOpenIdConnectAuthenticatorTest {
 		Assert.assertNull(creds);
 	}
 
+	@Test
+	public void testPeculiarJsonEscaping() {
+		Settings settings = Settings.builder().put("openid_connect_url", mockIdpServer.getDiscoverUri()).build();
+
+		HTTPJwtKeyByOpenIdConnectAuthenticator jwtAuth = new HTTPJwtKeyByOpenIdConnectAuthenticator(settings, null);
+
+		AuthCredentials creds = jwtAuth.extractCredentials(
+				new FakeRestRequest(ImmutableMap.of("Authorization", TestJwts.PeculiarEscaping.MC_COY_SIGNED_RSA_1), new HashMap<String, String>()),
+				null);
+
+		Assert.assertNotNull(creds);
+		Assert.assertEquals(TestJwts.MCCOY_SUBJECT, creds.getUsername());
+		Assert.assertEquals(TestJwts.TEST_AUDIENCE, creds.getAttributes().get("attr.jwt.aud"));
+		Assert.assertEquals(0, creds.getBackendRoles().size());
+		Assert.assertEquals(3, creds.getAttributes().size());
+	}
+
 }

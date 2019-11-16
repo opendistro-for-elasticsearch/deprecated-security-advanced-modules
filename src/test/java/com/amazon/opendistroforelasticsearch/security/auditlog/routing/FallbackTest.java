@@ -126,7 +126,7 @@ public class FallbackTest extends AbstractAuditlogiUnitTest {
 		List<AuditLogSink> allSinks = router.categorySinks.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
 		allSinks = allSinks.stream().filter(sink -> (sink instanceof LoggingSink)).collect(Collectors.toList());
 		allSinks.removeAll(Collections.singleton(router.defaultSink));
-		allSinks.remove(router.categorySinks.get(exclude));
+		allSinks.removeAll(router.categorySinks.get(exclude));
 		for(AuditLogSink sink : allSinks) {
 			LoggingSink loggingSink = (LoggingSink)sink;
 			Assert.assertEquals(0, loggingSink.messages.size());

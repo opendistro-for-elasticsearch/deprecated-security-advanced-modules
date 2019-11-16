@@ -208,4 +208,66 @@ public class FlsDlsTestMulti extends AbstractDlsFlsTest{
         Assert.assertTrue(res.getBody().contains("\"amount\" : 20"));
         Assert.assertTrue(res.getBody().contains("\"found\" : false"));
     }
+
+    @Test
+    public void testDlsSuggest() throws Exception {
+
+        setup();
+
+        HttpResponse res;
+        String query =
+
+                "{"+
+                        "\"query\": {"+
+                        "\"range\" : {"+
+                        "\"amount\" : {"+
+                        "\"gte\" : 11,"+
+                        "\"lte\" : 50000,"+
+                        "\"boost\" : 1.0"+
+                        "}"+
+                        "}"+
+                        "},"+
+                        "\"suggest\" : {\n" +
+                        "    \"thesuggestion\" : {\n" +
+                        "      \"text\" : \"cust\",\n" +
+                        "      \"term\" : {\n" +
+                        "        \"field\" : \"customer.name\"\n" +
+                        "      }\n" +
+                        "    }\n" +
+                        "  }"+
+                        "}";
+
+        Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executePostRequest("/deals/_search?pretty", query, encodeBasicHeader("admin", "admin"))).getStatusCode());
+        Assert.assertTrue(res.getBody().contains("thesuggestion"));
+
+        Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executePostRequest("/deals/_search?pretty", query, encodeBasicHeader("dept_manager_multi", "password"))).getStatusCode());
+        Assert.assertTrue(res.getBody().contains("thesuggestion"));
+    }
+
+    @Test
+    public void testDlsSuggestOnly() throws Exception {
+
+        setup();
+
+        HttpResponse res;
+        String query =
+
+                "{"+
+                        "\"suggest\" : {\n" +
+                        "    \"thesuggestion\" : {\n" +
+                        "      \"text\" : \"cust\",\n" +
+                        "      \"term\" : {\n" +
+                        "        \"field\" : \"customer.name\"\n" +
+                        "      }\n" +
+                        "    }\n" +
+                        "  }"+
+                        "}";
+
+        Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executePostRequest("/deals/_search?pretty", query, encodeBasicHeader("admin", "admin"))).getStatusCode());
+        Assert.assertTrue(res.getBody().contains("thesuggestion"));
+
+        Assert.assertEquals(HttpStatus.SC_OK, (res = rh.executePostRequest("/deals/_search?pretty", query, encodeBasicHeader("dept_manager_multi", "password"))).getStatusCode());
+        Assert.assertTrue(res.getBody().contains("thesuggestion"));
+    }
+
 }

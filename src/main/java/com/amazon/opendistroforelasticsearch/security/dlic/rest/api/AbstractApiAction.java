@@ -348,7 +348,7 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 		// not 400
 		consumeParameters(request);
 
-		// check if SG index has been initialized
+		// check if .opendistro_security index has been initialized
 		if (!ensureIndexExists()) {
 			return channel -> internalErrorResponse(channel, ErrorType.SECURITY_NOT_INITIALIZED.getMessage());
 		}
@@ -512,7 +512,7 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 	/**
 	 * Consume all defined parameters for the request. Before we handle the
 	 * request in subclasses where we actually need the parameter, some global
-	 * checks are performed, e.g. check whether the SG index exists. Thus, the
+	 * checks are performed, e.g. check whether the .security_index index exists. Thus, the
 	 * parameter(s) have not been consumed, and ES will always return a 400 with
 	 * an internal error message.
 	 *
