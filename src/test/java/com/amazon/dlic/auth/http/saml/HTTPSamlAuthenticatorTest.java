@@ -485,6 +485,7 @@ public class HTTPSamlAuthenticatorTest {
 
             Assert.assertEquals("horst", jwt.getClaim("sub"));
         }
+    }
 
     private AuthenticateHeaders getAutenticateHeaders(HTTPSamlAuthenticator samlAuthenticator) {
         RestRequest restRequest = new FakeRestRequest(ImmutableMap.of(), new HashMap<String, String>());
@@ -580,11 +581,6 @@ public class HTTPSamlAuthenticatorTest {
 
         @Override
         public XContentBuilder newBuilder(XContentType xContentType, boolean useFiltering) throws IOException {
-            return null;
-        }
-
-        @Override
-        public XContentBuilder newBuilder(XContentType xContentType, XContentType xType, boolean useFiltering) throws IOException {
             return null;
         }
 

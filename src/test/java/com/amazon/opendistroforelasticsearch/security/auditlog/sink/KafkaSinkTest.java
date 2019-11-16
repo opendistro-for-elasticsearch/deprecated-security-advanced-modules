@@ -15,6 +15,7 @@
 
 package com.amazon.opendistroforelasticsearch.security.auditlog.sink;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -25,6 +26,7 @@ import org.elasticsearch.common.xcontent.yaml.YamlXContent;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
 import org.springframework.kafka.test.rule.KafkaEmbedded;
 
 import scala.util.Random;
@@ -45,7 +47,7 @@ public class KafkaSinkTest extends AbstractAuditlogiUnitTest {
 	@Test
 	public void testKafka() throws Exception {
 	    String configYml = FileHelper.loadFile("auditlog/endpoints/sink/configuration_kafka.yml");
-	    configYml = configYml.replace("_RPLC_BOOTSTRAP_SERVERS_",embeddedKafka.getBrokersAsString());
+		configYml = configYml.replace("_RPLC_BOOTSTRAP_SERVERS_",embeddedKafka.getEmbeddedKafka().getBrokersAsString());
 		Settings.Builder settingsBuilder = Settings.builder().loadFromSource(configYml, YamlXContent.yamlXContent.type());
 		try(KafkaConsumer<Long, String> consumer = createConsumer()) {
 		    consumer.subscribe(Arrays.asList("compliance"));
