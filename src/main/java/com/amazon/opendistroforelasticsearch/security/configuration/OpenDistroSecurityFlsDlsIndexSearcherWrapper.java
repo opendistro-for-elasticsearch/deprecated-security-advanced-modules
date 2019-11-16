@@ -100,7 +100,6 @@ public class OpenDistroSecurityFlsDlsIndexSearcherWrapper extends OpenDistroSecu
             if (dlsEval != null) {
                 final Set<String> unparsedDlsQueries = queries.get(dlsEval);
                 if(unparsedDlsQueries != null && !unparsedDlsQueries.isEmpty()) {
-                    final BitsetFilterCache bsfc = this.indexService.cache().bitsetFilterCache();
                     //disable reader optimizations
                     dlsQuery = DlsQueryParser.parse(unparsedDlsQueries, this.indexService.newQueryShardContext(shardId.getId(), null, nowInMillis, null)
                             , this.indexService.xContentRegistry());
@@ -113,7 +112,7 @@ public class OpenDistroSecurityFlsDlsIndexSearcherWrapper extends OpenDistroSecu
             }
         }
 
-        return new DlsFlsFilterLeafReader.DlsFlsDirectoryReader(reader, flsFields, bsp,
+        return new DlsFlsFilterLeafReader.DlsFlsDirectoryReader(reader, flsFields, dlsQuery,
                 indexService, threadContext, clusterService, complianceConfig, auditlog, maskedFields, shardId);
     }
 }
