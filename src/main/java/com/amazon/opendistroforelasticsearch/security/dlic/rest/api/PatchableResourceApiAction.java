@@ -131,7 +131,7 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
         AbstractConfigurationValidator originalValidator = postProcessApplyPatchResult(channel, request, existingResourceAsJsonNode, patchedResourceAsJsonNode, name);
 
         if(originalValidator != null) {
-            if (!originalValidator.validateSettings()) {
+            if (!originalValidator.validate()) {
                 request.params().clear();
                 badRequestResponse(channel, originalValidator);
                 return;
@@ -141,7 +141,7 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
 
         AbstractConfigurationValidator validator = getValidator(request, patchedResourceAsJsonNode);
 
-        if (!validator.validateSettings()) {
+        if (!validator.validate()) {
             request.params().clear();
                 badRequestResponse(channel, validator);
             return;
@@ -203,7 +203,7 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
             AbstractConfigurationValidator originalValidator = postProcessApplyPatchResult(channel, request, oldResource, patchedResource, resourceName);
 
             if(originalValidator != null) {
-                if (!originalValidator.validateSettings()) {
+                if (!originalValidator.validate()) {
                     request.params().clear();
                         badRequestResponse(channel, originalValidator);
                     return;
@@ -213,7 +213,7 @@ public abstract class PatchableResourceApiAction extends AbstractApiAction {
             if (oldResource == null || !oldResource.equals(patchedResource)) {
                 AbstractConfigurationValidator validator = getValidator(request, patchedResource);
 
-                if (!validator.validateSettings()) {
+                if (!validator.validate()) {
                     request.params().clear();
                         badRequestResponse(channel, validator);
                     return;

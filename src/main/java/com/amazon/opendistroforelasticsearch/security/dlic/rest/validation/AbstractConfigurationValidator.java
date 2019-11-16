@@ -78,6 +78,8 @@ public abstract class AbstractConfigurationValidator {
     /** The error type */
     protected ErrorType errorType = ErrorType.NONE;
 
+    protected Exception lastException;
+
     /** Behaviour regarding payload */
     protected boolean payloadMandatory = false;
 
@@ -111,7 +113,7 @@ public abstract class AbstractConfigurationValidator {
      *
      * @return false if validation fails
      */
-    public boolean validateSettings() {
+    public boolean validate() {
         // no payload for DELETE and GET requests
         if (method.equals(Method.DELETE) || method.equals(Method.GET)) {
             return true;
@@ -131,7 +133,9 @@ public abstract class AbstractConfigurationValidator {
                 }
 
             } catch (IOException e) {
+                log.error(ErrorType.BODY_NOT_PARSEABLE.toString(), e);
                 this.errorType = ErrorType.BODY_NOT_PARSEABLE;
+                lastException = e;
                 return false;
             }
         }
@@ -180,6 +184,7 @@ public abstract class AbstractConfigurationValidator {
         } catch (Exception e) {
             log.error(ErrorType.BODY_NOT_PARSEABLE.toString(), e);
             this.errorType = ErrorType.BODY_NOT_PARSEABLE;
+            lastException = e;
             return false;
         }
 
@@ -224,6 +229,9 @@ public abstract class AbstractConfigurationValidator {
         try {
             final XContentBuilder builder = channel.newBuilder();
             builder.startObject();
+            if(lastException != null) {
+                builder.field("details", lastException.toString());
+            }
             switch (this.errorType) {
                 case NONE:
                     builder.field("status", "error");
@@ -239,7 +247,7 @@ public abstract class AbstractConfigurationValidator {
                 case INVALID_PASSWORD:
                     builder.field("status", "error");
                     builder.field("reason", esSettings.get(ConfigConstants.OPENDISTRO_SECURITY_RESTAPI_PASSWORD_VALIDATION_ERROR_MESSAGE,
-                            "Password does not match minimum criterias"));
+                            "Password does not match minimum criteria"));
                     break;
                 case WRONG_DATATYPE:
                     builder.field("status", "error");
@@ -251,6 +259,7 @@ public abstract class AbstractConfigurationValidator {
                 default:
                     builder.field("status", "error");
                     builder.field("reason", errorType.getMessage());
+
             }
             builder.endObject();
             return builder;

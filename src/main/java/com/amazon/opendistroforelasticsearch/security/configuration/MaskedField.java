@@ -77,6 +77,10 @@ public class MaskedField {
     }
 
     public BytesRef mask(BytesRef value) {
+        if(value == null) {
+            return null;
+        }
+
         if (isDefault()) {
             return blake2bHash(value);
         } else {

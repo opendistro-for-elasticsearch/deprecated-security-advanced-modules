@@ -40,11 +40,12 @@ public class InternalUsersValidator extends AbstractConfigurationValidator {
         allowedKeys.put("backend_roles", DataType.ARRAY);
         allowedKeys.put("attributes", DataType.OBJECT);
         allowedKeys.put("description", DataType.STRING);
+        allowedKeys.put("opendistro_security_roles", DataType.ARRAY);
     }
 
     @Override
-    public boolean validateSettings() {
-        if(!super.validateSettings()) {
+    public boolean validate() {
+        if(!super.validate()) {
             return false;
         }
 

@@ -109,7 +109,7 @@ public abstract class AbstractApiAction extends BaseRestHandler {
 		try {
 			// validate additional settings, if any
 			AbstractConfigurationValidator validator = getValidator(request, request.content());
-			if (!validator.validateSettings()) {
+			if (!validator.validate()) {
 				request.params().clear();
 				badRequestResponse(channel, validator);
 				return;
