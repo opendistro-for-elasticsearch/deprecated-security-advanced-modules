@@ -23,14 +23,10 @@ import java.util.function.LongSupplier;
 
 import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.join.BitSetProducer;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.IndexService;
-import org.elasticsearch.index.cache.bitset.BitsetFilterCache;
-import org.elasticsearch.index.engine.EngineException;
 import org.elasticsearch.index.mapper.MapperService;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.index.shard.ShardUtils;
@@ -38,17 +34,16 @@ import org.elasticsearch.index.shard.ShardUtils;
 import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
 import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceConfig;
 import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceIndexingOperationListener;
-import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
-import com.amazon.opendistroforelasticsearch.security.configuration.EmptyFilterLeafReader;
-import com.amazon.opendistroforelasticsearch.security.configuration.OpenDistroSecurityIndexSearcherWrapper;
+import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import com.amazon.opendistroforelasticsearch.security.support.HeaderHelper;
 import com.amazon.opendistroforelasticsearch.security.support.OpenDistroSecurityUtils;
+
 import com.google.common.collect.Sets;
 
 public class OpenDistroSecurityFlsDlsIndexSearcherWrapper extends OpenDistroSecurityIndexSearcherWrapper {
 
-    private static final Set<String> metaFields = Sets.union(Sets.newHashSet("_source", "_version"),
+    private static final Set<String> metaFields = Sets.union(Sets.newHashSet("_source", "_version", "_field_names", "_seq_no", "_primary_term"),
             Sets.newHashSet(MapperService.getAllMetaFields()));
     private final ClusterService clusterService;
     private final IndexService indexService;
@@ -81,7 +76,7 @@ public class OpenDistroSecurityFlsDlsIndexSearcherWrapper extends OpenDistroSecu
 
         Set<String> flsFields = null;
         Set<String> maskedFields = null;
-        BitSetProducer bsp = null;
+        Query dlsQuery = null;
 
         if(!isAdmin) {
 
@@ -106,11 +101,9 @@ public class OpenDistroSecurityFlsDlsIndexSearcherWrapper extends OpenDistroSecu
             if (dlsEval != null) {
                 final Set<String> unparsedDlsQueries = queries.get(dlsEval);
                 if(unparsedDlsQueries != null && !unparsedDlsQueries.isEmpty()) {
-                    final BitsetFilterCache bsfc = this.indexService.cache().bitsetFilterCache();
                     //disable reader optimizations
-                    final Query dlsQuery = DlsQueryParser.parse(unparsedDlsQueries, this.indexService.newQueryShardContext(shardId.getId(), null, nowInMillis, null)
+                    dlsQuery = DlsQueryParser.parse(unparsedDlsQueries, this.indexService.newQueryShardContext(shardId.getId(), null, nowInMillis, null)
                             , this.indexService.xContentRegistry());
-                    bsp = dlsQuery==null?null:bsfc.getBitSetProducer(dlsQuery);
                 }
             }
 
@@ -120,19 +113,7 @@ public class OpenDistroSecurityFlsDlsIndexSearcherWrapper extends OpenDistroSecu
             }
         }
 
-        return new DlsFlsFilterLeafReader.DlsFlsDirectoryReader(reader, flsFields, bsp,
+        return new DlsFlsFilterLeafReader.DlsFlsDirectoryReader(reader, flsFields, dlsQuery,
                 indexService, threadContext, clusterService, complianceConfig, auditlog, maskedFields, shardId);
-    }
-
-
-    @Override
-    protected IndexSearcher dlsFlsWrap(final IndexSearcher searcher, boolean isAdmin) throws EngineException {
-
-        if(searcher.getIndexReader().getClass() != DlsFlsFilterLeafReader.DlsFlsDirectoryReader.class
-                && searcher.getIndexReader().getClass() != EmptyFilterLeafReader.EmptyDirectoryReader.class) {
-            throw new RuntimeException("Unexpected index reader class "+searcher.getIndexReader().getClass());
-        }
-
-        return searcher;
     }
 }

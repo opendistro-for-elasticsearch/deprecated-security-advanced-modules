@@ -17,9 +17,6 @@ package com.amazon.dlic.auth.ldap.backend;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,14 +30,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchSecurityException;
-import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.common.settings.Settings;
-import org.ldaptive.BindRequest;
+
 import org.ldaptive.Connection;
-import org.ldaptive.Credential;
+import org.ldaptive.ConnectionConfig;
 import org.ldaptive.LdapEntry;
-import org.ldaptive.LdapException;
-import org.ldaptive.Response;
 import org.ldaptive.SearchFilter;
 import org.ldaptive.SearchScope;
 
@@ -84,51 +78,40 @@ public class LDAPAuthenticationBackend implements AuthenticationBackend {
         byte[] password = credentials.getPassword();
 
         try {
-
-            ldapConnection = LDAPAuthorizationBackend.getConnection(settings, configPath);
-
-            LdapEntry entry = exists(user, ldapConnection, settings, userBaseSettings);
-
-            // fake a user that no exists
-            // makes guessing if a user exists or not harder when looking on the
-            // authentication delay time
-            if (entry == null && settings.getAsBoolean(ConfigConstants.LDAP_FAKE_LOGIN_ENABLED, false)) {
-                String fakeLognDn = settings.get(ConfigConstants.LDAP_FAKE_LOGIN_DN,
-                        "CN=faketomakebindfail,DC=" + UUID.randomUUID().toString());
-                entry = new LdapEntry(fakeLognDn);
-                password = settings.get(ConfigConstants.LDAP_FAKE_LOGIN_PASSWORD, "fakeLoginPwd123")
-                        .getBytes(StandardCharsets.UTF_8);
-            } else if (entry == null) {
-                throw new ElasticsearchSecurityException("No user " + user + " found");
-            }
-
-            final String dn = entry.getDn();
-
-            if (log.isTraceEnabled()) {
-                log.trace("Try to authenticate dn {}", dn);
-            }
-
-            final BindRequest br = new BindRequest(dn, new Credential(password));
-            final SecurityManager sm = System.getSecurityManager();
-
-            if (sm != null) {
-                sm.checkPermission(new SpecialPermission());
-            }
-
-            final Connection _con = ldapConnection;
+            LdapEntry entry;
+            String dn;
+            ConnectionConfig connectionConfig;
 
             try {
-                AccessController.doPrivileged(new PrivilegedExceptionAction<Response<Void>>() {
-                    @Override
-                    public Response<Void> run() throws LdapException {
-                        return _con.reopen(br);
-                    }
-                });
-            } catch (PrivilegedActionException e) {
-                throw e.getException();
+                ldapConnection = LDAPAuthorizationBackend.getConnection(settings, configPath);
+
+                entry = exists(user, ldapConnection, settings, userBaseSettings);
+
+                // fake a user that no exists
+                // makes guessing if a user exists or not harder when looking on the
+                // authentication delay time
+                if (entry == null && settings.getAsBoolean(ConfigConstants.LDAP_FAKE_LOGIN_ENABLED, false)) {
+                    String fakeLognDn = settings.get(ConfigConstants.LDAP_FAKE_LOGIN_DN,
+                            "CN=faketomakebindfail,DC=" + UUID.randomUUID().toString());
+                    entry = new LdapEntry(fakeLognDn);
+                    password = settings.get(ConfigConstants.LDAP_FAKE_LOGIN_PASSWORD, "fakeLoginPwd123")
+                            .getBytes(StandardCharsets.UTF_8);
+                } else if (entry == null) {
+                    throw new ElasticsearchSecurityException("No user " + user + " found");
+                }
+
+                dn = entry.getDn();
+
+                if (log.isTraceEnabled()) {
+                    log.trace("Try to authenticate dn {}", dn);
+                }
+
+                connectionConfig = ldapConnection.getConnectionConfig();
             } finally {
-                Utils.unbindAndCloseSilently(_con);
+                Utils.unbindAndCloseSilently(ldapConnection);
             }
+
+            LDAPAuthorizationBackend.checkConnection(connectionConfig, dn, password);
 
             final String usernameAttribute = settings.get(ConfigConstants.LDAP_AUTHC_USERNAME_ATTRIBUTE, null);
             String username = dn;

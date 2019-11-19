@@ -231,3 +231,6 @@ opendistro_security_combined:
 opendistro_security_date_math:
   users:
     - date_math
+opendistro_security_fls_exists:
+  users:
+    - fls_exists

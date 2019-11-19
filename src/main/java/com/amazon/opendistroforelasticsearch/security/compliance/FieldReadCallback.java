@@ -28,13 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.FieldInfo;
 import org.elasticsearch.cluster.service.ClusterService;
-import org.elasticsearch.common.bytes.BytesArray;
-import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.util.concurrent.ThreadContext;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentHelper;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.support.XContentMapValues;
 import org.elasticsearch.index.Index;
 import org.elasticsearch.index.IndexService;
@@ -42,7 +36,7 @@ import org.elasticsearch.index.mapper.Uid;
 import org.elasticsearch.index.shard.ShardId;
 
 import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
-import com.amazon.opendistroforelasticsearch.security.compliance.ComplianceConfig;
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils;
 import com.amazon.opendistroforelasticsearch.security.support.HeaderHelper;
 import com.amazon.opendistroforelasticsearch.security.support.SourceFieldsContext;
 import com.amazon.opendistroforelasticsearch.security.support.WildcardMatcher;
@@ -112,22 +106,8 @@ public final class FieldReadCallback {
             if(fieldInfo.name.equals("_source")) {
 
                 if(filterFunction != null) {
-                    final BytesReference bytesRef = new BytesArray(fieldValue);
-                    final Tuple<XContentType, Map<String, Object>> bytesRefTuple = XContentHelper.convertToMap(bytesRef, false, XContentType.JSON);
-                    Map<String, Object> filteredSource = bytesRefTuple.v2();
-
-                    //if (!canOptimize) {
-                        filteredSource = filterFunction.apply(bytesRefTuple.v2());
-                    /*} else {
-                        if (!excludesSet.isEmpty()) {
-                            filteredSource.keySet().removeAll(excludesSet);
-                        } else {
-                            filteredSource.keySet().retainAll(includesSet);
-                        }
-                    }*/
-
-                    final XContentBuilder xBuilder = XContentBuilder.builder(bytesRefTuple.v1().xContent()).map(filteredSource);
-                    fieldValue = BytesReference.toBytes(BytesReference.bytes(xBuilder));
+                    final Map<String, Object> filteredSource = filterFunction.apply(Utils.byteArrayToMutableJsonMap(fieldValue));
+                    fieldValue = Utils.jsonMapToByteArray(filteredSource);
                 }
 
                 Map<String, Object> filteredSource = new JsonFlattener(new String(fieldValue, StandardCharsets.UTF_8)).flattenAsMap();

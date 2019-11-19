@@ -16,11 +16,15 @@
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.support;
 
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.elasticsearch.ElasticsearchParseException;
 import org.elasticsearch.ExceptionsHelper;
+import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.common.xcontent.ToXContent;
@@ -29,12 +33,16 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.amazon.opendistroforelasticsearch.security.DefaultObjectMapper;
 import com.amazon.opendistroforelasticsearch.security.support.OpenDistroSecurityDeprecationHandler;
 
 public class Utils {
+
+    private static final ObjectMapper internalMapper = new ObjectMapper();
 
     public static Map<String, Object> convertJsonToxToStructuredMap(ToXContent jsonContent) {
         Map<String, Object> map = null;
@@ -117,5 +125,57 @@ public class Utils {
             throw ExceptionsHelper.convertToElastic(e1);
         }
 
+    }
+
+    public static byte[] jsonMapToByteArray(Map<String, Object> jsonAsMap) throws IOException {
+
+        final SecurityManager sm = System.getSecurityManager();
+
+        if (sm != null) {
+            sm.checkPermission(new SpecialPermission());
+        }
+
+        try {
+            return AccessController.doPrivileged(new PrivilegedExceptionAction<byte[]>() {
+                @Override
+                public byte[] run() throws Exception {
+                    return internalMapper.writeValueAsBytes(jsonAsMap);
+                }
+            });
+        } catch (final PrivilegedActionException e) {
+            if (e.getCause() instanceof JsonProcessingException) {
+                throw (JsonProcessingException) e.getCause();
+            } else if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
+                throw new RuntimeException(e.getCause());
+            }
+        }
+    }
+
+    public static Map<String, Object> byteArrayToMutableJsonMap(byte[] jsonBytes) throws IOException {
+
+        final SecurityManager sm = System.getSecurityManager();
+
+        if (sm != null) {
+            sm.checkPermission(new SpecialPermission());
+        }
+
+        try {
+            return AccessController.doPrivileged(new PrivilegedExceptionAction<Map<String, Object>>() {
+                @Override
+                public Map<String, Object> run() throws Exception {
+                    return internalMapper.readValue(jsonBytes, new TypeReference<Map<String, Object>>() {});
+                }
+            });
+        } catch (final PrivilegedActionException e) {
+            if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            } else if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
+                throw new RuntimeException(e.getCause());
+            }
+        }
     }
 }

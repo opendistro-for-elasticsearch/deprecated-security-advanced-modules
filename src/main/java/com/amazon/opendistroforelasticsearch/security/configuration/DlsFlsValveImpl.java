@@ -29,9 +29,15 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkShardRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.common.xcontent.NamedXContentRegistry;
+import org.elasticsearch.index.query.ParsedQuery;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.internal.SearchContext;
+import org.elasticsearch.threadpool.ThreadPool;
 
-import com.amazon.opendistroforelasticsearch.security.configuration.DlsFlsRequestValve;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.support.HeaderHelper;
+import com.amazon.opendistroforelasticsearch.security.support.OpenDistroSecurityUtils;
 
 public class DlsFlsValveImpl implements DlsFlsRequestValve {
 
@@ -87,17 +93,6 @@ public class DlsFlsValveImpl implements DlsFlsRequestValve {
                 listener.onFailure(new ElasticsearchSecurityException("Resize is not supported when FLS or DLS or Fieldmasking is activated"));
                 return false;
             }
-
-            /*if(request instanceof IndicesAliasesRequest) {
-                final IndicesAliasesRequest aliasRequest = (IndicesAliasesRequest) request;
-                aliasRequest.getAliasActions().stream().filter(a->a.actionType() == Type.ADD).forEach(a->{
-
-
-                });
-
-                listener.onFailure(new ElasticsearchSecurityException("Managing aliases is not supported when FLS or DLS is activated"));
-                return false;
-            }*/
         }
 
         if(dls) {
@@ -109,17 +104,40 @@ public class DlsFlsValveImpl implements DlsFlsRequestValve {
                         listener.onFailure(new ElasticsearchSecurityException("Profiling is not supported when DLS is activated"));
                         return false;
                     }
-
-                    //if(source.suggest() != null) {
-                    //    listener.onFailure(new ElasticsearchSecurityException("Suggest is not supported when DLS is activated"));
-                    //    return false;
-                    //}
-
                 }
             }
         }
 
         return true;
+    }
+
+    @Override
+    public void handleSearchContext(SearchContext context, ThreadPool threadPool, NamedXContentRegistry namedXContentRegistry) {
+        try {
+            final Map<String, Set<String>> queries = (Map<String, Set<String>>) HeaderHelper.deserializeSafeFromHeader(threadPool.getThreadContext(),
+                    ConfigConstants.OPENDISTRO_SECURITY_DLS_QUERY_HEADER);
+
+            final String dlsEval = OpenDistroSecurityUtils.evalMap(queries, context.indexShard().indexSettings().getIndex().getName());
+
+            if (dlsEval != null) {
+
+                if(context.suggest() != null) {
+                    return;
+                }
+
+                assert context.parsedQuery() != null;
+
+                final Set<String> unparsedDlsQueries = queries.get(dlsEval);
+                if (unparsedDlsQueries != null && !unparsedDlsQueries.isEmpty()) {
+                    final ParsedQuery dlsQuery = DlsQueryParser.parse(unparsedDlsQueries, context.parsedQuery(), context.getQueryShardContext(), namedXContentRegistry);
+                    context.parsedQuery(dlsQuery);
+                    context.preProcess(true);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error evaluating dls for a search query: " + e, e);
+        }
+
     }
 
 }
