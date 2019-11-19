@@ -49,7 +49,7 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 		Settings settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
 		Assert.assertEquals(35, settings.size());
 
-		response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"add\", \"path\": \"/newuser\", \"value\": {\"password\": \"newuser\", \"opendistro_security_roles\": [\"opendistro_security_all_access\"] } }]", new Header[0]);
+		response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"add\", \"path\": \"/newuser\", \"value\": {\"password\": \"newuser\", \"opendistro_security_roles\": [\"all_access\"] } }]", new Header[0]);
 		Assert.assertEquals(response.getBody(), HttpStatus.SC_OK, response.getStatusCode());
 
 		response = rh.executeGetRequest("/_opendistro/_security/api/internalusers/newuser", new Header[0]);

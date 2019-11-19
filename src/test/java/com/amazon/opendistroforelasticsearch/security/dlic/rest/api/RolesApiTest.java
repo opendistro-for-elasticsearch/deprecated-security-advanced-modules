@@ -99,7 +99,7 @@ public class RolesApiTest extends AbstractRestApiUnitTest {
 
         rh.keystore = "restapi/kirk-keystore.jks";
         rh.sendHTTPClientCertificate = true;
-        HttpResponse response = rh.executePutRequest("_searchguard/api/roles/dup", "{ \"invalid\"::{{ [\"*\"], \"cluster_permissions\": [\"*\"] }");
+        HttpResponse response = rh.executePutRequest("_opendistro/_security/api/roles/dup", "{ \"invalid\"::{{ [\"*\"], \"cluster_permissions\": [\"*\"] }");
         Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
         Assert.assertTrue(response.getBody().contains("JsonParseException"));
         assertHealthy();
