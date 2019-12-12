@@ -1,3 +1,5 @@
+[![CI](https://github.com/opendistro-for-elasticsearch/security-advanced-modules/workflows/CI/badge.svg?branch=master)](https://github.com/opendistro-for-elasticsearch/security-advanced-modules/actions)
+
 # Open Distro For Elasticsearch Security Advanced Modules
 
 The Open Distro For Elasticsearch Security Advanced Modules builds on Open Distro for Elasticsearch Security to provide additional advanced features for securing your cluster. 
@@ -33,6 +35,19 @@ Please see our [technical documentation](https://opendistro.github.io/for-elasti
 
 https://github.com/opendistro-for-elasticsearch/security-parent/blob/master/README.md
 
+## Custom CI build for testing
+
+This project is dependent on [security-parent](https://github.com/opendistro-for-elasticsearch/security-parent) repository and [security](https://github.com/opendistro-for-elasticsearch/security) repository.
+By default the Github Actions CI workflow checks out the master branch of both the repos.
+In order to point to a different repository/fork/branch/tag for testing a pull request, please update `repository` and `ref` inputs of the respective checkout actions in the [ci.yml](.github/workflows/ci.yml) file. Here is a sample which uses `opendistro-1.3` branch of `security-parent` project during building.
+
+```
+    - name: Checkout security-parent
+      uses: actions/checkout@v1
+      with:
+        repository: opendistro-for-elasticsearch/security-parent
+        ref: refs/heads/opendistro-1.3
+```
 
 ## Debugging
 
