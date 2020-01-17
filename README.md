@@ -4,9 +4,9 @@
 
 The Open Distro For Elasticsearch Security Advanced Modules builds on Open Distro for Elasticsearch Security to provide additional advanced features for securing your cluster. 
 
-## Note:
+## Deprecated as of Opendistro version 1.4:
 
-* **Deprecated as of Opendistro version 1.4**
+* Security-advanced-modules and security-parent have been merged into security.
 
 ## Highlights
 
