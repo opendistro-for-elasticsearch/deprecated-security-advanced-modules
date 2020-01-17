@@ -6,7 +6,7 @@ The Open Distro For Elasticsearch Security Advanced Modules builds on Open Distr
 
 ## Note:
 
-* Deprecated as of Opendistro version 1.4
+* **Deprecated as of Opendistro version 1.4**
 
 ## Highlights
 
