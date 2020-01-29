@@ -109,6 +109,50 @@ final class DlsQueryParser {
 
     }
 
+    static ParsedQuery parse(final Set<String> unparsedDlsQueries, ParsedQuery originalQuery, final QueryShardContext queryShardContext,
+                             final NamedXContentRegistry namedXContentRegistry) throws IOException {
+        if (unparsedDlsQueries == null || unparsedDlsQueries.isEmpty()) {
+            return null;
+        }
+
+        final boolean hasNestedMapping = queryShardContext.getMapperService().hasNested();
+
+        BooleanQuery.Builder dlsQueryBuilder = new BooleanQuery.Builder();
+        dlsQueryBuilder.setMinimumNumberShouldMatch(1);
+
+        for (final String unparsedDlsQuery : unparsedDlsQueries) {
+            try {
+
+                final QueryBuilder qb = queries.get(unparsedDlsQuery, new Callable<QueryBuilder>() {
+
+                    @Override
+                    public QueryBuilder call() throws Exception {
+                        final XContentParser parser = JsonXContent.jsonXContent.createParser(namedXContentRegistry, OpenDistroSecurityDeprecationHandler.INSTANCE, unparsedDlsQuery);
+                        final QueryBuilder qb = AbstractQueryBuilder.parseInnerQueryBuilder(parser);
+                        return qb;
+                    }
+
+                });
+                final ParsedQuery parsedQuery = queryShardContext.toQuery(qb);
+
+                // no need for scoring here, so its possible to wrap this in a
+                // ConstantScoreQuery
+                final Query dlsQuery = new ConstantScoreQuery(parsedQuery.query());
+                dlsQueryBuilder.add(dlsQuery, Occur.SHOULD);
+
+                if (hasNestedMapping) {
+                    handleNested(queryShardContext, dlsQueryBuilder, dlsQuery);
+                }
+
+            } catch (ExecutionException e) {
+                throw new IOException(e);
+            }
+        }
+
+        dlsQueryBuilder.add(originalQuery.query(), Occur.MUST);
+        return new ParsedQuery(dlsQueryBuilder.build());
+    }
+
     private static void handleNested(final QueryShardContext queryShardContext,
             final BooleanQuery.Builder dlsQueryBuilder,
             final Query parentQuery) {

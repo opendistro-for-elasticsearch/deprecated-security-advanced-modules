@@ -61,9 +61,48 @@ public class RolesApiTest extends AbstractRestApiUnitTest {
 
         rh.keystore = "restapi/kirk-keystore.jks";
         rh.sendHTTPClientCertificate = true;
-        HttpResponse response = rh.executeGetRequest("/_opendistro/_security/api/roles");
+        HttpResponse response = rh.executeGetRequest("_opendistro/_security/api/roles");
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         Assert.assertFalse(response.getBody().contains("_meta"));
+    }
+
+    @Test
+    public void testPutDuplicateKeys() throws Exception {
+
+        setup();
+
+        rh.keystore = "restapi/kirk-keystore.jks";
+        rh.sendHTTPClientCertificate = true;
+        HttpResponse response = rh.executePutRequest("_opendistro/_security/api/roles/dup", "{ \"cluster_permissions\": [\"*\"], \"cluster_permissions\": [\"*\"] }");
+        Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
+        Assert.assertTrue(response.getBody().contains("JsonParseException"));
+        assertHealthy();
+    }
+
+    @Test
+    public void testPutUnknownKey() throws Exception {
+
+        setup();
+
+        rh.keystore = "restapi/kirk-keystore.jks";
+        rh.sendHTTPClientCertificate = true;
+        HttpResponse response = rh.executePutRequest("_opendistro/_security/api/roles/dup", "{ \"unknownkey\": [\"*\"], \"cluster_permissions\": [\"*\"] }");
+        Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
+        Assert.assertTrue(response.getBody().contains("invalid_keys"));
+        assertHealthy();
+    }
+
+    @Test
+    public void testPutInvalidJson() throws Exception {
+
+        setup();
+
+        rh.keystore = "restapi/kirk-keystore.jks";
+        rh.sendHTTPClientCertificate = true;
+        HttpResponse response = rh.executePutRequest("_opendistro/_security/api/roles/dup", "{ \"invalid\"::{{ [\"*\"], \"cluster_permissions\": [\"*\"] }");
+        Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
+        Assert.assertTrue(response.getBody().contains("JsonParseException"));
+        assertHealthy();
     }
 
     @Test
@@ -90,17 +129,14 @@ public class RolesApiTest extends AbstractRestApiUnitTest {
         response = rh.executeGetRequest("/_opendistro/_security/api/roles/nothinghthere", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
 
-        // GET, new URL endpoint in SG6
         response = rh.executeGetRequest("/_opendistro/_security/api/roles/", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 
-        // GET, new URL endpoint in SG6
         response = rh.executeGetRequest("/_opendistro/_security/api/roles", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         Assert.assertTrue(response.getBody().contains("\"cluster_permissions\":[\"*\"]"));
         Assert.assertFalse(response.getBody().contains("\"cluster_permissions\" : ["));
 
-        // GET, new URL endpoint in SG6, pretty
         response = rh.executeGetRequest("/_opendistro/_security/api/roles?pretty", new Header[0]);
         Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         Assert.assertFalse(response.getBody().contains("\"cluster_permissions\":[\"*\"]"));
@@ -147,7 +183,7 @@ public class RolesApiTest extends AbstractRestApiUnitTest {
         // user has only role starfleet left, role has READ access only
         checkWriteAccess(HttpStatus.SC_FORBIDDEN, "picard", "picard", "sf", "ships", 1);
 
-        // ES7 only supports one doc type, but SG permission checks run first
+        // ES7 only supports one doc type, but Opendistro permission checks run first
         // So we also get a 403 FORBIDDEN when tring to add new document type
         checkWriteAccess(HttpStatus.SC_FORBIDDEN, "picard", "picard", "sf", "public", 0);
 
@@ -208,7 +244,7 @@ public class RolesApiTest extends AbstractRestApiUnitTest {
         checkReadAccess(HttpStatus.SC_OK, "picard", "picard", "sf", "ships", 0);
 
         // now picard is only in opendistro_security_role_starfleet, which has write access to
-        // all indices. We collapse all document types in SG7 so this permission in the
+        // all indices. We collapse all document types in ODFE7 so this permission in the
         // starfleet role grants all permissions:
         //   public:  
         //       - 'indices:*'		

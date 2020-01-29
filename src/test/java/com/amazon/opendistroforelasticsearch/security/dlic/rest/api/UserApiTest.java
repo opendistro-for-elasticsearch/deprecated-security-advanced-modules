@@ -35,6 +35,31 @@ import com.amazon.opendistroforelasticsearch.security.test.helper.rest.RestHelpe
 public class UserApiTest extends AbstractRestApiUnitTest {
 
 	@Test
+	public void testOpenDistroSecurityRoles() throws Exception {
+
+		setup();
+
+		rh.keystore = "restapi/kirk-keystore.jks";
+		rh.sendHTTPClientCertificate = true;
+
+		// initial configuration, 5 users
+		HttpResponse response = rh
+				.executeGetRequest("_opendistro/_security/api/" + CType.INTERNALUSERS.toLCString());
+		Assert.assertEquals(response.getBody(), HttpStatus.SC_OK, response.getStatusCode());
+		Settings settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
+		Assert.assertEquals(35, settings.size());
+
+		response = rh.executePatchRequest("/_opendistro/_security/api/internalusers", "[{ \"op\": \"add\", \"path\": \"/newuser\", \"value\": {\"password\": \"newuser\", \"opendistro_security_roles\": [\"all_access\"] } }]", new Header[0]);
+		Assert.assertEquals(response.getBody(), HttpStatus.SC_OK, response.getStatusCode());
+
+		response = rh.executeGetRequest("/_opendistro/_security/api/internalusers/newuser", new Header[0]);
+		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+		Assert.assertTrue(response.getBody().contains("\"opendistro_security_roles\":[\"all_access\"]"));
+
+		checkGeneralAccess(HttpStatus.SC_OK, "newuser", "newuser");
+	}
+
+	@Test
 	public void testUserApi() throws Exception {
 
 		setup();
@@ -47,7 +72,7 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 				.executeGetRequest("_opendistro/_security/api/" + CType.INTERNALUSERS.toLCString());
 		Assert.assertEquals(response.getBody(), HttpStatus.SC_OK, response.getStatusCode());
 		Settings settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
-		Assert.assertEquals(30, settings.size());
+		Assert.assertEquals(35, settings.size());
 		// --- GET
 
 		// GET, user admin, exists
@@ -55,7 +80,7 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 		Assert.assertEquals(response.getBody(), HttpStatus.SC_OK, response.getStatusCode());
 		System.out.println(response.getBody());
 		settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
-		Assert.assertEquals(6, settings.size());
+		Assert.assertEquals(7, settings.size());
 		// hash must be filtered
 		Assert.assertEquals("", settings.get("admin.hash"));
 
@@ -345,8 +370,9 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 		System.out.println(response.getBody());
 		Settings settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
-		Assert.assertEquals(30, settings.size());
+		Assert.assertEquals(35, settings.size());
 
+		addUserWithPassword("tooshoort", "", HttpStatus.SC_BAD_REQUEST);
 		addUserWithPassword("tooshoort", "123", HttpStatus.SC_BAD_REQUEST);
 		addUserWithPassword("tooshoort", "1234567", HttpStatus.SC_BAD_REQUEST);
 		addUserWithPassword("tooshoort", "1Aa%", HttpStatus.SC_BAD_REQUEST);
@@ -393,6 +419,16 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 		Assert.assertTrue(response.getBody().contains("error"));
 		Assert.assertTrue(response.getBody().contains("xxx"));
+
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/ok1", "{\"backend_roles\":[\"my-backend-role\"],\"attributes\":{},\"password\":\"\"}", new Header[0]);
+		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/ok1", "{\"backend_roles\":[\"my-backend-role\"],\"attributes\":{}}", new Header[0]);
+		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+
+		response = rh.executePutRequest("/_opendistro/_security/api/internalusers/ok1", "{\"backend_roles\":[\"my-backend-role\"],\"attributes\":{},\"password\":\"bla\"}",
+			new Header[0]);
+		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
 	}
 	
 	@Test
@@ -408,7 +444,7 @@ public class UserApiTest extends AbstractRestApiUnitTest {
 				.executeGetRequest("_opendistro/_security/api/" + CType.INTERNALUSERS.toLCString());
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 		Settings settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
-		Assert.assertEquals(30, settings.size());
+		Assert.assertEquals(35, settings.size());
 
 		addUserWithPassword(".my.dotuser0", "$2a$12$n5nubfWATfQjSYHiWtUyeOxMIxFInUHOAx8VMmGmxFNPGpaBmeB.m",
 				HttpStatus.SC_CREATED);

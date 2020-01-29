@@ -16,7 +16,9 @@
 package com.amazon.dlic.auth.ldap2;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,11 +30,11 @@ import java.util.Set;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchSecurityException;
+import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.settings.Settings;
 import org.ldaptive.Connection;
@@ -116,6 +118,34 @@ public class LDAPAuthorizationBackend2 implements AuthorizationBackend, Destroya
     public void fillRoles(final User user, final AuthCredentials optionalAuthCreds)
             throws ElasticsearchSecurityException {
 
+        final SecurityManager sm = System.getSecurityManager();
+
+        if (sm != null) {
+            sm.checkPermission(new SpecialPermission());
+        }
+
+        try {
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+                @Override
+                public Void run() throws Exception {
+                    fillRoles0(user, optionalAuthCreds);
+                    return null;
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            if (e.getException() instanceof ElasticsearchSecurityException) {
+                throw (ElasticsearchSecurityException) e.getException();
+            } else if (e.getException() instanceof RuntimeException) {
+                throw (RuntimeException) e.getException();
+            } else {
+                throw new RuntimeException(e.getException());
+            }
+        }
+    }
+
+    private void fillRoles0(final User user, final AuthCredentials optionalAuthCreds)
+            throws ElasticsearchSecurityException {
+
         if (user == null) {
             return;
         }
@@ -153,7 +183,7 @@ public class LDAPAuthorizationBackend2 implements AuthorizationBackend, Destroya
                 Collections.emptyList());
         if (!skipUsers.isEmpty() && WildcardMatcher.matchAny(skipUsers, authenticatedUser)) {
             if (log.isDebugEnabled()) {
-                log.debug("Skipped search roles of user {}", authenticatedUser);
+                log.debug("Skipped search roles of user {}/{}", authenticatedUser, originalUserName);
             }
             return;
         }

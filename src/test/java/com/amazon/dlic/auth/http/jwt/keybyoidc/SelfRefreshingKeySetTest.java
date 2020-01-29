@@ -35,16 +35,16 @@ public class SelfRefreshingKeySetTest {
 	public void basicTest() throws AuthenticatorUnavailableException, BadCredentialsException {
 		SelfRefreshingKeySet selfRefreshingKeySet = new SelfRefreshingKeySet(new MockKeySetProvider());
 
-		JsonWebKey key1 = selfRefreshingKeySet.getKey("kid_a");
+		JsonWebKey key1 = selfRefreshingKeySet.getKey("kid/a");
 		Assert.assertEquals(TestJwk.OCT_1_K, key1.getProperty("k"));
 		Assert.assertEquals(1, selfRefreshingKeySet.getRefreshCount());
 
-		JsonWebKey key2 = selfRefreshingKeySet.getKey("kid_b");
+		JsonWebKey key2 = selfRefreshingKeySet.getKey("kid/b");
 		Assert.assertEquals(TestJwk.OCT_2_K, key2.getProperty("k"));
 		Assert.assertEquals(1, selfRefreshingKeySet.getRefreshCount());
 
 		try {
-			selfRefreshingKeySet.getKey("kid_X");
+			selfRefreshingKeySet.getKey("kid/X");
 			Assert.fail("Expected a BadCredentialsException");
 		} catch (BadCredentialsException e) {
 			Assert.assertEquals(2, selfRefreshingKeySet.getRefreshCount());
@@ -62,11 +62,11 @@ public class SelfRefreshingKeySetTest {
 
 		ExecutorService executorService = Executors.newCachedThreadPool();
 
-		Future<JsonWebKey> f1 = executorService.submit(() -> selfRefreshingKeySet.getKey("kid_a"));
+		Future<JsonWebKey> f1 = executorService.submit(() -> selfRefreshingKeySet.getKey("kid/a"));
 
 		provider.waitForCalled();
 
-		Future<JsonWebKey> f2 = executorService.submit(() -> selfRefreshingKeySet.getKey("kid_b"));
+		Future<JsonWebKey> f2 = executorService.submit(() -> selfRefreshingKeySet.getKey("kid/b"));
 
 		while (selfRefreshingKeySet.getQueuedGetCount() == 0) {
 			Thread.sleep(10);

@@ -40,11 +40,12 @@ public class InternalUsersValidator extends AbstractConfigurationValidator {
         allowedKeys.put("backend_roles", DataType.ARRAY);
         allowedKeys.put("attributes", DataType.OBJECT);
         allowedKeys.put("description", DataType.STRING);
+        allowedKeys.put("opendistro_security_roles", DataType.ARRAY);
     }
 
     @Override
-    public boolean validateSettings() {
-        if(!super.validateSettings()) {
+    public boolean validate() {
+        if(!super.validate()) {
             return false;
         }
 
@@ -60,14 +61,8 @@ public class InternalUsersValidator extends AbstractConfigurationValidator {
                 if(contentAsMap != null && contentAsMap.containsKey("password")) {
                     final String password = (String) contentAsMap.get("password");
 
-                    if(password == null || password.isEmpty()) {
-                        if(log.isDebugEnabled()) {
-                            log.debug("Unable to validate password because no password is given");
-                        }
-                        return false;
-                    }
-
-                    if(!regex.isEmpty() && !Pattern.compile("^"+regex+"$").matcher(password).matches()) {
+                    // Password can be null/empty for an existing user. Regex will validate password if present
+                    if (password != null && !password.isEmpty() && !regex.isEmpty() && !Pattern.compile("^"+regex+"$").matcher(password).matches()) {
                         if(log.isDebugEnabled()) {
                             log.debug("Regex does not match password");
                         }

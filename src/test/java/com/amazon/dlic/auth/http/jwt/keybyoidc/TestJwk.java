@@ -30,9 +30,9 @@ class TestJwk {
 	static final String OCT_2_K = "YP6Q3IF2qJEagV948dsicXKpG43Ci2W7ZxUpiVTBLZr1vFN9ZGUKxeXGgVWuMFYTmoHvv5AOC8BvoNOpcE3rcJNuNOqTMdujxD92CxjOykiLEKQ0Te_7xQ4LnSQjlqdIJ4U3S7qCnJLd1LxhKOGZcUhE_pjhwf7q2RUUpvC3UOyZZLog9yeflnp9nqqDy5yVqRYWZRcPI06kJTh3Z8IFi2JRJV14iUFQtOHQKuyJRMcsldKnfWl7YW3JdQ9IRN-c1lEYSEBmsavEejcqHZkbli2svqLfmCBJVWffXDRxhq0_VafiL83HC0bP9qeNKivhemw6foVmg8UMs7yJ6ao02A";
 	static final String OCT_3_K = "r3aeW3OK7-B4Hs3hq9BmlT1D3jRiolH9PL82XUz9xAS7dniAdmvMnN5GkOc1vqibOe2T-CC_103UglDm9D0iU9S9zn6wTuQt1L5wfZIoHd9f5IjJ_YFEzZMvsoUY_-ji_0K_ugVvBPwi9JnBQHHS4zrgmP06dGjmcnZDcIf4W_iFas3lDYSXilL1V2QhNaynpSqTarpfBGSphKv4Zg2JhsX8xB0VSaTlEq4lF8pzvpWSxXCW9CtomhB80daSuTizrmSTEPpdN3XzQ2-Tovo1ieMOfDU4csvjEk7Bwc2ThjpnA8ucKQUYpUv9joBxKuCdUltssthWnetrogjYOn_xGA";
 
-	static final JsonWebKey OCT_1 = createOct("kid_a", "HS256", OCT_1_K);
-	static final JsonWebKey OCT_2 = createOct("kid_b", "HS256", OCT_2_K);
-	static final JsonWebKey OCT_3 = createOct("kid_c", "HS256", OCT_3_K);
+	static final JsonWebKey OCT_1 = createOct("kid/a", "HS256", OCT_1_K);
+	static final JsonWebKey OCT_2 = createOct("kid/b", "HS256", OCT_2_K);
+	static final JsonWebKey OCT_3 = createOct("kid/c", "HS256", OCT_3_K);
 	static final JsonWebKey ESCAPED_SLASH_KID_OCT_1 = createOct("kid\\/_a", "HS256", OCT_1_K);
 	static final JsonWebKey FORWARD_SLASH_KID_OCT_1 = createOct("kid/_a", "HS256", OCT_1_K);
 
@@ -50,16 +50,16 @@ class TestJwk {
 	static final String RSA_X_N = "jDDVUMXOXDVcaRVAT5TtuiAsLxk7XAAwyyECfmySZul7D5XVLMtGe6rP2900q3nM4BaCEiuwXjmTCZDAGlFGs2a3eQ1vbBSv9_0KGHL-gZGFPNiv0v8aR7QzZ-abhGnRy5F52PlTWsypGgG_kQpF2t2TBotvYhvVPagAt4ljllDKvY1siOvS3nh4TqcUtWcbgQZEWPmaXuhx0eLmhQJca7UEw99YlGNew48AEzt7ZnfU0Qkz3JwSz7IcPx-NfIh6BN6LwAg_ASdoM3MR8rDOtLYavmJVhutrfOpE-4-fw1mf3eLYu7xrxIplSiOIsHunTUssnTiBkXAaGqGJs604Pw";
 	static final String RSA_X_E = "AQAB";
 
-	static final JsonWebKey RSA_1 = createRsa("kid_1", "RS256", RSA_1_E, RSA_1_N, RSA_1_D);
-	static final JsonWebKey RSA_1_PUBLIC = createRsaPublic("kid_1", "RS256", RSA_1_E, RSA_1_N);
-	static final JsonWebKey RSA_1_PUBLIC_NO_ALG = createRsaPublic("kid_1", null, RSA_1_E, RSA_1_N);
-    static final JsonWebKey RSA_1_PUBLIC_WRONG_ALG = createRsaPublic("kid_1", "HS256", RSA_1_E, RSA_1_N);
+	static final JsonWebKey RSA_1 = createRsa("kid/1", "RS256", RSA_1_E, RSA_1_N, RSA_1_D);
+	static final JsonWebKey RSA_1_PUBLIC = createRsaPublic("kid/1", "RS256", RSA_1_E, RSA_1_N);
+	static final JsonWebKey RSA_1_PUBLIC_NO_ALG = createRsaPublic("kid/1", null, RSA_1_E, RSA_1_N);
+    static final JsonWebKey RSA_1_PUBLIC_WRONG_ALG = createRsaPublic("kid/1", "HS256", RSA_1_E, RSA_1_N);
 
-	static final JsonWebKey RSA_2 = createRsa("kid_2", "RS256", RSA_2_E, RSA_2_N, RSA_2_D);
-	static final JsonWebKey RSA_2_PUBLIC = createRsaPublic("kid_2", "RS256", RSA_2_E, RSA_2_N);
+	static final JsonWebKey RSA_2 = createRsa("kid/2", "RS256", RSA_2_E, RSA_2_N, RSA_2_D);
+	static final JsonWebKey RSA_2_PUBLIC = createRsaPublic("kid/2", "RS256", RSA_2_E, RSA_2_N);
 
-	static final JsonWebKey RSA_X = createRsa("kid_2", "RS256", RSA_X_E, RSA_X_N, RSA_X_D);
-	static final JsonWebKey RSA_X_PUBLIC = createRsaPublic("kid_2", "RS256", RSA_X_E, RSA_X_N);
+	static final JsonWebKey RSA_X = createRsa("kid/2", "RS256", RSA_X_E, RSA_X_N, RSA_X_D);
+	static final JsonWebKey RSA_X_PUBLIC = createRsaPublic("kid/2", "RS256", RSA_X_E, RSA_X_N);
 
 	static final JsonWebKeys RSA_1_2_PUBLIC = createJwks(RSA_1_PUBLIC, RSA_2_PUBLIC);
 

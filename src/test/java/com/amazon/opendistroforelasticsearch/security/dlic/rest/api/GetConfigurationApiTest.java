@@ -39,7 +39,7 @@ public class GetConfigurationApiTest extends AbstractRestApiUnitTest {
 
 		// test that every config is accessible
 		// config
-		response = rh.executeGetRequest("_opendistro/_security/api/config");
+		response = rh.executeGetRequest("_opendistro/_security/api/securityconfig");
 		Assert.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
 		Settings settings = Settings.builder().loadFromSource(response.getBody(), XContentType.JSON).build();
 		Assert.assertEquals(
