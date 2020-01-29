@@ -15,8 +15,16 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
-import java.nio.file.Path;
-
+import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateAction;
+import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateRequest;
+import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateResponse;
+import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
+import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
+import com.amazon.opendistroforelasticsearch.security.configuration.IndexBaseConfigurationRepository;
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.NoOpValidator;
+import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
+import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.service.ClusterService;
@@ -30,16 +38,7 @@ import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
 import org.elasticsearch.threadpool.ThreadPool;
 
-import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateAction;
-import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateRequest;
-import com.amazon.opendistroforelasticsearch.security.action.configupdate.ConfigUpdateResponse;
-import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
-import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
-import com.amazon.opendistroforelasticsearch.security.configuration.IndexBaseConfigurationRepository;
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.NoOpValidator;
-import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
-import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
+import java.nio.file.Path;
 
 public class FlushCacheApiAction extends AbstractApiAction {
 
@@ -48,6 +47,10 @@ public class FlushCacheApiAction extends AbstractApiAction {
 			final AdminDNs adminDNs, final IndexBaseConfigurationRepository cl, final ClusterService cs,
             final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator, ThreadPool threadPool, AuditLog auditLog) {
 		super(settings, configPath, controller, client, adminDNs, cl, cs, principalExtractor, evaluator, threadPool, auditLog);
+	}
+
+	@Override
+	protected void registerHandlers(RestController controller, Settings settings) {
 		controller.registerHandler(Method.DELETE, "/_opendistro/_security/api/cache", this);
 		controller.registerHandler(Method.GET, "/_opendistro/_security/api/cache", this);
 		controller.registerHandler(Method.PUT, "/_opendistro/_security/api/cache", this);

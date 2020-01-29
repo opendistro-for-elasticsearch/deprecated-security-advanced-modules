@@ -119,6 +119,7 @@ public abstract class AbstractRestApiUnitTest extends SingleClusterTest {
 		rh.sendHTTPClientCertificate = true;
 		HttpResponse response = rh.executePutRequest("/_opendistro/_security/api/user/" + username,
 				"{\"password\": \"" + password + "\"}", new Header[0]);
+		System.out.println(response.getBody());
 		Assert.assertEquals(status, response.getStatusCode());
 		rh.sendHTTPClientCertificate = sendHTTPClientCertificate;
 	}
