@@ -51,16 +51,21 @@ import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvalu
 import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
 import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 
+import static com.amazon.opendistroforelasticsearch.security.dlic.rest.support.Utils.hash;
+
 public class InternalUsersApiAction extends PatchableResourceApiAction {
 
     @Inject
     public InternalUsersApiAction(final Settings settings, final Path configPath, final RestController controller,
-            final Client client, final AdminDNs adminDNs, final IndexBaseConfigurationRepository cl,
-            final ClusterService cs, final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator,
-            ThreadPool threadPool, AuditLog auditLog) {
+                                  final Client client, final AdminDNs adminDNs, final IndexBaseConfigurationRepository cl,
+                                  final ClusterService cs, final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator,
+                                  ThreadPool threadPool, AuditLog auditLog) {
         super(settings, configPath, controller, client, adminDNs, cl, cs, principalExtractor, evaluator, threadPool,
                 auditLog);
+    }
 
+    @Override
+    protected void registerHandlers(RestController controller, Settings settings) {
         // legacy mapping for backwards compatibility
         // TODO: remove in next version
         controller.registerHandler(Method.GET, "/_opendistro/_security/api/user/{name}", this);
@@ -94,7 +99,7 @@ public class InternalUsersApiAction extends PatchableResourceApiAction {
             return;
         }
 
-        if(username.contains(".")) {
+        if (username.contains(".")) {
             badRequestResponse(channel, "No dots are allowed in the name.");
             return;
         }
@@ -171,7 +176,6 @@ public class InternalUsersApiAction extends PatchableResourceApiAction {
         }, internaluser.v1());
 
 
-
     }
 
     @Override
@@ -210,15 +214,6 @@ public class InternalUsersApiAction extends PatchableResourceApiAction {
         }
 
         return null;
-    }
-
-    public static String hash(final char[] clearTextPassword) {
-        final byte[] salt = new byte[16];
-        new SecureRandom().nextBytes(salt);
-        final String hash = OpenBSDBCrypt.generate((Objects.requireNonNull(clearTextPassword)), salt, 12);
-        Arrays.fill(salt, (byte) 0);
-        Arrays.fill(clearTextPassword, '\0');
-        return hash;
     }
 
     @Override
