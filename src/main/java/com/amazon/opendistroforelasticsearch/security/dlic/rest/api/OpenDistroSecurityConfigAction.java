@@ -15,10 +15,14 @@
 
 package com.amazon.opendistroforelasticsearch.security.dlic.rest.api;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
+import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
+import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
+import com.amazon.opendistroforelasticsearch.security.configuration.IndexBaseConfigurationRepository;
+import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
 import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.SecurityConfigValidator;
+import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
+import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.bytes.BytesReference;
@@ -33,14 +37,8 @@ import org.elasticsearch.rest.RestRequest.Method;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.threadpool.ThreadPool;
 
-import com.amazon.opendistroforelasticsearch.security.auditlog.AuditLog;
-import com.amazon.opendistroforelasticsearch.security.configuration.AdminDNs;
-import com.amazon.opendistroforelasticsearch.security.configuration.IndexBaseConfigurationRepository;
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.AbstractConfigurationValidator;
-import com.amazon.opendistroforelasticsearch.security.dlic.rest.validation.NoOpValidator;
-import com.amazon.opendistroforelasticsearch.security.privileges.PrivilegesEvaluator;
-import com.amazon.opendistroforelasticsearch.security.ssl.transport.PrincipalExtractor;
-import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import java.io.IOException;
+import java.nio.file.Path;
 
 
 public class OpenDistroSecurityConfigAction extends PatchableResourceApiAction {
@@ -53,15 +51,18 @@ public class OpenDistroSecurityConfigAction extends PatchableResourceApiAction {
 			final PrincipalExtractor principalExtractor, final PrivilegesEvaluator evaluator, ThreadPool threadPool, AuditLog auditLog) {
 		super(settings, configPath, controller, client, adminDNs, cl, cs, principalExtractor, evaluator, threadPool, auditLog);
 		allowPutOrPatch = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_UNSUPPORTED_RESTAPI_ALLOW_SECURITYCONFIG_MODIFICATION, false);
+	}
+
+	@Override
+	protected void registerHandlers(RestController controller, Settings settings) {
 		controller.registerHandler(Method.GET, "/_opendistro/_security/api/securityconfig/", this);
 
-		if (allowPutOrPatch) {
+		boolean enablePutOrPatch = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_UNSUPPORTED_RESTAPI_ALLOW_SECURITYCONFIG_MODIFICATION, false);
+		if (enablePutOrPatch) {
 			controller.registerHandler(Method.PUT, "/_opendistro/_security/api/securityconfig/{name}", this);
 			controller.registerHandler(Method.PATCH, "/_opendistro/_security/api/securityconfig/", this);
 		}
 	}
-
-
 
 	@Override
 	protected void handleApiRequest(RestChannel channel, RestRequest request, Client client) throws IOException {
