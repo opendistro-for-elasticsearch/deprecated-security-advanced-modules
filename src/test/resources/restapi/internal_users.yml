@@ -16,3 +16,10 @@ test:
 q:
   hidden: true
   hash: $2a$12$Ioo1uXmH.Nq/lS5dUVBEsePSmZ5pSIpVO/xKHaquU/Jvq97I7nAgG
+hide:
+  hash: $2y$12$unbLt6ftTcIofGrFEcfwSOGYvYjUGLUvKWPjDG74KUv6kgUtesQMS
+  reserved: false
+  hidden: true
+  backend_roles: []
+  attributes: {}
+  description: "Hidden user - password - hide"
